@@ -1,6 +1,13 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
 import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.commands.query.ARG_AUTHOR
+import dev.cypdashuhn.worldtasker.commands.query.ARG_NAME
+import dev.cypdashuhn.worldtasker.commands.query.ARG_NEAR_RADIUS
+import dev.cypdashuhn.worldtasker.commands.query.ARG_TAGS
+import dev.cypdashuhn.worldtasker.commands.query.ARG_TIME_DATE
+import dev.cypdashuhn.worldtasker.commands.query.ARG_TIME_OP
+import dev.cypdashuhn.worldtasker.commands.query.ARG_TIME_TYPE
 import dev.cypdashuhn.worldtasker.commands.query.QueryTreeBuilder
 import dev.cypdashuhn.worldtasker.commands.query.TimeFilter
 import dev.cypdashuhn.worldtasker.commands.query.TimeOperator
@@ -18,16 +25,16 @@ import java.time.LocalDate
 internal fun buildGetNode(): LiteralArgument {
     fun makeExecutor(showCompleted: Boolean) = PlayerCommandExecutor { sender, args ->
         val query = TodoQuery(
-            nearRadius = args.argsMap["nearRadius"] as? Int,
-            tags = args.argsMap["tags"] as? String,
-            name = args.argsMap["name"] as? String,
-            author = args.argsMap["author"] as? String,
+            nearRadius = args.argsMap[ARG_NEAR_RADIUS] as? Int,
+            tags = args.argsMap[ARG_TAGS] as? String,
+            name = args.argsMap[ARG_NAME] as? String,
+            author = args.argsMap[ARG_AUTHOR] as? String,
             showCompleted = showCompleted,
-            timeFilter = (args.argsMap["timeType"] as? String)?.let {
+            timeFilter = (args.argsMap[ARG_TIME_TYPE] as? String)?.let {
                 TimeFilter(
                     type = TimeType.valueOf(it.uppercase()),
-                    operator = TimeOperator.valueOf((args.argsMap["timeOperator"] as String).uppercase()),
-                    date = LocalDate.parse(args.argsMap["timeDate"] as String)
+                    operator = TimeOperator.valueOf((args.argsMap[ARG_TIME_OP] as String).uppercase()),
+                    date = LocalDate.parse(args.argsMap[ARG_TIME_DATE] as String)
                 )
             }
         )

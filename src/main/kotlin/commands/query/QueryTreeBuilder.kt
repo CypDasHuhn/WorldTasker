@@ -35,25 +35,33 @@ object TimeQueryFlag : QueryFlag {
     override val flagLiteral = "--time"
 
     override fun buildInner(remaining: List<Argument<*>>, executor: PlayerCommandExecutor): Argument<*> {
-        val opArg = TextArgument("timeOperator")
-        val dateArg = TextArgument("timeDate")
+        val opArg = TextArgument(ARG_TIME_OP)
+        val dateArg = TextArgument(ARG_TIME_DATE)
         remaining.forEach { dateArg.then(it) }
         dateArg.executesPlayer(executor)
         opArg.then(dateArg)
 
-        val typeArg = TextArgument("timeType")
+        val typeArg = TextArgument(ARG_TIME_TYPE)
         typeArg.then(opArg)
         return typeArg
     }
 }
 
+internal const val ARG_NEAR_RADIUS  = "nearRadius"
+internal const val ARG_TAGS         = "tags"
+internal const val ARG_NAME         = "name"
+internal const val ARG_AUTHOR       = "author"
+internal const val ARG_TIME_TYPE    = "timeType"
+internal const val ARG_TIME_OP      = "timeOperator"
+internal const val ARG_TIME_DATE    = "timeDate"
+
 /** Full recursive builder for the /todo get query branches. */
 object QueryTreeBuilder {
     private val flags: List<QueryFlag> = listOf(
-        SimpleQueryFlag("--near")   { IntegerArgument("nearRadius") },
-        SimpleQueryFlag("--tags")   { TextArgument("tags").suggestTagNamesDsl() },
-        SimpleQueryFlag("--name")   { TextArgument("name") },
-        SimpleQueryFlag("--author") { TextArgument("author") },
+        SimpleQueryFlag("--near")   { IntegerArgument(ARG_NEAR_RADIUS) },
+        SimpleQueryFlag("--tags")   { TextArgument(ARG_TAGS).suggestTagNamesDsl() },
+        SimpleQueryFlag("--name")   { TextArgument(ARG_NAME) },
+        SimpleQueryFlag("--author") { TextArgument(ARG_AUTHOR) },
         TimeQueryFlag,
     )
 

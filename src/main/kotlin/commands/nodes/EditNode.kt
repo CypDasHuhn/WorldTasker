@@ -14,12 +14,19 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
+private const val NAME         = "editTodoName"
+private const val NEW_DESC     = "editTodoNewDescription"
+private const val SET_TAGS     = "editTodoSetTags"
+private const val ADD_TAGS     = "editTodoAddTags"
+private const val REMOVE_TAGS  = "editTodoRemoveTags"
+private const val WORK_COMMENT = "editTodoWorkComment"
+
 internal fun buildEditNode(): LiteralArgument {
-    val editNameArg = StringArgument("editTodoName").suggestTodoNames()
+    val editNameArg = StringArgument(NAME).suggestTodoNames()
 
     editNameArg.then(
         LiteralArgument("complete").executesPlayer(PlayerCommandExecutor { sender, args ->
-            handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
+            handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
                 TodoManager.complete(id, sender.name)
                 sender.msg("<green>Todo marked complete.")
             }
@@ -28,17 +35,17 @@ internal fun buildEditNode(): LiteralArgument {
 
     editNameArg.then(
         LiteralArgument("reactivate").executesPlayer(PlayerCommandExecutor { sender, args ->
-            handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
+            handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
                 TodoManager.reactivate(id, sender.name)
                 sender.msg("<green>Todo reactivated.")
             }
         })
     )
 
-    val newDescArg = TextArgument("editTodoNewDescription")
+    val newDescArg = TextArgument(NEW_DESC)
     newDescArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
-            TodoManager.updateDescription(id, args.argsMap["editTodoNewDescription"] as String)
+        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            TodoManager.updateDescription(id, args.argsMap[NEW_DESC] as String)
             sender.msg("<green>Description updated.")
         }
     })
@@ -46,29 +53,29 @@ internal fun buildEditNode(): LiteralArgument {
 
     val editTagsNode = LiteralArgument("tags")
 
-    val setTagsArg = TextArgument("editTodoSetTags").suggestTagNamesCommaText()
+    val setTagsArg = TextArgument(SET_TAGS).suggestTagNamesCommaText()
     setTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
             TagManager.removeAllForTodo(id)
-            resolveTagIds(args.argsMap["editTodoSetTags"] as String, sender).forEach { TagManager.addToTodo(id, it) }
+            resolveTagIds(args.argsMap[SET_TAGS] as String, sender).forEach { TagManager.addToTodo(id, it) }
             sender.msg("<green>Tags set.")
         }
     })
     editTagsNode.then(LiteralArgument("set").then(setTagsArg))
 
-    val addTagsArg = TextArgument("editTodoAddTags").suggestTagNamesCommaText()
+    val addTagsArg = TextArgument(ADD_TAGS).suggestTagNamesCommaText()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
-            resolveTagIds(args.argsMap["editTodoAddTags"] as String, sender).forEach { TagManager.addToTodo(id, it) }
+        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            resolveTagIds(args.argsMap[ADD_TAGS] as String, sender).forEach { TagManager.addToTodo(id, it) }
             sender.msg("<green>Tags added.")
         }
     })
     editTagsNode.then(LiteralArgument("add").then(addTagsArg))
 
-    val removeTagsArg = TextArgument("editTodoRemoveTags").suggestTagNamesCommaText()
+    val removeTagsArg = TextArgument(REMOVE_TAGS).suggestTagNamesCommaText()
     removeTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
-            resolveTagIds(args.argsMap["editTodoRemoveTags"] as String, sender).forEach { TagManager.removeFromTodo(id, it) }
+        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            resolveTagIds(args.argsMap[REMOVE_TAGS] as String, sender).forEach { TagManager.removeFromTodo(id, it) }
             sender.msg("<green>Tags removed.")
         }
     })
@@ -76,10 +83,10 @@ internal fun buildEditNode(): LiteralArgument {
 
     editNameArg.then(editTagsNode)
 
-    val workCommentArg = TextArgument("editTodoWorkComment")
+    val workCommentArg = TextArgument(WORK_COMMENT)
     workCommentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
-            HistoryManager.record(id, sender.name, TodoStatus.WORK, args.argsMap["editTodoWorkComment"] as String)
+        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            HistoryManager.record(id, sender.name, TodoStatus.WORK, args.argsMap[WORK_COMMENT] as String)
             sender.msg("<green>Work entry recorded.")
         }
     })

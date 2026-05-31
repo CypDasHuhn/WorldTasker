@@ -10,12 +10,12 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.jetbrains.exposed.sql.transactions.transaction
 
-const val JUMP_NODE_NAME = "jumpTodoName"
+private const val NAME = "jumpTodoName"
 
 internal fun buildJumpNode(): LiteralArgument {
-    val nameArg = StringArgument(JUMP_NODE_NAME).suggestTodoNames()
+    val nameArg = StringArgument(NAME).suggestTodoNames()
     nameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val name = args.argsMap[JUMP_NODE_NAME] as String
+        val name = args.argsMap[NAME] as String
         val todo = TodoManager.findByName(name)
         if (todo == null) {
             sender.msg("<red>Todo '<white>$name</white>' not found.")

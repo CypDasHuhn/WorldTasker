@@ -12,6 +12,24 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
+//region node names
+private const val TAGS_ADD_NS = "todoTagsAddNs"
+private const val TAGS_ADD_NAME = "todoTagsAddName"
+private const val TAGS_REMOVE_NAME = "todoTagsRemoveName"
+private const val TAGS_RENAME_OLD = "todoTagsRenameOld"
+private const val TAGS_RENAME_NEW = "todoTagsRenameNew"
+private const val NS_ADD_NAME = "todoNsAddName"
+private const val NS_REMOVE_NAME = "todoNsRemoveName"
+private const val NS_RENAME_OLD = "todoNsRenameOld"
+private const val NS_RENAME_NEW = "todoNsRenameNew"
+private const val INHERIT_ADD_CHILD = "inheritAddChild"
+private const val INHERIT_ADD_PARENT = "inheritAddParent"
+private const val INHERIT_SET_CHILD = "inheritSetChild"
+private const val INHERIT_SET_PARENTS = "inheritSetParents"
+private const val INHERIT_REM_CHILD = "inheritRemoveChild"
+private const val INHERIT_REM_PARENT = "inheritRemoveParent"
+//endregion
+
 internal fun buildTodoTagsNode(): LiteralArgument {
     val tagsNode = LiteralArgument("tags")
 
@@ -31,11 +49,11 @@ internal fun buildTodoTagsNode(): LiteralArgument {
         })
     )
 
-    val tagsAddNsArg = StringArgument("todoTagsAddNs").suggestNamespaceNames()
-    val tagsAddNameArg = StringArgument("todoTagsAddName")
+    val tagsAddNsArg = StringArgument(TAGS_ADD_NS).suggestNamespaceNames()
+    val tagsAddNameArg = StringArgument(TAGS_ADD_NAME)
     tagsAddNameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val nsName = args.argsMap["todoTagsAddNs"] as String
-        val tagName = args.argsMap["todoTagsAddName"] as String
+        val nsName = args.argsMap[TAGS_ADD_NS] as String
+        val tagName = args.argsMap[TAGS_ADD_NAME] as String
         val ns = NamespaceManager.findByName(nsName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$nsName</white>' not found. Create it first with /todo tags namespaces add.")
@@ -52,9 +70,9 @@ internal fun buildTodoTagsNode(): LiteralArgument {
     tagsAddNsArg.then(tagsAddNameArg)
     tagsNode.then(LiteralArgument("add").then(tagsAddNsArg))
 
-    val tagsRemoveNameArg = StringArgument("todoTagsRemoveName").suggestTagNames()
+    val tagsRemoveNameArg = StringArgument(TAGS_REMOVE_NAME).suggestTagNames()
     tagsRemoveNameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val tagName = args.argsMap["todoTagsRemoveName"] as String
+        val tagName = args.argsMap[TAGS_REMOVE_NAME] as String
         val tag = TagManager.findByName(tagName)
         if (tag == null) {
             sender.msg("<red>Tag '<white>$tagName</white>' not found.")
@@ -65,11 +83,11 @@ internal fun buildTodoTagsNode(): LiteralArgument {
     })
     tagsNode.then(LiteralArgument("remove").then(tagsRemoveNameArg))
 
-    val tagsRenameOldArg = StringArgument("todoTagsRenameOld").suggestTagNames()
-    val tagsRenameNewArg = StringArgument("todoTagsRenameNew")
+    val tagsRenameOldArg = StringArgument(TAGS_RENAME_OLD).suggestTagNames()
+    val tagsRenameNewArg = StringArgument(TAGS_RENAME_NEW)
     tagsRenameNewArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val oldName = args.argsMap["todoTagsRenameOld"] as String
-        val newName = args.argsMap["todoTagsRenameNew"] as String
+        val oldName = args.argsMap[TAGS_RENAME_OLD] as String
+        val newName = args.argsMap[TAGS_RENAME_NEW] as String
         val tag = TagManager.findByName(oldName)
         if (tag == null) {
             sender.msg("<red>Tag '<white>$oldName</white>' not found.")
@@ -102,17 +120,17 @@ private fun buildNamespacesNode(): LiteralArgument {
         })
     )
 
-    val nsAddArg = StringArgument("todoNsAddName")
+    val nsAddArg = StringArgument(NS_ADD_NAME)
     nsAddArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val name = args.argsMap["todoNsAddName"] as String
+        val name = args.argsMap[NS_ADD_NAME] as String
         NamespaceManager.create(name)
         sender.msg("<green>Namespace '<white>$name</white>' created.")
     })
     nsNode.then(LiteralArgument("add").then(nsAddArg))
 
-    val nsRemoveArg = StringArgument("todoNsRemoveName").suggestNamespaceNames()
+    val nsRemoveArg = StringArgument(NS_REMOVE_NAME).suggestNamespaceNames()
     nsRemoveArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val name = args.argsMap["todoNsRemoveName"] as String
+        val name = args.argsMap[NS_REMOVE_NAME] as String
         val ns = NamespaceManager.findByName(name)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$name</white>' not found.")
@@ -123,11 +141,11 @@ private fun buildNamespacesNode(): LiteralArgument {
     })
     nsNode.then(LiteralArgument("remove").then(nsRemoveArg))
 
-    val nsRenameOldArg = StringArgument("todoNsRenameOld").suggestNamespaceNames()
-    val nsRenameNewArg = StringArgument("todoNsRenameNew")
+    val nsRenameOldArg = StringArgument(NS_RENAME_OLD).suggestNamespaceNames()
+    val nsRenameNewArg = StringArgument(NS_RENAME_NEW)
     nsRenameNewArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val oldName = args.argsMap["todoNsRenameOld"] as String
-        val newName = args.argsMap["todoNsRenameNew"] as String
+        val oldName = args.argsMap[NS_RENAME_OLD] as String
+        val newName = args.argsMap[NS_RENAME_NEW] as String
         val ns = NamespaceManager.findByName(oldName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$oldName</white>' not found.")
@@ -145,46 +163,53 @@ private fun buildNamespacesNode(): LiteralArgument {
 private fun buildInheritNode(): LiteralArgument {
     val inheritNode = LiteralArgument("inherit")
 
-    // inherit add <child> <parent>
-    val addChildArg = StringArgument("inheritAddChild").suggestTagNames()
-    val addParentArg = StringArgument("inheritAddParent").suggestTagNames()
+    val addChildArg = StringArgument(INHERIT_ADD_CHILD).suggestTagNames()
+    val addParentArg = StringArgument(INHERIT_ADD_PARENT).suggestTagNames()
     addParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap["inheritAddChild"] as String
-        val parentName = args.argsMap["inheritAddParent"] as String
+        val childName = args.argsMap[INHERIT_ADD_CHILD] as String
+        val parentName = args.argsMap[INHERIT_ADD_PARENT] as String
         val child = TagManager.findByName(childName)
         val parent = TagManager.findByName(parentName)
-        if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
-        if (parent == null) { sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor }
+        if (child == null) {
+            sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor
+        }
+        if (parent == null) {
+            sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor
+        }
         TagManager.addInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
         sender.msg("<green>'<white>$childName</white>' now inherits from '<white>$parentName</white>'.")
     })
     addChildArg.then(addParentArg)
     inheritNode.then(LiteralArgument("add").then(addChildArg))
 
-    // inherit set <child> <parents>  (comma-separated)
-    val setChildArg = StringArgument("inheritSetChild").suggestTagNames()
-    val setParentsArg = TextArgument("inheritSetParents").suggestTagNamesCommaText()
+    val setChildArg = StringArgument(INHERIT_SET_CHILD).suggestTagNames()
+    val setParentsArg = TextArgument(INHERIT_SET_PARENTS).suggestTagNamesCommaText()
     setParentsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap["inheritSetChild"] as String
+        val childName = args.argsMap[INHERIT_SET_CHILD] as String
         val child = TagManager.findByName(childName)
-        if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
-        val parentIds = resolveTagIds(args.argsMap["inheritSetParents"] as String, sender)
+        if (child == null) {
+            sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor
+        }
+        val parentIds = resolveTagIds(args.argsMap[INHERIT_SET_PARENTS] as String, sender)
         TagManager.setInheritance(child[TagManager.Tags.id].value, parentIds)
         sender.msg("<green>Inheritance for '<white>$childName</white>' updated.")
     })
     setChildArg.then(setParentsArg)
     inheritNode.then(LiteralArgument("set").then(setChildArg))
 
-    // inherit remove <child> <parent>
-    val removeChildArg = StringArgument("inheritRemoveChild").suggestTagNames()
-    val removeParentArg = StringArgument("inheritRemoveParent").suggestTagNames()
+    val removeChildArg = StringArgument(INHERIT_REM_CHILD).suggestTagNames()
+    val removeParentArg = StringArgument(INHERIT_REM_PARENT).suggestTagNames()
     removeParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap["inheritRemoveChild"] as String
-        val parentName = args.argsMap["inheritRemoveParent"] as String
+        val childName = args.argsMap[INHERIT_REM_CHILD] as String
+        val parentName = args.argsMap[INHERIT_REM_PARENT] as String
         val child = TagManager.findByName(childName)
         val parent = TagManager.findByName(parentName)
-        if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
-        if (parent == null) { sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor }
+        if (child == null) {
+            sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor
+        }
+        if (parent == null) {
+            sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor
+        }
         TagManager.removeInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
         sender.msg("<green>'<white>$childName</white>' no longer inherits from '<white>$parentName</white>'.")
     })

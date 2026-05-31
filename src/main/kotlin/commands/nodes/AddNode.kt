@@ -11,29 +11,33 @@ import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.entity.Player
 
+private const val NAME        = "addTodoName"
+private const val DESCRIPTION = "addTodoDescription"
+private const val TAGS        = "addTodoTags"
+
 internal fun buildAddNode(): LiteralArgument {
-    val addTagsArg = TextArgument("addTodoTags").suggestTagNamesCommaText()
+    val addTagsArg = TextArgument(TAGS).suggestTagNamesCommaText()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleTodoAdd(
             sender,
-            args.argsMap["addTodoName"] as String,
-            args.argsMap["addTodoDescription"] as String,
-            args.argsMap["addTodoTags"] as String,
+            args.argsMap[NAME] as String,
+            args.argsMap[DESCRIPTION] as String,
+            args.argsMap[TAGS] as String,
         )
     })
 
-    val addDescArg = TextArgument("addTodoDescription")
+    val addDescArg = TextArgument(DESCRIPTION)
     addDescArg.then(addTagsArg)
     addDescArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleTodoAdd(
             sender,
-            args.argsMap["addTodoName"] as String,
-            args.argsMap["addTodoDescription"] as String,
+            args.argsMap[NAME] as String,
+            args.argsMap[DESCRIPTION] as String,
             null,
         )
     })
 
-    val addNameArg = StringArgument("addTodoName")
+    val addNameArg = StringArgument(NAME)
     addNameArg.then(addDescArg)
     val node = LiteralArgument("add")
     node.then(addNameArg)

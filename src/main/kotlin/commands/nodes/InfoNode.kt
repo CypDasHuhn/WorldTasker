@@ -9,10 +9,12 @@ import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
+private const val NAME = "infoTodoName"
+
 internal fun buildInfoNode(): LiteralArgument {
-    val nameArg = StringArgument("infoTodoName").suggestTodoNames()
+    val nameArg = StringArgument(NAME).suggestTodoNames()
     nameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val name = args.argsMap["infoTodoName"] as String
+        val name = args.argsMap[NAME] as String
         val todo = TodoManager.findByName(name)
         if (todo == null) {
             sender.msg("<red>Todo '<white>$name</white>' not found.")
