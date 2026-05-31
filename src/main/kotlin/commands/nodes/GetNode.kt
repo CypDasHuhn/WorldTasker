@@ -1,5 +1,6 @@
-package dev.cypdashuhn.worldtasker.commands
+package dev.cypdashuhn.worldtasker.commands.nodes
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.query.QueryTreeBuilder
 import dev.cypdashuhn.worldtasker.commands.query.TimeFilter
 import dev.cypdashuhn.worldtasker.commands.query.TimeOperator

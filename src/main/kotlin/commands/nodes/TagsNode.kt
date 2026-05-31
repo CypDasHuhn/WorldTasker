@@ -1,5 +1,8 @@
-package dev.cypdashuhn.worldtasker.commands
+package dev.cypdashuhn.worldtasker.commands.nodes
 
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.commands.suggestNamespaceNames
+import dev.cypdashuhn.worldtasker.commands.suggestTagNames
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.jorel.commandapi.arguments.LiteralArgument

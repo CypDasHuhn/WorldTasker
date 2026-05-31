@@ -1,5 +1,7 @@
-package dev.cypdashuhn.worldtasker.commands
+package dev.cypdashuhn.worldtasker.commands.nodes
 
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.commands.suggestTodoNames
 import dev.cypdashuhn.rooster.db.utility_tables.LocationManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.arguments.LiteralArgument
@@ -22,7 +24,7 @@ internal fun buildJumpNode(): LiteralArgument {
             return@PlayerCommandExecutor
         }
         val location = transaction {
-            LocationManager.Location.findById(locId.value)?.location()
+            LocationManager.Location.findById(locId)?.location()
         }
         if (location == null) {
             sender.msg("<red>Location data for '<white>$name</white>' is missing.")
