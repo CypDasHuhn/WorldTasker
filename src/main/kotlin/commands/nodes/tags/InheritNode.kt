@@ -11,21 +11,19 @@ import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
 //region node names
-private const val ADD_CHILD    = "inheritAddChild"
+private const val CHILD        = "inheritChild"
 private const val ADD_PARENT   = "inheritAddParent"
-private const val SET_CHILD    = "inheritSetChild"
 private const val SET_PARENTS  = "inheritSetParents"
-private const val REM_CHILD    = "inheritRemoveChild"
 private const val REM_PARENT   = "inheritRemoveParent"
 //endregion
 
 internal fun buildInheritNode(): LiteralArgument {
     val inheritNode = LiteralArgument("inherit")
+    val childArg = StringArgument(CHILD).suggestTagNames()
 
-    val addChildArg = StringArgument(ADD_CHILD).suggestTagNames()
     val addParentArg = StringArgument(ADD_PARENT).suggestTagNames()
     addParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap[ADD_CHILD] as String
+        val childName = args.argsMap[CHILD] as String
         val parentName = args.argsMap[ADD_PARENT] as String
         val child = TagManager.findByName(childName)
         val parent = TagManager.findByName(parentName)
@@ -34,26 +32,22 @@ internal fun buildInheritNode(): LiteralArgument {
         TagManager.addInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
         sender.msg("<green>'<white>$childName</white>' now inherits from '<white>$parentName</white>'.")
     })
-    addChildArg.then(addParentArg)
-    inheritNode.then(LiteralArgument("add").then(addChildArg))
+    childArg.then(LiteralArgument("add").then(addParentArg))
 
-    val setChildArg = StringArgument(SET_CHILD).suggestTagNames()
     val setParentsArg = TextArgument(SET_PARENTS).suggestTagNamesCommaText()
     setParentsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap[SET_CHILD] as String
+        val childName = args.argsMap[CHILD] as String
         val child = TagManager.findByName(childName)
         if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
         val parentIds = resolveTagIds(args.argsMap[SET_PARENTS] as String, sender)
         TagManager.setInheritance(child[TagManager.Tags.id].value, parentIds)
         sender.msg("<green>Inheritance for '<white>$childName</white>' updated.")
     })
-    setChildArg.then(setParentsArg)
-    inheritNode.then(LiteralArgument("set").then(setChildArg))
+    childArg.then(LiteralArgument("set").then(setParentsArg))
 
-    val removeChildArg = StringArgument(REM_CHILD).suggestTagNames()
-    val removeParentArg = StringArgument(REM_PARENT).suggestTagNames()
-    removeParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        val childName = args.argsMap[REM_CHILD] as String
+    val remParentArg = StringArgument(REM_PARENT).suggestTagNames()
+    remParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
+        val childName = args.argsMap[CHILD] as String
         val parentName = args.argsMap[REM_PARENT] as String
         val child = TagManager.findByName(childName)
         val parent = TagManager.findByName(parentName)
@@ -62,8 +56,8 @@ internal fun buildInheritNode(): LiteralArgument {
         TagManager.removeInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
         sender.msg("<green>'<white>$childName</white>' no longer inherits from '<white>$parentName</white>'.")
     })
-    removeChildArg.then(removeParentArg)
-    inheritNode.then(LiteralArgument("remove").then(removeChildArg))
+    childArg.then(LiteralArgument("remove").then(remParentArg))
 
+    inheritNode.then(childArg)
     return inheritNode
 }
