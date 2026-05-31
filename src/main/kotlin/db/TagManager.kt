@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.db
 
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.Table
@@ -41,6 +42,10 @@ object TagManager {
         Tags.selectAll().where { (Tags.name eq name) and (Tags.namespaceId eq namespaceId) }.firstOrNull()
     }
 
+    fun findByName(name: String): ResultRow? = transaction {
+        Tags.selectAll().where { Tags.name eq name }.firstOrNull()
+    }
+
     fun all(): List<ResultRow> = transaction {
         Tags.selectAll().toList()
     }
@@ -54,9 +59,14 @@ object TagManager {
     }
 
     fun addToTodo(todoId: Int, tagId: Int) = transaction {
-        TodoTags.insert {
-            it[TodoTags.todoId] = todoId
-            it[TodoTags.tagId] = tagId
+        val exists = TodoTags.selectAll()
+            .where { (TodoTags.todoId eq todoId) and (TodoTags.tagId eq tagId) }
+            .firstOrNull() != null
+        if (!exists) {
+            TodoTags.insert {
+                it[TodoTags.todoId] = todoId
+                it[TodoTags.tagId] = tagId
+            }
         }
     }
 
@@ -64,8 +74,19 @@ object TagManager {
         TodoTags.deleteWhere { (TodoTags.todoId eq todoId) and (TodoTags.tagId eq tagId) }
     }
 
+    fun removeAllForTodo(todoId: Int) = transaction {
+        TodoTags.deleteWhere { TodoTags.todoId eq todoId }
+    }
+
     fun tagsForTodo(todoId: Int): List<ResultRow> = transaction {
         (Tags innerJoin TodoTags).selectAll().where { TodoTags.todoId eq todoId }.toList()
+    }
+
+    fun tagLabelsForTodo(todoId: Int): List<String> = transaction {
+        (Tags innerJoin TodoTags innerJoin NamespaceManager.Namespaces)
+            .selectAll()
+            .where { TodoTags.todoId eq todoId }
+            .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
     }
 
     fun todosForTag(tagId: Int): List<ResultRow> = transaction {

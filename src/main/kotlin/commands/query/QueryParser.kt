@@ -19,7 +19,8 @@ data class TodoQuery(
     val tags: String? = null,
     val name: String? = null,
     val author: String? = null,
-    val timeFilter: TimeFilter? = null
+    val timeFilter: TimeFilter? = null,
+    val showCompleted: Boolean = false,
 )
 
 object QueryParser {
