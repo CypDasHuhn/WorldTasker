@@ -1,6 +1,7 @@
 package dev.cypdashuhn.worldtasker.commands.query
 
 import dev.cypdashuhn.worldtasker.commands.suggestTagNamesDsl
+import dev.cypdashuhn.worldtasker.commands.suggestTodoAuthors
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
@@ -61,7 +62,7 @@ object QueryTreeBuilder {
         SimpleQueryFlag("--near")   { IntegerArgument(ARG_NEAR_RADIUS) },
         SimpleQueryFlag("--tags")   { TextArgument(ARG_TAGS).suggestTagNamesDsl() },
         SimpleQueryFlag("--name")   { TextArgument(ARG_NAME) },
-        SimpleQueryFlag("--author") { TextArgument(ARG_AUTHOR) },
+        SimpleQueryFlag("--author") { TextArgument(ARG_AUTHOR).suggestTodoAuthors() },
         TimeQueryFlag,
     )
 

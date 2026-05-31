@@ -57,6 +57,16 @@ internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
         }
     })
 
+internal fun <T> Argument<T>.suggestTodoAuthors(): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { _ ->
+        transaction {
+            TodoManager.Todos.selectAll()
+                .map { it[TodoManager.Todos.author] }
+                .distinct()
+                .toTypedArray()
+        }
+    })
+
 /**
  * For TextArgument comma-separated tag lists: suggestions are full quoted strings including
  * already-typed tags as a prefix, so selecting appends rather than replaces.
