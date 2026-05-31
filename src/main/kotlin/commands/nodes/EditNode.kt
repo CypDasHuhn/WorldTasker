@@ -3,13 +3,12 @@ package dev.cypdashuhn.worldtasker.commands.nodes
 import dev.cypdashuhn.worldtasker.commands.handleWithTodo
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.resolveTagIds
-import dev.cypdashuhn.worldtasker.commands.suggestTagNamesGreedy
+import dev.cypdashuhn.worldtasker.commands.suggestTagNamesCommaText
 import dev.cypdashuhn.worldtasker.commands.suggestTodoNames
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoStatus
-import dev.jorel.commandapi.arguments.GreedyStringArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
@@ -47,7 +46,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     val editTagsNode = LiteralArgument("tags")
 
-    val setTagsArg = GreedyStringArgument("editTodoSetTags").suggestTagNamesGreedy()
+    val setTagsArg = TextArgument("editTodoSetTags").suggestTagNamesCommaText()
     setTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
             TagManager.removeAllForTodo(id)
@@ -57,7 +56,7 @@ internal fun buildEditNode(): LiteralArgument {
     })
     editTagsNode.then(LiteralArgument("set").then(setTagsArg))
 
-    val addTagsArg = GreedyStringArgument("editTodoAddTags").suggestTagNamesGreedy()
+    val addTagsArg = TextArgument("editTodoAddTags").suggestTagNamesCommaText()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
             resolveTagIds(args.argsMap["editTodoAddTags"] as String, sender).forEach { TagManager.addToTodo(id, it) }
@@ -66,7 +65,7 @@ internal fun buildEditNode(): LiteralArgument {
     })
     editTagsNode.then(LiteralArgument("add").then(addTagsArg))
 
-    val removeTagsArg = GreedyStringArgument("editTodoRemoveTags").suggestTagNamesGreedy()
+    val removeTagsArg = TextArgument("editTodoRemoveTags").suggestTagNamesCommaText()
     removeTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleWithTodo(sender, args.argsMap["editTodoName"] as String) { id ->
             resolveTagIds(args.argsMap["editTodoRemoveTags"] as String, sender).forEach { TagManager.removeFromTodo(id, it) }

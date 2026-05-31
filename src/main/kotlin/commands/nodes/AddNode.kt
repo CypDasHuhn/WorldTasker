@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.commands.nodes
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.resolveTagIds
+import dev.cypdashuhn.worldtasker.commands.suggestTagNamesCommaText
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.arguments.LiteralArgument
@@ -11,7 +12,7 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.entity.Player
 
 internal fun buildAddNode(): LiteralArgument {
-    val addTagsArg = TextArgument("addTodoTags")
+    val addTagsArg = TextArgument("addTodoTags").suggestTagNamesCommaText()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         handleTodoAdd(
             sender,

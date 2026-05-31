@@ -23,6 +23,12 @@ object TagManager {
         override val primaryKey = PrimaryKey(todoId, tagId)
     }
 
+    object TagInheritance : Table() {
+        val childId = reference("child_id", Tags)
+        val parentId = reference("parent_id", Tags)
+        override val primaryKey = PrimaryKey(childId, parentId)
+    }
+
     fun create(name: String, namespaceId: Int): Int = transaction {
         Tags.insert {
             it[Tags.name] = name
@@ -91,5 +97,74 @@ object TagManager {
 
     fun todosForTag(tagId: Int): List<ResultRow> = transaction {
         (TodoManager.Todos innerJoin TodoTags).selectAll().where { TodoTags.tagId eq tagId }.toList()
+    }
+
+    fun addInheritance(childId: Int, parentId: Int) = transaction {
+        val exists = TagInheritance.selectAll()
+            .where { (TagInheritance.childId eq childId) and (TagInheritance.parentId eq parentId) }
+            .firstOrNull() != null
+        if (!exists) TagInheritance.insert {
+            it[TagInheritance.childId] = childId
+            it[TagInheritance.parentId] = parentId
+        }
+    }
+
+    fun removeInheritance(childId: Int, parentId: Int) = transaction {
+        TagInheritance.deleteWhere {
+            (TagInheritance.childId eq childId) and (TagInheritance.parentId eq parentId)
+        }
+    }
+
+    fun setInheritance(childId: Int, parentIds: List<Int>) = transaction {
+        TagInheritance.deleteWhere { TagInheritance.childId eq childId }
+        parentIds.forEach { parentId ->
+            TagInheritance.insert {
+                it[TagInheritance.childId] = childId
+                it[TagInheritance.parentId] = parentId
+            }
+        }
+    }
+
+    fun parentsOf(tagId: Int): List<ResultRow> = transaction {
+        val parentIds = TagInheritance.selectAll()
+            .where { TagInheritance.childId eq tagId }
+            .map { it[TagInheritance.parentId].value }
+        if (parentIds.isEmpty()) emptyList()
+        else Tags.selectAll().where { Tags.id inList parentIds }.toList()
+    }
+
+    /** BFS expansion: returns the given IDs plus all ancestor IDs, cycle-safe. */
+    fun expandTagIds(directIds: Set<Int>): Set<Int> = transaction {
+        val visited = directIds.toMutableSet()
+        val queue = ArrayDeque(directIds.toList())
+        while (queue.isNotEmpty()) {
+            val tagId = queue.removeFirst()
+            TagInheritance.selectAll()
+                .where { TagInheritance.childId eq tagId }
+                .map { it[TagInheritance.parentId].value }
+                .filter { it !in visited }
+                .forEach { visited.add(it); queue.add(it) }
+        }
+        visited
+    }
+
+    /** Tag names (direct + all inherited) for a todo — used for DSL query matching. */
+    fun expandedTagNamesForTodo(todoId: Int): Set<String> = transaction {
+        val directIds = tagsForTodo(todoId).map { it[Tags.id].value }.toSet()
+        val allIds = expandTagIds(directIds)
+        if (allIds.isEmpty()) emptySet()
+        else Tags.selectAll().where { Tags.id inList allIds.toList() }
+            .map { it[Tags.name] }.toSet()
+    }
+
+    /** namespace:name labels for tags inherited (but not directly assigned) to a todo. */
+    fun inheritedTagLabelsForTodo(todoId: Int): List<String> = transaction {
+        val directIds = tagsForTodo(todoId).map { it[Tags.id].value }.toSet()
+        val inheritedIds = expandTagIds(directIds) - directIds
+        if (inheritedIds.isEmpty()) emptyList()
+        else (Tags innerJoin NamespaceManager.Namespaces)
+            .selectAll()
+            .where { Tags.id inList inheritedIds.toList() }
+            .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
     }
 }

@@ -35,17 +35,13 @@ fun executeTodoQuery(query: TodoQuery, playerLocation: Location?): List<ResultRo
         results = results.filter { row -> row[TodoManager.Todos.locationId]?.value in nearLocIds }
     }
 
-    // Post-filter: tags (AND semantics)
+    // Post-filter: tags DSL  (+ = AND, , = OR, - = NOT, () = group)
     query.tags?.let { tagsStr ->
-        val requiredIds = parseQueryTagIds(tagsStr)
-        if (requiredIds.isNotEmpty()) {
-            results = results.filter { row ->
-                val todoId = row[TodoManager.Todos.id].value
-                val presentIds = transaction {
-                    TagManager.tagsForTodo(todoId).map { it[TagManager.Tags.id].value }.toSet()
-                }
-                requiredIds.all { it in presentIds }
-            }
+        val expr = try { parseTagDsl(tagsStr) } catch (_: IllegalArgumentException) { return@let }
+        results = results.filter { row ->
+            val todoId = row[TodoManager.Todos.id].value
+            val allNames = TagManager.expandedTagNamesForTodo(todoId)
+            expr.matches(allNames)
         }
     }
 
@@ -84,10 +80,3 @@ private fun resolveTimeTodoIds(tf: TimeFilter): Set<Int> {
     }
 }
 
-private fun parseQueryTagIds(dsl: String): List<Int> = transaction {
-    dsl.split(",").mapNotNull { raw ->
-        val name = raw.trim()
-        if (name.isEmpty()) null
-        else TagManager.findByName(name)?.get(TagManager.Tags.id)?.value
-    }
-}

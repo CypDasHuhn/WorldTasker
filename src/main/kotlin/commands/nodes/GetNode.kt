@@ -7,7 +7,6 @@ import dev.cypdashuhn.worldtasker.commands.query.TimeOperator
 import dev.cypdashuhn.worldtasker.commands.query.TimeType
 import dev.cypdashuhn.worldtasker.commands.query.TodoQuery
 import dev.cypdashuhn.worldtasker.commands.query.executeTodoQuery
-import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
@@ -66,17 +65,11 @@ private fun executeGetQuery(sender: Player, query: TodoQuery) {
     shown.forEach { row ->
         val id = row[TodoManager.Todos.id].value
         val name = row[TodoManager.Todos.name]
-        val author = row[TodoManager.Todos.author]
-        val description = row[TodoManager.Todos.description]
-        val createdDate = HistoryManager.createdAtForTodo(id)?.toLocalDate()?.toString() ?: "?"
         val state = TodoManager.stateOf(id)
+        val tags = TagManager.tagLabelsForTodo(id)
 
         val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
-        sender.msg("<yellow>#$id <white>$name <gray>(@$author · $createdDate)$stateSuffix")
-
-        val tags = TagManager.tagLabelsForTodo(id)
-        val tagPart = if (tags.isNotEmpty()) "<green>Tags:<gray> ${tags.joinToString(", ")}" else null
-        val descSnippet = if (description.length > 50) description.take(50) + "…" else description
-        sender.msg("  ${listOfNotNull(tagPart, "<gray>\"$descSnippet\"").joinToString(" <dark_gray>|</dark_gray> ")}")
+        val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
+        sender.msg("<yellow>#$id <white>$name$stateSuffix$tagSuffix")
     }
 }

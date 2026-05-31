@@ -18,7 +18,7 @@ internal fun handleWithTodo(sender: Player, name: String, block: (Int) -> Unit) 
 }
 
 internal fun resolveTagIds(tagsStr: String, sender: Player): List<Int> {
-    return tagsStr.split(Regex("[,\\s]+")).mapNotNull { raw ->
+    return tagsStr.split(",").mapNotNull { raw ->
         val name = raw.trim()
         if (name.isEmpty()) return@mapNotNull null
         val tag = TagManager.findByName(name)

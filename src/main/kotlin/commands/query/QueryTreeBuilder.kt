@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.commands.query
 
+import dev.cypdashuhn.worldtasker.commands.suggestTagNamesDsl
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
@@ -50,7 +51,7 @@ object TimeQueryFlag : QueryFlag {
 object QueryTreeBuilder {
     private val flags: List<QueryFlag> = listOf(
         SimpleQueryFlag("--near")   { IntegerArgument("nearRadius") },
-        SimpleQueryFlag("--tags")   { TextArgument("tags") },
+        SimpleQueryFlag("--tags")   { TextArgument("tags").suggestTagNamesDsl() },
         SimpleQueryFlag("--name")   { TextArgument("name") },
         SimpleQueryFlag("--author") { TextArgument("author") },
         TimeQueryFlag,

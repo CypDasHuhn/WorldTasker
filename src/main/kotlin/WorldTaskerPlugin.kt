@@ -57,6 +57,7 @@ class WorldTaskerPlugin : JavaPlugin() {
                 TagManager.Tags,
                 TodoManager.Todos,
                 TagManager.TodoTags,
+                TagManager.TagInheritance,
                 HistoryManager.History,
             ))
         }

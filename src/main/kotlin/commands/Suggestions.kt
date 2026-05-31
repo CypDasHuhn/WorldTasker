@@ -36,27 +36,48 @@ internal fun <T> Argument<T>.suggestTagNames(): Argument<T> =
     })
 
 /**
- * For GreedyStringArgument tag lists: each suggestion includes the already-confirmed tags as a
- * prefix so that selecting a completion appends rather than replaces.
+ * For TextArgument DSL tag filter: completes the tag name currently being typed while
+ * preserving the already-typed operators and tag names as a prefix.
  *
- * e.g. if the user has typed "urgent " the suggestions are "urgent bug", "urgent docs", …
+ * e.g. if the user has typed "urgent+b the suggestions are "urgent+bug", "urgent+backend", …
  */
-internal fun <T> Argument<T>.suggestTagNamesGreedy(): Argument<T> =
+internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
-        val current = info.currentArg()
-        val parts = current.split(Regex("[,\\s]+")).filter { it.isNotEmpty() }
-        // Tags already fully typed (everything except the word currently being typed)
-        val done = if (current.isEmpty() || current.last() == ' ' || current.last() == ',')
-            parts.toSet()
+        val raw = info.currentArg().removePrefix("\"")
+        if (raw.trimEnd().endsWith(")")) return@strings emptyArray()
+        val lastOpIdx = raw.indexOfLast { it in "+,-(" }
+        val prefix = if (lastOpIdx == -1) "" else raw.substring(0, lastOpIdx + 1)
+        val currentToken = if (lastOpIdx == -1) raw else raw.substring(lastOpIdx + 1)
+        transaction {
+            TagManager.all()
+                .map { it[TagManager.Tags.name] }
+                .filter { it.startsWith(currentToken, ignoreCase = true) }
+                .map { "\"$prefix$it\"" }
+                .toTypedArray()
+        }
+    })
+
+/**
+ * For TextArgument comma-separated tag lists: suggestions are full quoted strings including
+ * already-typed tags as a prefix, so selecting appends rather than replaces.
+ *
+ * e.g. if the user has typed "urgent, the suggestions are "urgent,bug", "urgent,docs", …
+ */
+internal fun <T> Argument<T>.suggestTagNamesCommaText(): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { info ->
+        val raw = info.currentArg().removePrefix("\"")
+        val parts = raw.split(",")
+        val done = if (raw.isEmpty() || raw.endsWith(","))
+            parts.filter { it.isNotEmpty() }.toSet()
         else
-            parts.dropLast(1).toSet()
-        val prefix = if (done.isEmpty()) "" else done.joinToString(" ") + " "
+            parts.dropLast(1).filter { it.isNotEmpty() }.toSet()
+        val prefix = if (done.isEmpty()) "" else done.joinToString(",") + ","
 
         transaction {
             TagManager.all()
                 .map { it[TagManager.Tags.name] }
                 .filter { it !in done }
-                .map { "$prefix$it" }
+                .map { "\"$prefix$it\"" }
                 .toTypedArray()
         }
     })
