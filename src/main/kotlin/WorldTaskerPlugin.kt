@@ -11,6 +11,10 @@ import dev.cypdashuhn.rooster.db.utility_tables.attributes.PlayerAttributeManage
 import dev.cypdashuhn.rooster.localization.provider.LocaleProvider
 import dev.cypdashuhn.rooster.localization.provider.YmlLocaleProvider
 import dev.cypdashuhn.worldtasker.commands.todo
+import dev.cypdashuhn.worldtasker.db.HistoryManager
+import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIBukkitConfig
 import dev.jorel.commandapi.CommandAPIPaperConfig
@@ -48,7 +52,13 @@ class WorldTaskerPlugin : JavaPlugin() {
                 )
             )
 
-            db(listOf())
+            db(listOf(
+                NamespaceManager.Namespaces,
+                TagManager.Tags,
+                TodoManager.Todos,
+                TagManager.TodoTags,
+                HistoryManager.History,
+            ))
         }
 
         CommandAPI.onEnable()

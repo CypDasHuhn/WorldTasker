@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.commands.query.TimeFilter
 import dev.cypdashuhn.worldtasker.commands.query.TimeOperator
 import dev.cypdashuhn.worldtasker.commands.query.TimeType
 import dev.cypdashuhn.worldtasker.commands.query.TodoQuery
+import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
@@ -49,7 +50,10 @@ private fun executeGetQuery(sender: Player, query: TodoQuery) {
     val parts = mutableListOf<String>()
     parts.add("§6=== Todo Query Results ===")
 
-    query.nearRadius?.let { parts.add("§e--near: §f$it chunks") }
+    query.nearRadius?.let { radius ->
+        val nearby = TodoManager.findNear(sender.location, radius)
+        parts.add("§e--near: §f$radius chunks (${nearby.size} locations matched)")
+    }
     query.tags?.let { parts.add("§e--tags: §f$it") }
     query.name?.let { parts.add("§e--name: §f$it") }
     query.author?.let { parts.add("§e--author: §f$it") }
