@@ -1,6 +1,6 @@
 package dev.cypdashuhn.worldtasker.db
 
-import dev.cypdashuhn.rooster.db.utility_tables.LocationManager
+import dev.rooster.db.utility_tables.LocationManager
 import dev.cypdashuhn.worldtasker.WorldTaskerPlugin
 import org.bukkit.Location
 import org.jetbrains.exposed.dao.id.IntIdTable

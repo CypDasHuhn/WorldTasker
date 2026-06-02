@@ -2,7 +2,7 @@ package dev.cypdashuhn.worldtasker.commands.nodes
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.suggestTodoNames
-import dev.cypdashuhn.rooster.db.utility_tables.LocationManager
+import dev.rooster.db.utility_tables.LocationManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.arguments.LiteralArgument

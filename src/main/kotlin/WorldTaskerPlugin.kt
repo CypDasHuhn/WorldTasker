@@ -1,15 +1,15 @@
 package dev.cypdashuhn.worldtasker
 
 import com.google.common.cache.CacheBuilder
-import dev.cypdashuhn.rooster.common.RoosterCache
-import dev.cypdashuhn.rooster.common.RoosterServices
-import dev.cypdashuhn.rooster.common.initRooster
-import dev.cypdashuhn.rooster.db.db
-import dev.cypdashuhn.rooster.db.utility_tables.LocationManager
-import dev.cypdashuhn.rooster.db.utility_tables.PlayerManager
-import dev.cypdashuhn.rooster.db.utility_tables.attributes.PlayerAttributeManager
-import dev.cypdashuhn.rooster.localization.provider.LocaleProvider
-import dev.cypdashuhn.rooster.localization.provider.YmlLocaleProvider
+import dev.rooster.core.RoosterCache
+import dev.rooster.core.RoosterServices
+import dev.rooster.core.initRooster
+import dev.rooster.db.db
+import dev.rooster.db.utility_tables.LocationManager
+import dev.rooster.db.utility_tables.PlayerManager
+import dev.rooster.db.utility_tables.attributes.PlayerAttributeManager
+import dev.rooster.localization.provider.LocaleProvider
+import dev.rooster.localization.provider.YmlLocaleProvider
 import dev.cypdashuhn.worldtasker.commands.todo
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.NamespaceManager

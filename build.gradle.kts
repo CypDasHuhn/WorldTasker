@@ -54,7 +54,7 @@ dependencies {
     implementation("dev.jorel:commandapi-paper-shade:11.2.0")
 
     implementation(project(":RoosterSql"))
-    implementation(project(":RoosterCommon"))
+    implementation(project(":RoosterCore"))
     implementation(project(":RoosterLocalization"))
     implementation(project(":RoosterUI"))
 }
