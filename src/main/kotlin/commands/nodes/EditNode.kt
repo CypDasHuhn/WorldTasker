@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
+import dev.cypdashuhn.worldtasker.commands.TodoNameFilter
 import dev.cypdashuhn.worldtasker.commands.handleWithTodo
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.resolveTagIds
@@ -9,6 +10,7 @@ import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoStatus
+import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
@@ -21,12 +23,12 @@ private const val ADD_TAGS     = "editTodoAddTags"
 private const val REMOVE_TAGS  = "editTodoRemoveTags"
 private const val WORK_COMMENT = "editTodoWorkComment"
 
-internal fun buildEditNode(): LiteralArgument {
-    val editNameArg = StringArgument(NAME).suggestTodoNames()
+private fun buildEditNameArg(filter: TodoNameFilter): Argument<String> {
+    val editNameArg = StringArgument(NAME).suggestTodoNames(filter)
 
     editNameArg.then(
         LiteralArgument("complete").executesPlayer(PlayerCommandExecutor { sender, args ->
-            handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
                 TodoManager.complete(id, sender.name)
                 sender.msg("<green>Todo marked complete.")
             }
@@ -35,7 +37,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     editNameArg.then(
         LiteralArgument("reactivate").executesPlayer(PlayerCommandExecutor { sender, args ->
-            handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+            handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
                 TodoManager.reactivate(id, sender.name)
                 sender.msg("<green>Todo reactivated.")
             }
@@ -44,7 +46,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     val newDescArg = TextArgument(NEW_DESC)
     newDescArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
             TodoManager.updateDescription(id, args.argsMap[NEW_DESC] as String)
             sender.msg("<green>Description updated.")
         }
@@ -55,7 +57,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     val setTagsArg = TextArgument(SET_TAGS).suggestTagNamesCommaText()
     setTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
             TagManager.removeAllForTodo(id)
             resolveTagIds(args.argsMap[SET_TAGS] as String, sender).forEach { TagManager.addToTodo(id, it) }
             sender.msg("<green>Tags set.")
@@ -65,7 +67,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     val addTagsArg = TextArgument(ADD_TAGS).suggestTagNamesCommaText()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
             resolveTagIds(args.argsMap[ADD_TAGS] as String, sender).forEach { TagManager.addToTodo(id, it) }
             sender.msg("<green>Tags added.")
         }
@@ -74,7 +76,7 @@ internal fun buildEditNode(): LiteralArgument {
 
     val removeTagsArg = TextArgument(REMOVE_TAGS).suggestTagNamesCommaText()
     removeTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
             resolveTagIds(args.argsMap[REMOVE_TAGS] as String, sender).forEach { TagManager.removeFromTodo(id, it) }
             sender.msg("<green>Tags removed.")
         }
@@ -85,14 +87,20 @@ internal fun buildEditNode(): LiteralArgument {
 
     val workCommentArg = TextArgument(WORK_COMMENT)
     workCommentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
-        handleWithTodo(sender, args.argsMap[NAME] as String) { id ->
+        handleWithTodo(sender, args.argsMap[NAME] as String, filter) { id ->
             HistoryManager.record(id, sender.name, TodoStatus.WORK, args.argsMap[WORK_COMMENT] as String)
             sender.msg("<green>Work entry recorded.")
         }
     })
     editNameArg.then(LiteralArgument("work").then(workCommentArg))
 
+    return editNameArg
+}
+
+internal fun buildEditNode(): LiteralArgument {
     val node = LiteralArgument("edit")
-    node.then(editNameArg)
+    node.then(buildEditNameArg(TodoNameFilter.ACTIVE))
+    node.then(LiteralArgument("--completed").then(buildEditNameArg(TodoNameFilter.COMPLETED)))
+    node.then(LiteralArgument("--all").then(buildEditNameArg(TodoNameFilter.ALL)))
     return node
 }

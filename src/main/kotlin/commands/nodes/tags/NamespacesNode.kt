@@ -3,15 +3,17 @@ package dev.cypdashuhn.worldtasker.commands.nodes.tags
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.suggestNamespaceNames
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
 //region node names
-private const val ADD_NAME   = "todoNsAddName"
+private const val ADD_NAME    = "todoNsAddName"
 private const val REMOVE_NAME = "todoNsRemoveName"
 private const val RENAME_OLD  = "todoNsRenameOld"
 private const val RENAME_NEW  = "todoNsRenameNew"
+private const val INFO_NAME   = "todoNsInfoName"
 //endregion
 
 internal fun buildNamespacesNode(): LiteralArgument {
@@ -65,6 +67,44 @@ internal fun buildNamespacesNode(): LiteralArgument {
     })
     nsRenameOldArg.then(nsRenameNewArg)
     nsNode.then(LiteralArgument("rename").then(nsRenameOldArg))
+
+    val nsInfoArg = StringArgument(INFO_NAME).suggestNamespaceNames()
+    nsInfoArg.executesPlayer(PlayerCommandExecutor { sender, args ->
+        val name = args.argsMap[INFO_NAME] as String
+        val ns = NamespaceManager.findByName(name)
+        if (ns == null) {
+            sender.msg("<red>Namespace '<white>$name</white>' not found.")
+            return@PlayerCommandExecutor
+        }
+        val nsId = ns[NamespaceManager.Namespaces.id].value
+        val tags = TagManager.byNamespace(nsId)
+        if (tags.isEmpty()) {
+            sender.msg("<gold>=== $name ===")
+            sender.msg("<gray>No tags in this namespace.")
+            return@PlayerCommandExecutor
+        }
+        sender.msg("<gold>=== $name ===")
+        tags.forEach { row ->
+            val tagId = row[TagManager.Tags.id].value
+            val tagName = row[TagManager.Tags.name]
+            val parents = TagManager.parentsOf(tagId)
+            if (parents.isEmpty()) {
+                sender.msg("<white>$tagName")
+            } else {
+                val parentLabels = parents.joinToString("<gray>, <white>") { parent ->
+                    val parentNsId = parent[TagManager.Tags.namespaceId].value
+                    val parentTagName = parent[TagManager.Tags.name]
+                    if (parentNsId == nsId) parentTagName
+                    else {
+                        val parentNsName = NamespaceManager.find(parentNsId)?.get(NamespaceManager.Namespaces.name) ?: "?"
+                        "$parentNsName:$parentTagName"
+                    }
+                }
+                sender.msg("<white>$tagName <dark_gray>inherits: <white>$parentLabels")
+            }
+        }
+    })
+    nsNode.then(LiteralArgument("info").then(nsInfoArg))
 
     return nsNode
 }

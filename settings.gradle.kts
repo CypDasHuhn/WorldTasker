@@ -3,14 +3,7 @@ plugins {
 }
 rootProject.name = "WorldTasker"
 
-include(":RoosterUI")
-project(":RoosterUI").projectDir = file("../rooster-ui")
-
-include(":RoosterCore")
-project(":RoosterCore").projectDir = file("../rooster-core")
-
-include(":RoosterLocalization")
-project(":RoosterLocalization").projectDir = file("../rooster-localization")
-
-include(":RoosterSql")
-project(":RoosterSql").projectDir = file("../rooster-sql")
+includeBuild("../rooster-core")
+includeBuild("../rooster-localization")
+includeBuild("../rooster-sql")
+includeBuild("../rooster-ui")

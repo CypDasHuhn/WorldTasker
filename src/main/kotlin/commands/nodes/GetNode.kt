@@ -23,7 +23,7 @@ import org.bukkit.entity.Player
 import java.time.LocalDate
 
 internal fun buildGetNode(): LiteralArgument {
-    fun makeExecutor(showCompleted: Boolean) = PlayerCommandExecutor { sender, args ->
+    fun makeExecutor(showCompleted: Boolean, random: Boolean = false) = PlayerCommandExecutor { sender, args ->
         val query = TodoQuery(
             nearRadius = args.argsMap[ARG_NEAR_RADIUS] as? Int,
             tags = args.argsMap[ARG_TAGS] as? String,
@@ -38,29 +38,47 @@ internal fun buildGetNode(): LiteralArgument {
                 )
             }
         )
-        executeGetQuery(sender, query)
+        executeGetQuery(sender, query, random)
     }
 
     val executor = makeExecutor(false)
     val completedExecutor = makeExecutor(true)
+    val randomExecutor = makeExecutor(false, random = true)
 
-    val getNode = LiteralArgument("get")
-    getNode.executesPlayer(executor)
-    QueryTreeBuilder.build(executor).forEach { getNode.then(it) }
+    val searchNode = LiteralArgument("search")
+    searchNode.executesPlayer(executor)
+    QueryTreeBuilder.build(executor).forEach { searchNode.then(it) }
 
     val completedNode = LiteralArgument("--completed")
     completedNode.executesPlayer(completedExecutor)
     QueryTreeBuilder.build(completedExecutor).forEach { completedNode.then(it) }
-    getNode.then(completedNode)
+    searchNode.then(completedNode)
 
-    return getNode
+    val randomNode = LiteralArgument("--random")
+    randomNode.executesPlayer(randomExecutor)
+    QueryTreeBuilder.build(randomExecutor).forEach { randomNode.then(it) }
+    searchNode.then(randomNode)
+
+    return searchNode
 }
 
-private fun executeGetQuery(sender: Player, query: TodoQuery) {
+private fun executeGetQuery(sender: Player, query: TodoQuery, random: Boolean = false) {
     val results = executeTodoQuery(query, sender.location)
 
     if (results.isEmpty()) {
         sender.msg("<gray>No todos found.")
+        return
+    }
+
+    if (random) {
+        val row = results.random()
+        val id = row[TodoManager.Todos.id].value
+        val name = row[TodoManager.Todos.name]
+        val state = TodoManager.stateOf(id)
+        val tags = TagManager.tagLabelsForTodo(id)
+        val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
+        val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
+        sender.msg("<gold>Random todo: <yellow>#$id <white>$name$stateSuffix$tagSuffix")
         return
     }
 

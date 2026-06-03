@@ -25,8 +25,8 @@ internal fun buildInheritNode(): LiteralArgument {
     addParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val childName = args.argsMap[CHILD] as String
         val parentName = args.argsMap[ADD_PARENT] as String
-        val child = TagManager.findByName(childName)
-        val parent = TagManager.findByName(parentName)
+        val child = TagManager.findByQualifiedName(childName)
+        val parent = TagManager.findByQualifiedName(parentName)
         if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
         if (parent == null) { sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor }
         TagManager.addInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
@@ -37,7 +37,7 @@ internal fun buildInheritNode(): LiteralArgument {
     val setParentsArg = TextArgument(SET_PARENTS).suggestTagNamesCommaText()
     setParentsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val childName = args.argsMap[CHILD] as String
-        val child = TagManager.findByName(childName)
+        val child = TagManager.findByQualifiedName(childName)
         if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
         val parentIds = resolveTagIds(args.argsMap[SET_PARENTS] as String, sender)
         TagManager.setInheritance(child[TagManager.Tags.id].value, parentIds)
@@ -49,8 +49,8 @@ internal fun buildInheritNode(): LiteralArgument {
     remParentArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val childName = args.argsMap[CHILD] as String
         val parentName = args.argsMap[REM_PARENT] as String
-        val child = TagManager.findByName(childName)
-        val parent = TagManager.findByName(parentName)
+        val child = TagManager.findByQualifiedName(childName)
+        val parent = TagManager.findByQualifiedName(parentName)
         if (child == null) { sender.msg("<red>Tag '<white>$childName</white>' not found."); return@PlayerCommandExecutor }
         if (parent == null) { sender.msg("<red>Tag '<white>$parentName</white>' not found."); return@PlayerCommandExecutor }
         TagManager.removeInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)

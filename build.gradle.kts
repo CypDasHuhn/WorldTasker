@@ -4,7 +4,6 @@ plugins {
     java
     id("xyz.jpenilla.run-paper") version "2.3.1"
     kotlin("jvm") version "2.2.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("com.gradleup.shadow") version "8.3.3"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
 }
@@ -53,10 +52,11 @@ dependencies {
 
     implementation("dev.jorel:commandapi-paper-shade:11.2.0")
 
-    implementation(project(":RoosterSql"))
-    implementation(project(":RoosterCore"))
-    implementation(project(":RoosterLocalization"))
-    implementation(project(":RoosterUI"))
+    implementation("dev.rooster.db:RoosterDb:1.0-SNAPSHOT")
+    implementation("dev.rooster.core:rooster-core:1.0-SNAPSHOT")
+    implementation("dev.rooster.localization:rooster-localization:1.0-SNAPSHOT")
+    implementation("dev.rooster.ui:RoosterUI:1.0-SNAPSHOT")
+    implementation("dev.rooster.ui.sql:RoosterUISql:1.0-SNAPSHOT")
 }
 
 val targetJavaVersion = 21

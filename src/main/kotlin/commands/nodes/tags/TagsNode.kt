@@ -60,7 +60,7 @@ internal fun buildTodoTagsNode(): LiteralArgument {
     val tagsRemoveNameArg = StringArgument(REMOVE_NAME).suggestTagNames()
     tagsRemoveNameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val tagName = args.argsMap[REMOVE_NAME] as String
-        val tag = TagManager.findByName(tagName)
+        val tag = TagManager.findByQualifiedName(tagName)
         if (tag == null) {
             sender.msg("<red>Tag '<white>$tagName</white>' not found.")
             return@PlayerCommandExecutor
@@ -75,7 +75,7 @@ internal fun buildTodoTagsNode(): LiteralArgument {
     tagsRenameNewArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val oldName = args.argsMap[RENAME_OLD] as String
         val newName = args.argsMap[RENAME_NEW] as String
-        val tag = TagManager.findByName(oldName)
+        val tag = TagManager.findByQualifiedName(oldName)
         if (tag == null) {
             sender.msg("<red>Tag '<white>$oldName</white>' not found.")
             return@PlayerCommandExecutor

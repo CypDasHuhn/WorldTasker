@@ -52,6 +52,15 @@ object TagManager {
         Tags.selectAll().where { Tags.name eq name }.firstOrNull()
     }
 
+    fun findByQualifiedName(qualified: String): ResultRow? {
+        val colon = qualified.indexOf(':')
+        if (colon == -1) return null
+        val nsName = qualified.substring(0, colon)
+        val tagName = qualified.substring(colon + 1)
+        val ns = NamespaceManager.findByName(nsName) ?: return null
+        return findByName(tagName, ns[NamespaceManager.Namespaces.id].value)
+    }
+
     fun all(): List<ResultRow> = transaction {
         Tags.selectAll().toList()
     }
@@ -148,13 +157,16 @@ object TagManager {
         visited
     }
 
-    /** Tag names (direct + all inherited) for a todo — used for DSL query matching. */
+    /** Qualified `namespace:name` labels (direct + all inherited) for a todo — used for DSL query matching. */
     fun expandedTagNamesForTodo(todoId: Int): Set<String> = transaction {
         val directIds = tagsForTodo(todoId).map { it[Tags.id].value }.toSet()
         val allIds = expandTagIds(directIds)
         if (allIds.isEmpty()) emptySet()
-        else Tags.selectAll().where { Tags.id inList allIds.toList() }
-            .map { it[Tags.name] }.toSet()
+        else (Tags innerJoin NamespaceManager.Namespaces)
+            .selectAll()
+            .where { Tags.id inList allIds.toList() }
+            .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
+            .toSet()
     }
 
     /** namespace:name labels for tags inherited (but not directly assigned) to a todo. */

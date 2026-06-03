@@ -1,26 +1,25 @@
 package dev.cypdashuhn.worldtasker
 
-import com.google.common.cache.CacheBuilder
-import dev.rooster.core.RoosterCache
+import dev.cypdashuhn.worldtasker.commands.initCommands
 import dev.rooster.core.RoosterServices
 import dev.rooster.core.initRooster
 import dev.rooster.db.db
 import dev.rooster.db.utility_tables.LocationManager
-import dev.rooster.db.utility_tables.PlayerManager
-import dev.rooster.db.utility_tables.attributes.PlayerAttributeManager
-import dev.rooster.localization.provider.LocaleProvider
-import dev.rooster.localization.provider.YmlLocaleProvider
 import dev.cypdashuhn.worldtasker.commands.todo
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.initDb
+import dev.cypdashuhn.worldtasker.ui.TodoDetailInterface
+import dev.cypdashuhn.worldtasker.ui.TodoListInterface
+import dev.cypdashuhn.worldtasker.ui.initUi
+import dev.rooster.ui.ui
 import dev.jorel.commandapi.CommandAPI
-import dev.jorel.commandapi.CommandAPIBukkitConfig
 import dev.jorel.commandapi.CommandAPIPaperConfig
+import dev.rooster.localization.provider.YmlLocaleProvider.Companion.addYmlLocaleProvider
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 
 class WorldTaskerPlugin : JavaPlugin() {
@@ -28,9 +27,6 @@ class WorldTaskerPlugin : JavaPlugin() {
     companion object {
         lateinit var plugin: JavaPlugin
         val services = RoosterServices()
-        val cache = RoosterCache<String, Any>(CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES))
-        val playerManager by services.setDelegate(PlayerManager())
-        val playerAttributeManager by services.setDelegate(PlayerAttributeManager(playerManager))
         val locationManager by services.setDelegate(LocationManager())
     }
 
@@ -42,31 +38,19 @@ class WorldTaskerPlugin : JavaPlugin() {
         plugin = this
 
 
-        initRooster(plugin, services, cache) {
-            services.setDelegate<LocaleProvider>(
-                YmlLocaleProvider(
-                    mapOf(
-                        "en_US" to Locale.ENGLISH,
-                        "de_DE" to Locale.GERMAN
-                    ), "en_US"
-                )
+        initRooster(plugin, services) {
+            services.addYmlLocaleProvider(
+                mapOf(
+                    "en_US" to Locale.ENGLISH,
+                    "de_DE" to Locale.GERMAN
+                ), "en_US"
             )
 
-            db(listOf(
-                NamespaceManager.Namespaces,
-                TagManager.Tags,
-                TodoManager.Todos,
-                TagManager.TodoTags,
-                TagManager.TagInheritance,
-                HistoryManager.History,
-            ))
+            initDb()
+            initUi()
         }
 
         CommandAPI.onEnable()
         initCommands()
-    }
-
-    fun initCommands() {
-        todo()
     }
 }

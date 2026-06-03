@@ -8,11 +8,15 @@ import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-internal fun <T> Argument<T>.suggestTodoNames(): Argument<T> =
+internal fun <T> Argument<T>.suggestTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
         transaction {
             TodoManager.Todos.selectAll()
-                .map { it[TodoManager.Todos.name] }
+                .mapNotNull { row ->
+                    val id = row[TodoManager.Todos.id].value
+                    val state = TodoManager.stateOf(id)
+                    if (filter.allowsState(state)) row[TodoManager.Todos.name] else null
+                }
                 .toTypedArray()
         }
     })
@@ -29,8 +33,9 @@ internal fun <T> Argument<T>.suggestNamespaceNames(): Argument<T> =
 internal fun <T> Argument<T>.suggestTagNames(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
         transaction {
-            TagManager.all()
-                .map { it[TagManager.Tags.name] }
+            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
+                .selectAll()
+                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
                 .toTypedArray()
         }
     })
@@ -49,8 +54,9 @@ internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
         val prefix = if (lastOpIdx == -1) "" else raw.substring(0, lastOpIdx + 1)
         val currentToken = if (lastOpIdx == -1) raw else raw.substring(lastOpIdx + 1)
         transaction {
-            TagManager.all()
-                .map { it[TagManager.Tags.name] }
+            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
+                .selectAll()
+                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
                 .filter { it.startsWith(currentToken, ignoreCase = true) }
                 .map { "\"$prefix$it\"" }
                 .toTypedArray()
@@ -84,8 +90,9 @@ internal fun <T> Argument<T>.suggestTagNamesCommaText(): Argument<T> =
         val prefix = if (done.isEmpty()) "" else done.joinToString(",") + ","
 
         transaction {
-            TagManager.all()
-                .map { it[TagManager.Tags.name] }
+            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
+                .selectAll()
+                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
                 .filter { it !in done }
                 .map { "\"$prefix$it\"" }
                 .toTypedArray()
