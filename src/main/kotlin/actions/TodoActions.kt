@@ -1,0 +1,165 @@
+package dev.cypdashuhn.worldtasker.actions
+
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.commands.query.TodoQuery
+import dev.cypdashuhn.worldtasker.commands.query.executeTodoQuery
+import dev.cypdashuhn.worldtasker.db.HistoryManager
+import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoState
+import dev.cypdashuhn.worldtasker.db.TodoStatus
+import dev.rooster.db.utility_tables.LocationManager
+import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
+
+object TodoActions {
+    fun add(sender: Player, name: String, description: String, tagsStr: String?) {
+        val id = TodoManager.create(name, sender.name, description, sender.location)
+        if (tagsStr != null) resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        sender.msg("<green>Todo '<white>$name</white>' created (id $id).")
+    }
+
+    fun complete(sender: Player, id: Int) {
+        TodoManager.complete(id, sender.name)
+        sender.msg("<green>Todo marked complete.")
+    }
+
+    fun reactivate(sender: Player, id: Int) {
+        TodoManager.reactivate(id, sender.name)
+        sender.msg("<green>Todo reactivated.")
+    }
+
+    fun updateDescription(sender: Player, id: Int, description: String) {
+        TodoManager.updateDescription(id, description)
+        sender.msg("<green>Description updated.")
+    }
+
+    fun delete(sender: Player, name: String, id: Int) {
+        TodoManager.delete(id, sender.name)
+        sender.msg("<green>Todo '<white>$name</white>' removed.")
+    }
+
+    fun work(sender: Player, id: Int, comment: String) {
+        HistoryManager.record(id, sender.name, TodoStatus.WORK, comment)
+        sender.msg("<green>Work entry recorded.")
+    }
+
+    fun setTags(sender: Player, id: Int, tagsStr: String) {
+        TagManager.removeAllForTodo(id)
+        resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        sender.msg("<green>Tags set.")
+    }
+
+    fun addTags(sender: Player, id: Int, tagsStr: String) {
+        resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        sender.msg("<green>Tags added.")
+    }
+
+    fun removeTags(sender: Player, id: Int, tagsStr: String) {
+        resolveTagIds(tagsStr, sender).forEach { TagManager.removeFromTodo(id, it) }
+        sender.msg("<green>Tags removed.")
+    }
+
+    fun get(sender: Player, query: TodoQuery, random: Boolean = false) {
+        val results = executeTodoQuery(query, sender.location)
+        if (results.isEmpty()) {
+            sender.msg("<gray>No todos found.")
+            return
+        }
+        if (random) {
+            val row = results.random()
+            val id = row[TodoManager.Todos.id].value
+            val name = row[TodoManager.Todos.name]
+            val state = TodoManager.stateOf(id)
+            val tags = TagManager.tagLabelsForTodo(id)
+            val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
+            val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
+            sender.msg("<gold>Random todo: <yellow>#$id <white>$name$stateSuffix$tagSuffix")
+            return
+        }
+        val cap = 10
+        val shown = results.take(cap)
+        val countLabel = if (results.size > cap) "<yellow>${results.size}</yellow> <gold>found, showing first $cap" else "<yellow>${results.size}</yellow> <gold>found"
+        sender.msg("<gold>=== Todos $countLabel <gold>===")
+        shown.forEach { row ->
+            val id = row[TodoManager.Todos.id].value
+            val name = row[TodoManager.Todos.name]
+            val state = TodoManager.stateOf(id)
+            val tags = TagManager.tagLabelsForTodo(id)
+            val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
+            val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
+            sender.msg("<yellow>#$id <white>$name$stateSuffix$tagSuffix")
+        }
+    }
+
+    fun info(sender: Player, name: String, id: Int) {
+        val todo = TodoManager.findByName(name) ?: return
+        val author = todo[TodoManager.Todos.author]
+        val description = todo[TodoManager.Todos.description]
+        val tags = TagManager.tagLabelsForTodo(id)
+        val inherited = TagManager.inheritedTagLabelsForTodo(id)
+        val history = HistoryManager.forTodo(id)
+        sender.msg("<gold>=== <white>$name <gold>===")
+        sender.msg("<gray>Author: <white>$author")
+        sender.msg("<gray>\"<white>$description<gray>\"")
+        if (tags.isNotEmpty()) sender.msg("<gray>Tags: <white>${tags.joinToString(", ")}")
+        if (inherited.isNotEmpty()) sender.msg("<gray>Inherited: <dark_gray>${inherited.joinToString(", ")}")
+        sender.msg("<gold>--- History ---")
+        history.forEach { entry ->
+            val time = entry[HistoryManager.History.time].toLocalDate()
+            val entryAuthor = entry[HistoryManager.History.author]
+            val status = entry[HistoryManager.History.status]
+            val comment = entry[HistoryManager.History.comment]
+            val commentPart = if (comment != null) " <gray>— <white>$comment" else ""
+            sender.msg("<dark_gray>$time <yellow>$status <gray>($entryAuthor)$commentPart")
+        }
+    }
+
+    fun jump(sender: Player, name: String, id: Int) {
+        val todo = TodoManager.findByName(name) ?: return
+        val locId = todo[TodoManager.Todos.locationId]
+        if (locId == null) {
+            sender.msg("<red>Todo '<white>$name</white>' has no location.")
+            return
+        }
+        val location = transaction { LocationManager.Location.findById(locId)?.location() }
+        if (location == null) {
+            sender.msg("<red>Location data for '<white>$name</white>' is missing.")
+            return
+        }
+        sender.teleport(location)
+        sender.msg("<green>Teleported to todo '<white>$name</white>'.")
+        val description = todo[TodoManager.Todos.description]
+        val tags = TagManager.tagLabelsForTodo(id)
+        if (tags.isNotEmpty()) sender.msg("<green>Tags:<gray> ${tags.joinToString(", ")}")
+        sender.msg("<gray>\"$description\"")
+    }
+
+    fun jumpRandom(sender: Player) {
+        val candidates = transaction { TodoManager.Todos.selectAll().toList() }
+            .filter { row ->
+                row[TodoManager.Todos.locationId] != null &&
+                    TodoManager.stateOf(row[TodoManager.Todos.id].value) == TodoState.ACTIVE
+            }
+        val todo = candidates.randomOrNull()
+        if (todo == null) {
+            sender.msg("<red>No active todos with a location found.")
+            return
+        }
+        val id = todo[TodoManager.Todos.id].value
+        val name = todo[TodoManager.Todos.name]
+        val locId = todo[TodoManager.Todos.locationId]!!
+        val location = transaction { LocationManager.Location.findById(locId)?.location() }
+        if (location == null) {
+            sender.msg("<red>Location data for '<white>$name</white>' is missing.")
+            return
+        }
+        sender.teleport(location)
+        sender.msg("<green>Teleported to random todo '<white>$name</white>'.")
+        val description = todo[TodoManager.Todos.description]
+        val tags = TagManager.tagLabelsForTodo(id)
+        if (tags.isNotEmpty()) sender.msg("<green>Tags:<gray> ${tags.joinToString(", ")}")
+        sender.msg("<gray>\"$description\"")
+    }
+}

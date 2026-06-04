@@ -1,6 +1,6 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
-import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.actions.TodoActions
 import dev.cypdashuhn.worldtasker.commands.query.ARG_AUTHOR
 import dev.cypdashuhn.worldtasker.commands.query.ARG_NAME
 import dev.cypdashuhn.worldtasker.commands.query.ARG_NEAR_RADIUS
@@ -13,13 +13,8 @@ import dev.cypdashuhn.worldtasker.commands.query.TimeFilter
 import dev.cypdashuhn.worldtasker.commands.query.TimeOperator
 import dev.cypdashuhn.worldtasker.commands.query.TimeType
 import dev.cypdashuhn.worldtasker.commands.query.TodoQuery
-import dev.cypdashuhn.worldtasker.commands.query.executeTodoQuery
-import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.db.TodoManager
-import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
-import org.bukkit.entity.Player
 import java.time.LocalDate
 
 internal fun buildGetNode(): LiteralArgument {
@@ -38,7 +33,7 @@ internal fun buildGetNode(): LiteralArgument {
                 )
             }
         )
-        executeGetQuery(sender, query, random)
+        TodoActions.get(sender, query, random)
     }
 
     val executor = makeExecutor(false)
@@ -60,41 +55,4 @@ internal fun buildGetNode(): LiteralArgument {
     searchNode.then(randomNode)
 
     return searchNode
-}
-
-private fun executeGetQuery(sender: Player, query: TodoQuery, random: Boolean = false) {
-    val results = executeTodoQuery(query, sender.location)
-
-    if (results.isEmpty()) {
-        sender.msg("<gray>No todos found.")
-        return
-    }
-
-    if (random) {
-        val row = results.random()
-        val id = row[TodoManager.Todos.id].value
-        val name = row[TodoManager.Todos.name]
-        val state = TodoManager.stateOf(id)
-        val tags = TagManager.tagLabelsForTodo(id)
-        val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
-        val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
-        sender.msg("<gold>Random todo: <yellow>#$id <white>$name$stateSuffix$tagSuffix")
-        return
-    }
-
-    val cap = 10
-    val shown = results.take(cap)
-    val countLabel = if (results.size > cap) "<yellow>${results.size}</yellow> <gold>found, showing first $cap" else "<yellow>${results.size}</yellow> <gold>found"
-    sender.msg("<gold>=== Todos $countLabel <gold>===")
-
-    shown.forEach { row ->
-        val id = row[TodoManager.Todos.id].value
-        val name = row[TodoManager.Todos.name]
-        val state = TodoManager.stateOf(id)
-        val tags = TagManager.tagLabelsForTodo(id)
-
-        val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
-        val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
-        sender.msg("<yellow>#$id <white>$name$stateSuffix$tagSuffix")
-    }
 }

@@ -1,10 +1,9 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
+import dev.cypdashuhn.worldtasker.actions.TodoActions
 import dev.cypdashuhn.worldtasker.commands.TodoNameFilter
 import dev.cypdashuhn.worldtasker.commands.handleWithTodo
-import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.suggestTodoNames
-import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
@@ -16,10 +15,7 @@ private fun buildRemoveNameArg(filter: TodoNameFilter): Argument<String> {
     val removeNameArg = StringArgument(NAME).suggestTodoNames(filter)
     removeNameArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         val name = args.argsMap[NAME] as String
-        handleWithTodo(sender, name, filter) { id ->
-            TodoManager.delete(id, sender.name)
-            sender.msg("<green>Todo '<white>$name</white>' removed.")
-        }
+        handleWithTodo(sender, name, filter) { id -> TodoActions.delete(sender, name, id) }
     })
     return removeNameArg
 }

@@ -1,6 +1,5 @@
 package dev.cypdashuhn.worldtasker.commands
 
-import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -31,16 +30,3 @@ internal fun handleWithTodo(sender: Player, name: String, filter: TodoNameFilter
     block(id)
 }
 
-internal fun resolveTagIds(tagsStr: String, sender: Player): List<Int> {
-    return tagsStr.split(",").mapNotNull { raw ->
-        val name = raw.trim()
-        if (name.isEmpty()) return@mapNotNull null
-        val tag = TagManager.findByQualifiedName(name)
-        if (tag == null) {
-            sender.msg("<yellow>Tag '<white>$name</white>' not found, skipping.")
-            null
-        } else {
-            tag[TagManager.Tags.id].value
-        }
-    }
-}
