@@ -17,7 +17,7 @@ import dev.cypdashuhn.worldtasker.ui.initUi
 import dev.rooster.ui.ui
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
-import dev.rooster.localization.provider.YmlLocaleProvider.Companion.addYmlLocaleProvider
+import dev.rooster.localization.provider.YmlLocaleProvider
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
@@ -39,12 +39,12 @@ class WorldTaskerPlugin : JavaPlugin() {
 
 
         initRooster(plugin, services) {
-            services.addYmlLocaleProvider(
+            services.set(YmlLocaleProvider(
                 mapOf(
                     "en_US" to Locale.ENGLISH,
                     "de_DE" to Locale.GERMAN
                 ), "en_US"
-            )
+            ))
 
             initDb()
             initUi()
