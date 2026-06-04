@@ -107,7 +107,7 @@ object TodoActions {
         if (inherited.isNotEmpty()) sender.msg("<gray>Inherited: <dark_gray>${inherited.joinToString(", ")}")
         sender.msg("<gold>--- History ---")
         history.forEach { entry ->
-            val time = entry[HistoryManager.History.time].toLocalDate()
+            val time = entry[HistoryManager.History.time].format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
             val entryAuthor = entry[HistoryManager.History.author]
             val status = entry[HistoryManager.History.status]
             val comment = entry[HistoryManager.History.comment]

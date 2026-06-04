@@ -83,7 +83,7 @@ object TagSelectInterface : ScrollInterface<TagSelectContext, TagData>(
             TagSelectInterface.openInventory(click.player, context)
         }
 
-    override fun getOtherItems(): List<InterfaceItem<TagSelectContext>> =
+    override fun getInterfaceItems(): List<InterfaceItem<TagSelectContext>> =
         listOf(
             item()
                 .atSlot(2 * 9)

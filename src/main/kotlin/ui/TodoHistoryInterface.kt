@@ -18,6 +18,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 data class HistoryEntry(
     val status: TodoStatus,
@@ -80,7 +81,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     .replaceFirstChar { it.uppercase() }
             val lore =
                 buildList {
-                    add(mm("<dark_gray>${data.author} · ${data.time.toLocalDate()}"))
+                    add(mm("<dark_gray>${data.author} · ${data.time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"))
                     data.comment?.let { add(mm("<gray>\"$it\"")) }
                 }
             createItem(material, mm("<white>$stateName"), lore)
@@ -91,7 +92,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
         context: TodoHistoryContext,
     ): ClickInfo<TodoHistoryContext>.() -> Unit = { }
 
-    override fun getOtherItems(): List<InterfaceItem<TodoHistoryContext>> =
+    override fun getInterfaceItems(): List<InterfaceItem<TodoHistoryContext>> =
         listOf(
             item()
                 .atSlot(bottomRow)

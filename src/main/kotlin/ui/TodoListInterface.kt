@@ -84,7 +84,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
             TodoDetailInterface.openInventory(click.player, TodoDetailContext(data.id))
         }
 
-    override fun getOtherItems(): List<InterfaceItem<TodoListContext>> =
+    override fun getInterfaceItems() =
         listOf(
             item()
                 .atSlot(6, 0)

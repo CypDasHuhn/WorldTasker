@@ -75,7 +75,7 @@ object NamespaceSelectInterface : ScrollInterface<NamespaceSelectContext, Namesp
             TagSelectInterface.openInventory(click.player, TagSelectContext(data.id, context.filter))
         }
 
-    override fun getOtherItems(): List<InterfaceItem<NamespaceSelectContext>> =
+    override fun getInterfaceItems(): List<InterfaceItem<NamespaceSelectContext>> =
         listOf(
             item()
                 .atSlot(9 * 2)
