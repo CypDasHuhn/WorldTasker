@@ -9,6 +9,7 @@ import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOptions
+import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
@@ -34,8 +35,7 @@ object NamespaceSelectInterface : ScrollInterface<NamespaceSelectContext, Namesp
     handler { NamespaceSelectContext(TodoFilter()) },
     ScrollInterfaceOptions<NamespaceSelectContext>().apply {
         inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Namespaces") }
-        inventorySize = 9 * 3
-        contentArea = (0 to 0) to (8 to 2)
+        sizeFromRows(3)
     },
 ) {
     override fun contentProvider(

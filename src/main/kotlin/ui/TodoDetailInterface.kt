@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.rooster.core.util.createItem
 import dev.rooster.db.utility_tables.LocationManager
 import dev.rooster.ui.interfaces.Context
+import dev.rooster.ui.interfaces.InventorySize
 import dev.rooster.ui.interfaces.RoosterInterface
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.options
@@ -26,7 +27,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
     "TodoDetailInterface",
     handler { TodoDetailContext(0) },
     options {
-        inventorySize = 9 * 2
+        inventorySize = InventorySize.TWO_ROWS
         inventoryTitle = { _, context ->
             val name = transaction { TodoManager.findById(context.todoId)?.name } ?: "Todo"
             mm("<white>$name")

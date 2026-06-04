@@ -9,6 +9,7 @@ import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOptions
+import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
@@ -37,9 +38,8 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
     "TodoHistoryInterface",
     handler { TodoHistoryContext(0) },
     ScrollInterfaceOptions<TodoHistoryContext>().apply {
-        scrollDirection = ScrollInterface.ScrollDirection.LEFT_RIGHT
-        inventorySize = 9 * 2
-        contentArea = (0 to 0) to (8 to 0)
+        scrollDirection = ScrollDirection.LEFT_RIGHT
+        sizeFromRows(2)
         inventoryTitle = { _, context ->
             val name = transaction { TodoManager.findById(context.todoId)?.name } ?: "Todo"
             mm("<white>$name <gray>· History")
@@ -79,7 +79,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     .lowercase()
                     .replaceFirstChar { it.uppercase() }
             val lore =
-                buildList<TextComponent> {
+                buildList {
                     add(mm("<dark_gray>${data.author} · ${data.time.toLocalDate()}"))
                     data.comment?.let { add(mm("<gray>\"$it\"")) }
                 }
@@ -94,7 +94,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
     override fun getOtherItems(): List<InterfaceItem<TodoHistoryContext>> =
         listOf(
             item()
-                .atSlot(8)
+                .atSlot(bottomRow)
                 .displayAs(
                     createItem(
                         Material.FEATHER,

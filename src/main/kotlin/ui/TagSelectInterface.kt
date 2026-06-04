@@ -9,6 +9,7 @@ import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOptions
+import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
@@ -37,8 +38,7 @@ object TagSelectInterface : ScrollInterface<TagSelectContext, TagData>(
     handler { TagSelectContext(0, TodoFilter()) },
     ScrollInterfaceOptions<TagSelectContext>().apply {
         inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Tags") }
-        inventorySize = 9 * 3
-        contentArea = (0 to 0) to (8 to 2)
+        sizeFromRows(3)
     },
 ) {
     override fun contentProvider(

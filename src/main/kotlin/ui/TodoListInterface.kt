@@ -9,6 +9,7 @@ import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOptions
+import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
@@ -38,16 +39,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
     handler { TodoListContext() },
     ScrollInterfaceOptions<TodoListContext>().apply {
         inventoryTitle = { _, _ -> mm("<white><bold>Todos") }
-        contentArea = (0 to 0) to (8 to 5)
-        modifyScroller = {
-            this.displayAs(
-                createItem(
-                    Material.COMPASS,
-                    mm("<white>Scroll"),
-                    listOf(mm("<gray>Click left to scroll down, right to scroll down.")),
-                ),
-            )
-        }
+        sizeFromRows(6)
     },
 ) {
     override fun contentProvider(
@@ -95,7 +87,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
     override fun getOtherItems(): List<InterfaceItem<TodoListContext>> =
         listOf(
             item()
-                .atSlot(45)
+                .atSlot(6, 0)
                 .displayAs {
                     val filter = context.filter
                     val lore =
