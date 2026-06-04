@@ -4,7 +4,7 @@ plugins {
     java
     id("xyz.jpenilla.run-paper") version "2.3.1"
     kotlin("jvm") version "2.2.0"
-    id("com.gradleup.shadow") version "8.3.3"
+    id("com.gradleup.shadow") version "8.3.6"
     id("net.minecrell.plugin-yml.bukkit") version "0.6.0"
 }
 
@@ -84,7 +84,10 @@ tasks {
 }
 
 tasks.withType<ShadowJar> {
-    relocate("dev.jorel.commandapi", "dev.cypdashuhn.worldtasker.commandapi")
+    // relocate("dev.jorel.commandapi", "dev.cypdashuhn.worldtasker.commandapi")
+    // TODO: re-enable once Shadow fixes mapValue(int[]) crash with Kotlin 2.x @Metadata annotations.
+    // Shadow's RelocatorRemapper (Groovy) cannot dispatch super.mapValue() when ASM passes int[]
+    // from @kotlin.Metadata(mv=[2,2,0]) — only triggered when hasRelocators() is true.
     manifest {
         attributes["paperweight-mappings-namespace"] = "mojang"
     }
