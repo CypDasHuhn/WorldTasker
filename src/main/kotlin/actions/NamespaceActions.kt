@@ -1,9 +1,13 @@
 package dev.cypdashuhn.worldtasker.actions
 
+import dev.cypdashuhn.worldtasker.actions.isValidResourceName
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import org.bukkit.entity.Player
+
+private fun Player.invalidName(name: String) =
+    msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '.', '-'.")
 
 object NamespaceActions {
     fun list(sender: Player) {
@@ -17,6 +21,7 @@ object NamespaceActions {
     }
 
     fun add(sender: Player, name: String) {
+        if (!isValidResourceName(name)) { sender.invalidName(name); return }
         NamespaceManager.create(name)
         sender.msg("<green>Namespace '<white>$name</white>' created.")
     }
@@ -32,6 +37,7 @@ object NamespaceActions {
     }
 
     fun rename(sender: Player, oldName: String, newName: String) {
+        if (!isValidResourceName(newName)) { sender.invalidName(newName); return }
         val ns = NamespaceManager.findByName(oldName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$oldName</white>' not found.")

@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.db
 
+import org.bukkit.NamespacedKey
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
@@ -50,6 +51,11 @@ object TagManager {
 
     fun findByName(name: String): ResultRow? = transaction {
         Tags.selectAll().where { Tags.name eq name }.firstOrNull()
+    }
+
+    fun findByQualifiedName(key: NamespacedKey): ResultRow? {
+        val ns = NamespaceManager.findByName(key.namespace) ?: return null
+        return findByName(key.key, ns[NamespaceManager.Namespaces.id].value)
     }
 
     fun findByQualifiedName(qualified: String): ResultRow? {
