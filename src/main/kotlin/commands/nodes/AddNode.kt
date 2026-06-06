@@ -1,7 +1,8 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
 import dev.cypdashuhn.worldtasker.actions.TodoActions
-import dev.cypdashuhn.worldtasker.commands.suggestTagNamesCommaText
+import dev.cypdashuhn.worldtasker.commands.suggestTagNamesGreedy
+import dev.jorel.commandapi.arguments.GreedyStringArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
@@ -12,7 +13,7 @@ private const val DESCRIPTION = "addTodoDescription"
 private const val TAGS        = "addTodoTags"
 
 internal fun buildAddNode(): LiteralArgument {
-    val addTagsArg = TextArgument(TAGS).suggestTagNamesCommaText()
+    val addTagsArg = GreedyStringArgument(TAGS).suggestTagNamesGreedy()
     addTagsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         TodoActions.add(sender, args.argsMap[NAME] as String, args.argsMap[DESCRIPTION] as String, args.argsMap[TAGS] as String)
     })

@@ -12,8 +12,7 @@ private fun Player.invalidName(name: String) =
     msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
 
 fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
-    tagsStr.split(",").mapNotNull { raw ->
-        val name = raw.trim()
+    tagsStr.trim().split(Regex("\\s+")).mapNotNull { name ->
         if (name.isEmpty()) return@mapNotNull null
         val tag = TagManager.findByQualifiedName(name)
         if (tag == null) {

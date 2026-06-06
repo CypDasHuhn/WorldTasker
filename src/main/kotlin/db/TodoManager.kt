@@ -67,6 +67,10 @@ object TodoManager {
         Todos.selectAll().where { Todos.name eq name }.firstOrNull()
     }
 
+    fun findAllByName(name: String): List<ResultRow> = transaction {
+        Todos.selectAll().where { Todos.name eq name }.toList()
+    }
+
     fun findById(id: Int): TodoEntry? = transaction {
         Todos.selectAll().where { Todos.id eq id }.firstOrNull().let{ if (it == null) null else TodoEntry.wrapRow(it) }
     }

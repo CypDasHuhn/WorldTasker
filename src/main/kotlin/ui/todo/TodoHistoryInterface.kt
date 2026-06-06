@@ -105,7 +105,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .atSlot(bottomRow + 3)
                 .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.ACTIVE }
                 .displayAs(
-                    createItem(Material.LIGHT_BLUE_CONCRETE, mm("<white>Work"), listOf(mm("<gray>Record work with a comment."))),
+                    createItem(Material.IRON_PICKAXE, mm("<white>Work"), listOf(mm("<gray>Record work with a comment."))),
                 ).onClick {
                     val player = click.player
                     val todoId = context.todoId
@@ -120,7 +120,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .atSlot(bottomRow + 5)
                 .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.ACTIVE }
                 .displayAs(
-                    createItem(Material.RED_CONCRETE, mm("<white>Complete"), listOf(mm("<gray>Mark this todo as completed."))),
+                    createItem(Material.FIREWORK_ROCKET, mm("<white>Complete"), listOf(mm("<gray>Mark this todo as completed."))),
                 ).onClick {
                     HistoryManager.record(context.todoId, click.player, TodoStatus.COMPLETE)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
@@ -131,7 +131,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .atSlot(bottomRow + 5)
                 .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.COMPLETED }
                 .displayAs(
-                    createItem(Material.YELLOW_CONCRETE, mm("<white>Reactivate"), listOf(mm("<gray>Mark this todo as active again."))),
+                    createItem(Material.LANTERN, mm("<white>Reactivate"), listOf(mm("<gray>Mark this todo as active again."))),
                 ).onClick {
                     HistoryManager.record(context.todoId, click.player, TodoStatus.REACTIVATE)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))

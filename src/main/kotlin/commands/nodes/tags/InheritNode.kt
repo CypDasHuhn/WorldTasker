@@ -2,10 +2,10 @@ package dev.cypdashuhn.worldtasker.commands.nodes.tags
 
 import dev.cypdashuhn.worldtasker.actions.TagActions
 import dev.cypdashuhn.worldtasker.commands.suggestTagNames
-import dev.cypdashuhn.worldtasker.commands.suggestTagNamesCommaText
+import dev.cypdashuhn.worldtasker.commands.suggestTagNamesGreedy
 import dev.jorel.commandapi.arguments.LiteralArgument
+import dev.jorel.commandapi.arguments.GreedyStringArgument
 import dev.jorel.commandapi.arguments.NamespacedKeyArgument
-import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.NamespacedKey
 
@@ -24,7 +24,7 @@ internal fun buildInheritNode(): LiteralArgument {
     })
     childArg.then(LiteralArgument("add").then(addParentArg))
 
-    val setParentsArg = TextArgument(SET_PARENTS).suggestTagNamesCommaText()
+    val setParentsArg = GreedyStringArgument(SET_PARENTS).suggestTagNamesGreedy()
     setParentsArg.executesPlayer(PlayerCommandExecutor { sender, args ->
         TagActions.setInheritance(sender, args.argsMap[CHILD] as NamespacedKey, args.argsMap[SET_PARENTS] as String)
     })

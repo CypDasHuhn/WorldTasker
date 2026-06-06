@@ -3,10 +3,27 @@ package dev.cypdashuhn.worldtasker.commands
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+
+internal fun <T> Argument<T>.suggestScopedTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { _ ->
+        transaction {
+            val allTodos = TodoManager.Todos.selectAll().mapNotNull { row ->
+                val id = row[TodoManager.Todos.id].value
+                if (filter.allowsState(TodoManager.stateOf(id))) Pair(id, row[TodoManager.Todos.name]) else null
+            }
+            allTodos.flatMap { (id, name) ->
+                val scoped = if (TodoScopeManager.isActive())
+                    TodoScopeManager.scopeTagNameForTodo(id)?.let { tag -> "$tag:$name" }
+                else null
+                listOfNotNull(name, scoped)
+            }.distinct().toTypedArray()
+        }
+    })
 
 internal fun <T> Argument<T>.suggestTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
@@ -73,28 +90,22 @@ internal fun <T> Argument<T>.suggestTodoAuthors(): Argument<T> =
         }
     })
 
-/**
- * For TextArgument comma-separated tag lists: suggestions are full quoted strings including
- * already-typed tags as a prefix, so selecting appends rather than replaces.
- *
- * e.g. if the user has typed "urgent, the suggestions are "urgent,bug", "urgent,docs", …
- */
-internal fun <T> Argument<T>.suggestTagNamesCommaText(): Argument<T> =
+internal fun <T> Argument<T>.suggestTagNamesGreedy(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
-        val raw = info.currentArg().removePrefix("\"")
-        val parts = raw.split(",")
-        val done = if (raw.isEmpty() || raw.endsWith(","))
+        val raw = info.currentArg()
+        val parts = raw.split(" ")
+        val done = if (raw.isEmpty() || raw.endsWith(" "))
             parts.filter { it.isNotEmpty() }.toSet()
         else
             parts.dropLast(1).filter { it.isNotEmpty() }.toSet()
-        val prefix = if (done.isEmpty()) "" else done.joinToString(",") + ","
+        val prefix = if (done.isEmpty()) "" else done.joinToString(" ") + " "
 
         transaction {
             (TagManager.Tags innerJoin NamespaceManager.Namespaces)
                 .selectAll()
                 .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
                 .filter { it !in done }
-                .map { "\"$prefix$it\"" }
+                .map { "$prefix$it" }
                 .toTypedArray()
         }
     })

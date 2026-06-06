@@ -3,8 +3,21 @@ package dev.cypdashuhn.worldtasker.db
 import dev.rooster.core.YmlOperations
 import dev.rooster.core.YmlShell
 import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 
 private const val CONFIG_KEY = "todo-scope-namespace"
+
+sealed class TodoResolveResult {
+    data class Found(val id: Int, val name: String) : TodoResolveResult()
+    object NotFound : TodoResolveResult()
+    data class Ambiguous(
+        val todoName: String,
+        val scopedOptions: List<String>,
+        val hasUntagged: Boolean,
+    ) : TodoResolveResult()
+}
 
 object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
     private var namespaceId: Int? = null
@@ -60,4 +73,49 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
     }
 
     fun canDeleteNamespace(id: Int): Boolean = id != namespaceId
+
+    // ── resolution ────────────────────────────────────────────────────────
+
+    fun resolveInput(key: NamespacedKey, allowedStates: Set<TodoState>): TodoResolveResult {
+        val todoName = key.key
+        val isBare = key.namespace == "minecraft"
+
+        val candidates = TodoManager.findAllByName(todoName)
+            .filter { row -> TodoManager.stateOf(row[TodoManager.Todos.id].value) in allowedStates }
+
+        if (!isBare) {
+            val scoped = candidates.filter { row ->
+                scopeTagNameForTodo(row[TodoManager.Todos.id].value) == key.namespace
+            }
+            return when {
+                scoped.isEmpty() -> TodoResolveResult.NotFound
+                else -> TodoResolveResult.Found(scoped[0][TodoManager.Todos.id].value, todoName)
+            }
+        }
+
+        return when (candidates.size) {
+            0 -> TodoResolveResult.NotFound
+            1 -> TodoResolveResult.Found(candidates[0][TodoManager.Todos.id].value, todoName)
+            else -> {
+                val scopedOptions = candidates.mapNotNull { row ->
+                    val id = row[TodoManager.Todos.id].value
+                    scopeTagNameForTodo(id)?.let { tag -> "$tag:$todoName" }
+                }
+                val hasUntagged = candidates.any { row ->
+                    scopeTagNameForTodo(row[TodoManager.Todos.id].value) == null
+                }
+                TodoResolveResult.Ambiguous(todoName, scopedOptions, hasUntagged)
+            }
+        }
+    }
+
+    fun scopeTagNameForTodo(todoId: Int): String? {
+        if (!isActive() || tags.isEmpty()) return null
+        return transaction {
+            TagManager.TodoTags
+                .selectAll()
+                .where { TagManager.TodoTags.todoId eq todoId }
+                .firstNotNullOfOrNull { row -> tags[row[TagManager.TodoTags.tagId].value] }
+        }
+    }
 }
