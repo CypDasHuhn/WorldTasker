@@ -14,7 +14,8 @@ import org.bukkit.NamespacedKey
 private const val NAME = "infoTodoName"
 
 private fun infoNameArg(filter: TodoNameFilter) =
-    NamespacedKeyArgument(NAME).suggestScopedTodoNames(filter)
+    NamespacedKeyArgument(NAME)
+        .suggestScopedTodoNames(filter)
         .executesPlayer(PlayerCommandExecutor { sender, args ->
             handleWithScopedTodo(sender, args.argsMap[NAME] as NamespacedKey, filter) { id, name ->
                 TodoActions.info(sender, name, id)

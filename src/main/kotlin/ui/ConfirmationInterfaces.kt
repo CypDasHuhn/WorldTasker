@@ -16,18 +16,19 @@ import dev.cypdashuhn.worldtasker.ui.todo.TodoDetailInterface
 import dev.cypdashuhn.worldtasker.ui.todo.TodoListInterface
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
-import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.constructors.confirmation.BaseConfirmationInterface
 import dev.rooster.ui.interfaces.constructors.confirmation.CancelInfo
+import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 private fun <T : Context> CancelInfo<T>.player(): Player? =
@@ -51,9 +52,10 @@ object DeleteTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
     override fun getInventory(player: Player, context: TodoDetailContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<red>Delete Todo?"))
 
-    override fun getOtherItems(): List<InterfaceItem<TodoDetailContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This todo will be deleted forever."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<TodoDetailContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This todo will be deleted forever."))),
+        )
 }
 
 // ─── Rename Todo ──────────────────────────────────────────────────────────────
@@ -77,21 +79,27 @@ object RenameTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
     override fun getInventory(player: Player, context: TodoDetailContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<yellow>Rename Todo?"))
 
-    override fun getOtherItems(): List<InterfaceItem<TodoDetailContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<TodoDetailContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
+        )
 }
 
 // ─── Delete Namespace ─────────────────────────────────────────────────────────
 
-class DeleteNamespaceContext(val namespaceId: Int) : Context()
+class DeleteNamespaceContext(
+    val namespaceId: Int
+) : Context()
 
 object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceContext>(
     "DeleteNamespaceConfirmation",
     handler { DeleteNamespaceContext(0) },
     onConfirm = { info ->
         when (NamespaceManager.delete(info.context.namespaceId)) {
-            NamespaceDeleteResult.DELETED -> NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+            NamespaceDeleteResult.DELETED -> {
+                NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+            }
+
             NamespaceDeleteResult.BLOCKED_SCOPE -> {
                 info.click.player.msg("<red>This namespace is the active todo scope and cannot be deleted.")
                 NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
@@ -106,14 +114,17 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
     override fun getInventory(player: Player, context: DeleteNamespaceContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<red>Delete Namespace?"))
 
-    override fun getOtherItems(): List<InterfaceItem<DeleteNamespaceContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>All tags in this namespace will also be deleted."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<DeleteNamespaceContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>All tags in this namespace will also be deleted."))),
+        )
 }
 
 // ─── Rename Namespace ─────────────────────────────────────────────────────────
 
-class RenameNamespaceContext(val namespaceId: Int) : Context()
+class RenameNamespaceContext(
+    val namespaceId: Int
+) : Context()
 
 object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceContext>(
     "RenameNamespaceConfirmation",
@@ -134,14 +145,18 @@ object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceCo
     override fun getInventory(player: Player, context: RenameNamespaceContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<yellow>Rename Namespace?"))
 
-    override fun getOtherItems(): List<InterfaceItem<RenameNamespaceContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<RenameNamespaceContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
+        )
 }
 
 // ─── Delete Tag ───────────────────────────────────────────────────────────────
 
-class DeleteTagContext(val tagId: Int, val namespaceId: Int) : Context()
+class DeleteTagContext(
+    val tagId: Int,
+    val namespaceId: Int
+) : Context()
 
 object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
     "DeleteTagConfirmation",
@@ -158,14 +173,18 @@ object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
     override fun getInventory(player: Player, context: DeleteTagContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<red>Delete Tag?"))
 
-    override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This tag will be removed from all todos."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This tag will be removed from all todos."))),
+        )
 }
 
 // ─── Rename Tag ───────────────────────────────────────────────────────────────
 
-class RenameTagContext(val tagId: Int, val namespaceId: Int) : Context()
+class RenameTagContext(
+    val tagId: Int,
+    val namespaceId: Int
+) : Context()
 
 object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
     "RenameTagConfirmation",
@@ -187,7 +206,8 @@ object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
     override fun getInventory(player: Player, context: RenameTagContext): Inventory =
         Bukkit.createInventory(null, 9, mm("<yellow>Rename Tag?"))
 
-    override fun getOtherItems(): List<InterfaceItem<RenameTagContext>> = listOf(
-        item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
-    )
+    override fun getOtherItems(): List<InterfaceItem<RenameTagContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.NAME_TAG, mm("<yellow>You will be prompted to type the new name."))),
+        )
 }

@@ -22,9 +22,10 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-private const val MATERIAL_SLOT = 13  // center slot of a 3-row inventory
+private const val MATERIAL_SLOT = 13 // center slot of a 3-row inventory
 
 // ─── abstract base ────────────────────────────────────────────────────────────
 
@@ -33,23 +34,23 @@ abstract class ChangeMaterialBase<C : Context>(
     handler: ContextHandler<C>,
     titleFn: (Player, C) -> Component,
 ) : RoosterInterface<C>(
-    name,
-    handler,
-    options {
-        inventorySize = InventorySize.THREE_ROWS
-        inventoryTitle = titleFn
-        cancelEvent = { info ->
-            info.click.slot != MATERIAL_SLOT &&
-                info.click.event.clickedInventory != info.click.event.view.bottomInventory
-        }
-    },
-) {
+        name,
+        handler,
+        options {
+            inventorySize = InventorySize.THREE_ROWS
+            inventoryTitle = titleFn
+            cancelEvent = { info ->
+                info.click.slot != MATERIAL_SLOT &&
+                    info.click.event.clickedInventory != info.click.event.view.bottomInventory
+            }
+        },
+    ) {
     abstract fun onSave(info: ClickInfo<C>, material: Material)
 
     override fun getInterfaceItems(): List<InterfaceItem<C>> =
         listOf(
             item()
-                .atSlots((0..2).map { it * 9 }.flatMap { outer -> (3..5).map { it -> it + outer }}.filter { it != MATERIAL_SLOT })
+                .atSlots((0..2).map { it * 9 }.flatMap { outer -> (3..5).map { it -> it + outer } }.filter { it != MATERIAL_SLOT })
                 .displayAs(createItem(Material.GRAY_STAINED_GLASS_PANE, mm(""), listOf())),
             item()
                 .atSlot(bottomRow + 8)
@@ -60,7 +61,9 @@ abstract class ChangeMaterialBase<C : Context>(
                         listOf(mm("<gray>Saves the item in the center slot as the material.")),
                     ),
                 ).onClick {
-                    val newMaterial = click.player.openInventory.topInventory.getItem(MATERIAL_SLOT)?.type
+                    val newMaterial = click.player.openInventory.topInventory
+                        .getItem(MATERIAL_SLOT)
+                        ?.type
                     if (newMaterial != null && newMaterial != Material.AIR) {
                         onSave(this, newMaterial)
                     }

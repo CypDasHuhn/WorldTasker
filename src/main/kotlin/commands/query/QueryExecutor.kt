@@ -30,14 +30,20 @@ fun executeTodoQuery(query: TodoQuery, playerLocation: Location?): List<ResultRo
 
     // Post-filter: nearRadius
     if (query.nearRadius != null && playerLocation != null) {
-        val nearLocIds = TodoManager.findNear(playerLocation, query.nearRadius)
-            .map { it.id.value }.toSet()
+        val nearLocIds = TodoManager
+            .findNear(playerLocation, query.nearRadius)
+            .map { it.id.value }
+            .toSet()
         results = results.filter { row -> row[TodoManager.Todos.locationId]?.value in nearLocIds }
     }
 
     // Post-filter: tags DSL  (+ = AND, , = OR, - = NOT, () = group)
     query.tags?.let { tagsStr ->
-        val expr = try { parseTagDsl(tagsStr) } catch (_: IllegalArgumentException) { return@let }
+        val expr = try {
+            parseTagDsl(tagsStr)
+        } catch (_: IllegalArgumentException) {
+            return@let
+        }
         results = results.filter { row ->
             val todoId = row[TodoManager.Todos.id].value
             val allNames = TagManager.expandedTagNamesForTodo(todoId)
@@ -66,17 +72,19 @@ private fun resolveTimeTodoIds(tf: TimeFilter): Set<Int> {
         TimeType.WORKED -> TodoStatus.WORK
     }
     return transaction {
-        var q = HistoryManager.History.selectAll()
+        var q = HistoryManager.History
+            .selectAll()
             .andWhere { HistoryManager.History.status eq statusFilter }
         q = when (tf.operator) {
             TimeOperator.BEFORE -> q.andWhere { HistoryManager.History.time less start }
+
             TimeOperator.AFTER -> q.andWhere { HistoryManager.History.time greaterEq end }
+
             TimeOperator.ON -> q.andWhere {
                 (HistoryManager.History.time greaterEq start) and
-                        (HistoryManager.History.time less end)
+                    (HistoryManager.History.time less end)
             }
         }
         q.map { it[HistoryManager.History.todoId].value }.toSet()
     }
 }
-

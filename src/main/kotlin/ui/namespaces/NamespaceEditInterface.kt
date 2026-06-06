@@ -20,6 +20,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class NamespaceEditContext : ScrollContext()
@@ -32,19 +33,13 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
         sizeFromRows(4)
     },
 ) {
-    override fun contentDisplay(
-        data: NamespaceData,
-        context: NamespaceEditContext,
-    ): InterfaceInfo<NamespaceEditContext>.() -> ItemStack =
+    override fun contentDisplay(data: NamespaceData, context: NamespaceEditContext,): InterfaceInfo<NamespaceEditContext>.() -> ItemStack =
         {
             val tagCount = TagManager.byNamespace(data.id).size
             createItem(data.material, mm("<white>${data.name}"), listOf(mm("<gray>$tagCount tag(s)")))
         }
 
-    override fun contentClick(
-        data: NamespaceData,
-        context: NamespaceEditContext,
-    ): ClickInfo<NamespaceEditContext>.() -> Unit =
+    override fun contentClick(data: NamespaceData, context: NamespaceEditContext,): ClickInfo<NamespaceEditContext>.() -> Unit =
         {
             TagEditInterface.openInventory(click.player, TagEditContext(data.id))
         }

@@ -27,36 +27,43 @@ object HistoryManager {
         val comment = text("comment").nullable()
     }
 
-    fun record(todoId: Int, player: Player, status: TodoStatus, comment: String? = null) = transaction {
-        History.insert {
-            it[History.todoId] = todoId
-            it[History.time] = LocalDateTime.now()
-            it[History.playerId] = player.dbPlayer().id
-            it[History.status] = status
-            it[History.comment] = comment
+    fun record(todoId: Int, player: Player, status: TodoStatus, comment: String? = null) =
+        transaction {
+            History.insert {
+                it[History.todoId] = todoId
+                it[History.time] = LocalDateTime.now()
+                it[History.playerId] = player.dbPlayer().id
+                it[History.status] = status
+                it[History.comment] = comment
+            }
         }
-    }
 
-    fun forTodo(todoId: Int): List<ResultRow> = transaction {
-        History.join(PlayerManager.Players, JoinType.LEFT, History.playerId, PlayerManager.Players.id)
-            .selectAll()
-            .where { History.todoId eq todoId }
-            .orderBy(History.time, SortOrder.ASC)
-            .toList()
-    }
+    fun forTodo(todoId: Int): List<ResultRow> =
+        transaction {
+            History
+                .join(PlayerManager.Players, JoinType.LEFT, History.playerId, PlayerManager.Players.id)
+                .selectAll()
+                .where { History.todoId eq todoId }
+                .orderBy(History.time, SortOrder.ASC)
+                .toList()
+        }
 
-    fun latestForTodo(todoId: Int): ResultRow? = transaction {
-        History.selectAll()
-            .where { History.todoId eq todoId }
-            .orderBy(History.time, SortOrder.DESC)
-            .firstOrNull()
-    }
+    fun latestForTodo(todoId: Int): ResultRow? =
+        transaction {
+            History
+                .selectAll()
+                .where { History.todoId eq todoId }
+                .orderBy(History.time, SortOrder.DESC)
+                .firstOrNull()
+        }
 
-    fun createdAtForTodo(todoId: Int): LocalDateTime? = transaction {
-        History.selectAll()
-            .where { (History.todoId eq todoId) and (History.status eq TodoStatus.CREATE) }
-            .orderBy(History.time, SortOrder.ASC)
-            .firstOrNull()
-            ?.get(History.time)
-    }
+    fun createdAtForTodo(todoId: Int): LocalDateTime? =
+        transaction {
+            History
+                .selectAll()
+                .where { (History.todoId eq todoId) and (History.status eq TodoStatus.CREATE) }
+                .orderBy(History.time, SortOrder.ASC)
+                .firstOrNull()
+                ?.get(History.time)
+        }
 }

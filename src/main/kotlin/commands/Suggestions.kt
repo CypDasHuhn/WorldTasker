@@ -23,32 +23,37 @@ internal fun <T> Argument<T>.suggestScopedTodoNames(filter: TodoNameFilter = Tod
                 val id = row[TodoManager.Todos.id].value
                 if (filter.allowsState(TodoManager.stateOf(id))) Pair(id, row[TodoManager.Todos.name]) else null
             }
-            allTodos.flatMap { (id, name) ->
-                val scoped = if (TodoScopeManager.isActive())
-                    TodoScopeManager.scopeTagNameForTodo(id)?.let { tag -> "$tag:$name" }
-                else null
-                listOfNotNull(name, scoped)
-            }.distinct().toTypedArray()
+            allTodos
+                .flatMap { (id, name) ->
+                    val scoped = if (TodoScopeManager.isActive()) {
+                        TodoScopeManager.scopeTagNameForTodo(id)?.let { tag -> "$tag:$name" }
+                    } else {
+                        null
+                    }
+                    listOfNotNull(name, scoped)
+                }.distinct()
+                .toTypedArray()
         }
     })
 
 internal fun <T> Argument<T>.suggestTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
         transaction {
-            TodoManager.Todos.selectAll()
+            TodoManager.Todos
+                .selectAll()
                 .mapNotNull { row ->
                     val id = row[TodoManager.Todos.id].value
                     val state = TodoManager.stateOf(id)
                     if (filter.allowsState(state)) row[TodoManager.Todos.name] else null
-                }
-                .toTypedArray()
+                }.toTypedArray()
         }
     })
 
 internal fun <T> Argument<T>.suggestNamespaceNames(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
         transaction {
-            NamespaceManager.all()
+            NamespaceManager
+                .all()
                 .map { it[NamespaceManager.Namespaces.name] }
                 .toTypedArray()
         }
@@ -90,7 +95,8 @@ internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
 internal fun <T> Argument<T>.suggestTodoAuthors(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
         transaction {
-            TodoManager.Todos.selectAll()
+            TodoManager.Todos
+                .selectAll()
                 .map { it[TodoManager.Todos.author] }
                 .distinct()
                 .toTypedArray()
@@ -101,10 +107,11 @@ internal fun <T> Argument<T>.suggestTagNamesGreedy(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
         val raw = info.currentArg()
         val parts = raw.split(" ")
-        val done = if (raw.isEmpty() || raw.endsWith(" "))
+        val done = if (raw.isEmpty() || raw.endsWith(" ")) {
             parts.filter { it.isNotEmpty() }.toSet()
-        else
+        } else {
             parts.dropLast(1).filter { it.isNotEmpty() }.toSet()
+        }
         val prefix = if (done.isEmpty()) "" else done.joinToString(" ") + " "
 
         transaction {

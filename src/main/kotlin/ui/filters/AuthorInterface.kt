@@ -23,11 +23,17 @@ import org.bukkit.inventory.meta.SkullMeta
 import java.util.UUID
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-class AuthorContext(var filter: TodoFilter = TodoFilter()) : ScrollContext()
+class AuthorContext(
+    var filter: TodoFilter = TodoFilter()
+) : ScrollContext()
 
-data class AuthorEntry(val name: String, val uuid: String)
+data class AuthorEntry(
+    val name: String,
+    val uuid: String
+)
 
 object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
     "AuthorInterface",
@@ -38,17 +44,14 @@ object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
     },
 ) {
     private fun allPlayers(): List<AuthorEntry> =
-        WorldTaskerPlugin.playerManager.players()
+        WorldTaskerPlugin.playerManager
+            .players()
             .sortedBy { it.name }
             .map { AuthorEntry(it.name, it.uuid) }
 
-    override fun contentProvider(id: Int, context: AuthorContext): AuthorEntry? =
-        allPlayers().getOrNull(id)
+    override fun contentProvider(id: Int, context: AuthorContext): AuthorEntry? = allPlayers().getOrNull(id)
 
-    override fun contentDisplay(
-        data: AuthorEntry,
-        context: AuthorContext,
-    ): InterfaceInfo<AuthorContext>.() -> ItemStack =
+    override fun contentDisplay(data: AuthorEntry, context: AuthorContext,): InterfaceInfo<AuthorContext>.() -> ItemStack =
         {
             val state = context.filter.authorStateOf(data.name)
             val (stateLabel, loreColor) = when (state) {
@@ -74,10 +77,7 @@ object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
             skull
         }
 
-    override fun contentClick(
-        data: AuthorEntry,
-        context: AuthorContext,
-    ): ClickInfo<AuthorContext>.() -> Unit =
+    override fun contentClick(data: AuthorEntry, context: AuthorContext,): ClickInfo<AuthorContext>.() -> Unit =
         {
             context.filter = context.filter.toggleAuthor(data.name)
             AuthorInterface.openInventory(click.player, context)

@@ -10,8 +10,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 private const val CONFIG_KEY = "todo-scope-namespace"
 
 sealed class TodoResolveResult {
-    data class Found(val id: Int, val name: String) : TodoResolveResult()
+    data class Found(
+        val id: Int,
+        val name: String
+    ) : TodoResolveResult()
+
     object NotFound : TodoResolveResult()
+
     data class Ambiguous(
         val todoName: String,
         val scopedOptions: List<String>,
@@ -80,7 +85,8 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
         val todoName = key.key
         val isBare = key.namespace == "minecraft"
 
-        val candidates = TodoManager.findAllByName(todoName)
+        val candidates = TodoManager
+            .findAllByName(todoName)
             .filter { row -> TodoManager.stateOf(row[TodoManager.Todos.id].value) in allowedStates }
 
         if (!isBare) {
@@ -94,8 +100,14 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
         }
 
         return when (candidates.size) {
-            0 -> TodoResolveResult.NotFound
-            1 -> TodoResolveResult.Found(candidates[0][TodoManager.Todos.id].value, todoName)
+            0 -> {
+                TodoResolveResult.NotFound
+            }
+
+            1 -> {
+                TodoResolveResult.Found(candidates[0][TodoManager.Todos.id].value, todoName)
+            }
+
             else -> {
                 val scopedOptions = candidates.mapNotNull { row ->
                     val id = row[TodoManager.Todos.id].value

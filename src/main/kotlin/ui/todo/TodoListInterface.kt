@@ -39,6 +39,7 @@ class TodoListContext(
 ) : ScrollContext()
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
@@ -49,10 +50,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
         sizeFromRows(6)
     },
 ) {
-    override fun contentProvider(
-        id: Int,
-        context: TodoListContext,
-    ): TodoData? {
+    override fun contentProvider(id: Int, context: TodoListContext,): TodoData? {
         val filter = context.filter
         val ids = TodoManager.filteredIds(filter)
         val todoId = ids.getOrNull(id) ?: return null
@@ -70,10 +68,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
         }
     }
 
-    override fun contentDisplay(
-        data: TodoData,
-        context: TodoListContext,
-    ): InterfaceInfo<TodoListContext>.() -> ItemStack =
+    override fun contentDisplay(data: TodoData, context: TodoListContext,): InterfaceInfo<TodoListContext>.() -> ItemStack =
         {
             val lore =
                 buildList<TextComponent> {
@@ -91,10 +86,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
             skull
         }
 
-    override fun contentClick(
-        data: TodoData,
-        context: TodoListContext,
-    ): ClickInfo<TodoListContext>.() -> Unit =
+    override fun contentClick(data: TodoData, context: TodoListContext,): ClickInfo<TodoListContext>.() -> Unit =
         {
             TodoDetailInterface.openInventory(click.player, TodoDetailContext(data.id))
         }
@@ -121,7 +113,6 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         lore,
                     )
                 }.routeTo(FiltersInterface) { FiltersContext(context.filter) },
-
             // New todo button
             item()
                 .atSlot(6, 4)
@@ -144,7 +135,6 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         }
                     }
                 },
-
             // Namespace edit button
             item()
                 .atSlot(6, 8)
@@ -155,7 +145,6 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         listOf(mm("<gray>Manage namespaces and tags.")),
                     ),
                 ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
-
             // Random todo button
             item()
                 .atSlot(6, 7)

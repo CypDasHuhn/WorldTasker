@@ -43,21 +43,25 @@ object QueryParser {
                     nearRadius = tokens[i].toIntOrNull()
                         ?: throw QueryParseException("--near value must be an integer, got: ${tokens[i]}")
                 }
+
                 "--tags" -> {
                     i++
                     if (i >= tokens.size) throw QueryParseException("--tags requires a tag query value")
                     tags = tokens[i]
                 }
+
                 "--name" -> {
                     i++
                     if (i >= tokens.size) throw QueryParseException("--name requires a name value")
                     name = tokens[i]
                 }
+
                 "--author" -> {
                     i++
                     if (i >= tokens.size) throw QueryParseException("--author requires an author name")
                     author = tokens[i]
                 }
+
                 "--time" -> {
                     i++
                     if (i + 2 >= tokens.size) throw QueryParseException("--time requires <type> <operator> <date>")
@@ -85,7 +89,11 @@ object QueryParser {
                     tokens.add(raw.substring(i + 1, end))
                     i = end + 1
                 }
-                raw[i].isWhitespace() -> i++
+
+                raw[i].isWhitespace() -> {
+                    i++
+                }
+
                 else -> {
                     val start = i
                     while (i < raw.length && !raw[i].isWhitespace()) i++
@@ -96,27 +104,30 @@ object QueryParser {
         return tokens
     }
 
-    private fun parseTimeType(value: String): TimeType = when (value.lowercase()) {
-        "created" -> TimeType.CREATED
-        "worked" -> TimeType.WORKED
-        "completed" -> TimeType.COMPLETED
-        else -> TimeType.valueOf(value.uppercase())
-    }
+    private fun parseTimeType(value: String): TimeType =
+        when (value.lowercase()) {
+            "created" -> TimeType.CREATED
+            "worked" -> TimeType.WORKED
+            "completed" -> TimeType.COMPLETED
+            else -> TimeType.valueOf(value.uppercase())
+        }
 
-    private fun parseTimeOperator(value: String): TimeOperator = when (value.lowercase()) {
-        "before", "<" -> TimeOperator.BEFORE
-        "after", ">" -> TimeOperator.AFTER
-        "on", "=" -> TimeOperator.ON
-        else -> TimeOperator.valueOf(value.uppercase())
-    }
+    private fun parseTimeOperator(value: String): TimeOperator =
+        when (value.lowercase()) {
+            "before", "<" -> TimeOperator.BEFORE
+            "after", ">" -> TimeOperator.AFTER
+            "on", "=" -> TimeOperator.ON
+            else -> TimeOperator.valueOf(value.uppercase())
+        }
 
-    private fun parseDate(value: String): LocalDate {
-        return try {
+    private fun parseDate(value: String): LocalDate =
+        try {
             LocalDate.parse(value, dateFormat)
         } catch (e: DateTimeParseException) {
             throw QueryParseException("Invalid date format: $value. Expected yyyy-MM-dd")
         }
-    }
 }
 
-class QueryParseException(message: String) : RuntimeException(message)
+class QueryParseException(
+    message: String
+) : RuntimeException(message)

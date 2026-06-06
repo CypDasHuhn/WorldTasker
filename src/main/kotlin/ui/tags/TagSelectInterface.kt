@@ -1,10 +1,10 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
-import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
-import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.ContextHandler
@@ -31,6 +31,7 @@ data class TagData(
 // ─── abstract base shared by all tag overview modes ──────────────────────────
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 abstract class TagOverviewBase<C : ScrollContext>(
@@ -38,7 +39,6 @@ abstract class TagOverviewBase<C : ScrollContext>(
     handler: ContextHandler<C>,
     options: ScrollInterfaceOptions<C>,
 ) : ScrollInterface<C, TagData>(name, handler, options) {
-
     abstract fun namespaceId(context: C): Int
 
     override fun contentProvider(id: Int, context: C): TagData? =
@@ -69,10 +69,7 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
 ) {
     override fun namespaceId(context: TagQueryContext) = context.namespaceId
 
-    override fun contentDisplay(
-        data: TagData,
-        context: TagQueryContext,
-    ): InterfaceInfo<TagQueryContext>.() -> ItemStack =
+    override fun contentDisplay(data: TagData, context: TagQueryContext,): InterfaceInfo<TagQueryContext>.() -> ItemStack =
         {
             val state = context.filter.stateOf(data.id)
             val (material, stateLabel, loreColor) =
@@ -94,10 +91,7 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
             })
         }
 
-    override fun contentClick(
-        data: TagData,
-        context: TagQueryContext,
-    ): ClickInfo<TagQueryContext>.() -> Unit =
+    override fun contentClick(data: TagData, context: TagQueryContext,): ClickInfo<TagQueryContext>.() -> Unit =
         {
             context.filter = context.filter.toggle(data.id)
             TagSelectInterface.openInventory(click.player, context)

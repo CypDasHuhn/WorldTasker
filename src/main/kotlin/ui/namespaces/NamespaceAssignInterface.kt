@@ -19,6 +19,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class NamespaceAssignContext(
@@ -42,10 +43,7 @@ object NamespaceAssignInterface : NamespaceOverviewBase<NamespaceAssignContext>(
             createItem(data.material, mm("<white>${data.name}"), listOf(mm("<gray>$tagCount tag(s)")))
         }
 
-    override fun contentClick(
-        data: NamespaceData,
-        context: NamespaceAssignContext,
-    ): ClickInfo<NamespaceAssignContext>.() -> Unit =
+    override fun contentClick(data: NamespaceData, context: NamespaceAssignContext,): ClickInfo<NamespaceAssignContext>.() -> Unit =
         {
             TagAssignInterface.openInventory(click.player, TagAssignContext(data.id, context.todoId))
         }

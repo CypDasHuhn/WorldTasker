@@ -10,11 +10,11 @@ import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.NamespacedKey
 
-private const val ADD_NS      = "todoTagsAddNs"
-private const val ADD_NAME    = "todoTagsAddName"
+private const val ADD_NS = "todoTagsAddNs"
+private const val ADD_NAME = "todoTagsAddName"
 private const val REMOVE_NAME = "todoTagsRemoveName"
-private const val RENAME_OLD  = "todoTagsRenameOld"
-private const val RENAME_NEW  = "todoTagsRenameNew"
+private const val RENAME_OLD = "todoTagsRenameOld"
+private const val RENAME_NEW = "todoTagsRenameNew"
 
 internal fun buildTodoTagsNode(): LiteralArgument =
     la("tags").apply {
@@ -26,7 +26,8 @@ internal fun buildTodoTagsNode(): LiteralArgument =
             })
         ))
         then(la("remove").then(
-            NamespacedKeyArgument(REMOVE_NAME).suggestTagNames()
+            NamespacedKeyArgument(REMOVE_NAME)
+                .suggestTagNames()
                 .executesPlayer(PlayerCommandExecutor { sender, args ->
                     TagActions.remove(sender, args.argsMap[REMOVE_NAME] as NamespacedKey)
                 })

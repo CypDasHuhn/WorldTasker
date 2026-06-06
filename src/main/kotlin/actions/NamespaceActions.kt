@@ -22,7 +22,10 @@ object NamespaceActions {
     }
 
     fun add(sender: Player, name: String) {
-        if (!isValidResourceName(name)) { sender.invalidName(name); return }
+        if (!isValidResourceName(name)) {
+            sender.invalidName(name)
+            return
+        }
         NamespaceManager.create(name)
         sender.msg("<green>Namespace '<white>$name</white>' created.")
     }
@@ -35,12 +38,17 @@ object NamespaceActions {
         }
         when (NamespaceManager.delete(ns[NamespaceManager.Namespaces.id].value)) {
             NamespaceDeleteResult.DELETED -> sender.msg("<green>Namespace '<white>$name</white>' removed.")
-            NamespaceDeleteResult.BLOCKED_SCOPE -> sender.msg("<red>Namespace '<white>$name</white>' is the active todo scope and cannot be deleted.")
+
+            NamespaceDeleteResult.BLOCKED_SCOPE -> sender
+                .msg("<red>Namespace '<white>$name</white>' is the active todo scope and cannot be deleted.")
         }
     }
 
     fun rename(sender: Player, oldName: String, newName: String) {
-        if (!isValidResourceName(newName)) { sender.invalidName(newName); return }
+        if (!isValidResourceName(newName)) {
+            sender.invalidName(newName)
+            return
+        }
         val ns = NamespaceManager.findByName(oldName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$oldName</white>' not found.")
@@ -73,8 +81,9 @@ object NamespaceActions {
                 val parentLabels = parents.joinToString("<gray>, <white>") { parent ->
                     val parentNsId = parent[TagManager.Tags.namespaceId].value
                     val parentTagName = parent[TagManager.Tags.name]
-                    if (parentNsId == nsId) parentTagName
-                    else {
+                    if (parentNsId == nsId) {
+                        parentTagName
+                    } else {
                         val parentNsName = NamespaceManager.find(parentNsId)?.get(NamespaceManager.Namespaces.name) ?: "?"
                         "$parentNsName:$parentTagName"
                     }

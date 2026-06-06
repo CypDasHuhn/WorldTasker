@@ -7,11 +7,11 @@ import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
-private const val ADD_NAME    = "todoNsAddName"
+private const val ADD_NAME = "todoNsAddName"
 private const val REMOVE_NAME = "todoNsRemoveName"
-private const val RENAME_OLD  = "todoNsRenameOld"
-private const val RENAME_NEW  = "todoNsRenameNew"
-private const val INFO_NAME   = "todoNsInfoName"
+private const val RENAME_OLD = "todoNsRenameOld"
+private const val RENAME_NEW = "todoNsRenameNew"
+private const val INFO_NAME = "todoNsInfoName"
 
 internal fun buildNamespacesNode(): LiteralArgument =
     la("namespaces").apply {
@@ -22,7 +22,8 @@ internal fun buildNamespacesNode(): LiteralArgument =
             })
         ))
         then(la("remove").then(
-            StringArgument(REMOVE_NAME).suggestNamespaceNames()
+            StringArgument(REMOVE_NAME)
+                .suggestNamespaceNames()
                 .executesPlayer(PlayerCommandExecutor { sender, args ->
                     NamespaceActions.remove(sender, args.argsMap[REMOVE_NAME] as String)
                 })
@@ -34,7 +35,8 @@ internal fun buildNamespacesNode(): LiteralArgument =
             })
         ))
         then(la("info").then(
-            StringArgument(INFO_NAME).suggestNamespaceNames()
+            StringArgument(INFO_NAME)
+                .suggestNamespaceNames()
                 .executesPlayer(PlayerCommandExecutor { sender, args ->
                     NamespaceActions.info(sender, args.argsMap[INFO_NAME] as String)
                 })

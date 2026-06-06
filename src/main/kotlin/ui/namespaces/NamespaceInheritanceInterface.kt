@@ -19,6 +19,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class NamespaceInheritanceContext(

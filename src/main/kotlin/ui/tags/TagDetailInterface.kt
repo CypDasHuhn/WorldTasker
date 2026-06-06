@@ -21,6 +21,7 @@ import org.bukkit.Material
 import org.jetbrains.exposed.sql.transactions.transaction
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class TagDetailContext(
@@ -63,7 +64,8 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                     val lore = buildList<TextComponent> {
                         add(mm("<gray>${parents.size} parent tag(s)"))
                         parents.forEach { p ->
-                            val pNsName = NamespaceManager.find(p[TagManager.Tags.namespaceId].value)
+                            val pNsName = NamespaceManager
+                                .find(p[TagManager.Tags.namespaceId].value)
                                 ?.get(NamespaceManager.Namespaces.name) ?: "?"
                             add(mm("<dark_gray>$pNsName:${p[TagManager.Tags.name]}"))
                         }

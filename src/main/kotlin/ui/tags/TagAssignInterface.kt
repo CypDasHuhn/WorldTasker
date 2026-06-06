@@ -1,9 +1,9 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
-import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
-import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.InterfaceInfo
@@ -21,6 +21,7 @@ import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class TagAssignContext(
@@ -41,10 +42,7 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
 ) {
     override fun namespaceId(context: TagAssignContext) = context.namespaceId
 
-    override fun contentDisplay(
-        data: TagData,
-        context: TagAssignContext,
-    ): InterfaceInfo<TagAssignContext>.() -> ItemStack =
+    override fun contentDisplay(data: TagData, context: TagAssignContext,): InterfaceInfo<TagAssignContext>.() -> ItemStack =
         {
             val assigned = transaction {
                 TagManager.tagsForTodo(context.todoId).any { it[TagManager.Tags.id].value == data.id }
@@ -58,16 +56,16 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
             })
         }
 
-    override fun contentClick(
-        data: TagData,
-        context: TagAssignContext,
-    ): ClickInfo<TagAssignContext>.() -> Unit =
+    override fun contentClick(data: TagData, context: TagAssignContext,): ClickInfo<TagAssignContext>.() -> Unit =
         {
             val assigned = transaction {
                 TagManager.tagsForTodo(context.todoId).any { it[TagManager.Tags.id].value == data.id }
             }
-            if (assigned) TagManager.removeFromTodo(context.todoId, data.id)
-            else TagManager.addToTodo(context.todoId, data.id)
+            if (assigned) {
+                TagManager.removeFromTodo(context.todoId, data.id)
+            } else {
+                TagManager.addToTodo(context.todoId, data.id)
+            }
             TagAssignInterface.openInventory(click.player, context)
         }
 

@@ -37,7 +37,6 @@ abstract class NamespaceOverviewBase<C : ScrollContext>(
     handler: ContextHandler<C>,
     options: ScrollInterfaceOptions<C>,
 ) : ScrollInterface<C, NamespaceData>(name, handler, options) {
-
     override fun contentProvider(id: Int, context: C): NamespaceData? =
         NamespaceManager.all().getOrNull(id)?.let {
             NamespaceData(
@@ -51,6 +50,7 @@ abstract class NamespaceOverviewBase<C : ScrollContext>(
 // ─── query mode (tag filter selection) ───────────────────────────────────────
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class NamespaceQueryContext(
@@ -87,10 +87,7 @@ object NamespaceSelectInterface : NamespaceOverviewBase<NamespaceQueryContext>(
             createItem(data.material, mm("<white>${data.name}"), lore)
         }
 
-    override fun contentClick(
-        data: NamespaceData,
-        context: NamespaceQueryContext,
-    ): ClickInfo<NamespaceQueryContext>.() -> Unit =
+    override fun contentClick(data: NamespaceData, context: NamespaceQueryContext,): ClickInfo<NamespaceQueryContext>.() -> Unit =
         {
             TagSelectInterface.openInventory(click.player, TagQueryContext(data.id, context.filter, context.returnToFilters))
         }

@@ -25,9 +25,12 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-class TagEditContext(val namespaceId: Int) : ScrollContext()
+class TagEditContext(
+    val namespaceId: Int
+) : ScrollContext()
 
 object TagEditInterface : TagOverviewBase<TagEditContext>(
     "TagEditInterface",
@@ -42,10 +45,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
 ) {
     override fun namespaceId(context: TagEditContext) = context.namespaceId
 
-    override fun contentDisplay(
-        data: TagData,
-        context: TagEditContext,
-    ): InterfaceInfo<TagEditContext>.() -> ItemStack =
+    override fun contentDisplay(data: TagData, context: TagEditContext,): InterfaceInfo<TagEditContext>.() -> ItemStack =
         {
             val ancestors = TagManager.ancestorLabelsOf(data.id)
             val lore = buildList<TextComponent> {
@@ -57,10 +57,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
             createItem(data.material, mm("<white>${data.name}"), lore)
         }
 
-    override fun contentClick(
-        data: TagData,
-        context: TagEditContext,
-    ): ClickInfo<TagEditContext>.() -> Unit =
+    override fun contentClick(data: TagData, context: TagEditContext,): ClickInfo<TagEditContext>.() -> Unit =
         {
             TagDetailInterface.openInventory(click.player, TagDetailContext(data.id, context.namespaceId))
         }
@@ -78,8 +75,9 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                 ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
             item()
                 .atSlot(bottomRow + 5)
-                .displayAs { createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material."))) }
-                .routeTo(ChangeNamespaceMaterialInterface) { ChangeNamespaceMaterialContext(context.namespaceId) },
+                .displayAs {
+                    createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material.")))
+                }.routeTo(ChangeNamespaceMaterialInterface) { ChangeNamespaceMaterialContext(context.namespaceId) },
             item()
                 .atSlot(bottomRow + 6)
                 .displayAs { createItem(Material.WRITABLE_BOOK, mm("<white>Add Tag"), listOf(mm("<gray>Type a new tag name."))) }

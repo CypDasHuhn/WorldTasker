@@ -18,9 +18,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-class FiltersContext(var filter: TodoFilter = TodoFilter()) : Context()
+class FiltersContext(
+    var filter: TodoFilter = TodoFilter()
+) : Context()
 
 object FiltersInterface : RoosterInterface<FiltersContext>(
     "FiltersInterface",
@@ -39,7 +42,6 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                 .onClick {
                     TodoListInterface.openInventory(click.player, TodoListContext(filter = context.filter))
                 },
-
             // Tag filter button → namespace query mode
             item()
                 .atSlot(2)
@@ -61,7 +63,6 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                         NamespaceQueryContext(context.filter, returnToFilters = true),
                     )
                 },
-
             // Status cycle button
             item()
                 .atSlot(4)
@@ -81,7 +82,6 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                     context.filter = context.filter.copy(statusFilter = next)
                     FiltersInterface.openInventory(click.player, context)
                 },
-
             // Author filter button
             item()
                 .atSlot(6)
@@ -94,7 +94,6 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                     }
                     createItem(Material.PLAYER_HEAD, mm("<white>Author Filter"), lore)
                 }.routeTo(AuthorInterface) { AuthorContext(context.filter) },
-
             // Distance filter button
             item()
                 .atSlot(bottomRow + 4)
@@ -129,10 +128,12 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                                 )
                             }
                         }
+
                         event.click.isRightClick -> {
                             val newRadius = (f.distanceRadius - 1).coerceAtLeast(if (f.distanceEnabled) 1 else 0)
                             context.filter = f.copy(distanceRadius = newRadius)
                         }
+
                         else -> {
                             context.filter = f.copy(distanceRadius = f.distanceRadius + 1)
                         }

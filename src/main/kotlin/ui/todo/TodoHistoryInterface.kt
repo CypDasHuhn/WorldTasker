@@ -35,6 +35,7 @@ class TodoHistoryContext(
 ) : ScrollContext()
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
@@ -49,10 +50,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
         }
     },
 ) {
-    override fun contentProvider(
-        id: Int,
-        context: TodoHistoryContext,
-    ): HistoryEntry? {
+    override fun contentProvider(id: Int, context: TodoHistoryContext,): HistoryEntry? {
         val entries = HistoryManager.forTodo(context.todoId)
         return entries.getOrNull(id)?.let {
             HistoryEntry(
@@ -64,10 +62,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
         }
     }
 
-    override fun contentDisplay(
-        data: HistoryEntry,
-        context: TodoHistoryContext,
-    ): InterfaceInfo<TodoHistoryContext>.() -> ItemStack =
+    override fun contentDisplay(data: HistoryEntry, context: TodoHistoryContext,): InterfaceInfo<TodoHistoryContext>.() -> ItemStack =
         {
             val material =
                 when (data.status) {
@@ -77,7 +72,9 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     TodoStatus.REACTIVATE -> Material.YELLOW_CONCRETE
                     TodoStatus.DELETE -> Material.BLACK_CONCRETE
                 }
-            val stateName = data.status.name.lowercase().replaceFirstChar { it.uppercase() }
+            val stateName = data.status.name
+                .lowercase()
+                .replaceFirstChar { it.uppercase() }
             val lore =
                 buildList {
                     add(mm("<dark_gray>${data.author} · ${data.time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"))
@@ -86,10 +83,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
             createItem(material, mm("<white>$stateName"), lore)
         }
 
-    override fun contentClick(
-        data: HistoryEntry,
-        context: TodoHistoryContext,
-    ): ClickInfo<TodoHistoryContext>.() -> Unit = { }
+    override fun contentClick(data: HistoryEntry, context: TodoHistoryContext,): ClickInfo<TodoHistoryContext>.() -> Unit = { }
 
     override fun getInterfaceItems(): List<InterfaceItem<TodoHistoryContext>> =
         listOf(
@@ -99,7 +93,6 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .displayAs(
                     createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to todo detail."))),
                 ).routeTo(TodoDetailInterface) { TodoDetailContext(context.todoId) },
-
             // Work — only when active
             item()
                 .atSlot(bottomRow + 3)
@@ -114,7 +107,6 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                         TodoHistoryInterface.openInventory(player, TodoHistoryContext(todoId))
                     }
                 },
-
             // Complete — only when active
             item()
                 .atSlot(bottomRow + 5)
@@ -125,7 +117,6 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     HistoryManager.record(context.todoId, click.player, TodoStatus.COMPLETE)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
                 },
-
             // Reactivate — only when completed
             item()
                 .atSlot(bottomRow + 5)

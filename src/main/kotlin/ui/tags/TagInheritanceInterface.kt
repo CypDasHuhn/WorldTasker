@@ -19,9 +19,15 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-data class InheritedTagData(val parentTagId: Int, val name: String, val material: Material, val nsName: String)
+data class InheritedTagData(
+    val parentTagId: Int,
+    val name: String,
+    val material: Material,
+    val nsName: String
+)
 
 class TagInheritanceContext(
     val tagId: Int,
@@ -42,7 +48,8 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
     override fun contentProvider(id: Int, context: TagInheritanceContext): InheritedTagData? {
         val parents = TagManager.parentsOf(context.tagId)
         return parents.getOrNull(id)?.let { row ->
-            val nsName = NamespaceManager.find(row[TagManager.Tags.namespaceId].value)
+            val nsName = NamespaceManager
+                .find(row[TagManager.Tags.namespaceId].value)
                 ?.get(NamespaceManager.Namespaces.name) ?: "?"
             InheritedTagData(
                 parentTagId = row[TagManager.Tags.id].value,
@@ -65,10 +72,7 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
             )
         }
 
-    override fun contentClick(
-        data: InheritedTagData,
-        context: TagInheritanceContext,
-    ): ClickInfo<TagInheritanceContext>.() -> Unit =
+    override fun contentClick(data: InheritedTagData, context: TagInheritanceContext,): ClickInfo<TagInheritanceContext>.() -> Unit =
         {
             TagManager.removeInheritance(context.tagId, data.parentTagId)
             TagInheritanceInterface.openInventory(click.player, context)
@@ -124,10 +128,7 @@ object TagInheritanceSelectInterface : TagOverviewBase<TagInheritanceSelectConte
             createItem(data.material, mm("<white>${data.name}"), lore)
         }
 
-    override fun contentClick(
-        data: TagData,
-        context: TagInheritanceSelectContext,
-    ): ClickInfo<TagInheritanceSelectContext>.() -> Unit =
+    override fun contentClick(data: TagData, context: TagInheritanceSelectContext,): ClickInfo<TagInheritanceSelectContext>.() -> Unit =
         {
             if (data.id != context.childTagId) {
                 TagManager.addInheritance(context.childTagId, data.id)

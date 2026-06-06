@@ -4,6 +4,7 @@ import dev.rooster.db.utility_tables.LocationManager
 import org.jetbrains.exposed.sql.transactions.transaction
 
 enum class TagFilterState { NEUTRAL, INCLUDE, EXCLUDE }
+
 enum class StatusFilter { DEFAULT, ALL, COMPLETED }
 
 data class TodoFilter(
@@ -19,34 +20,39 @@ data class TodoFilter(
 ) {
     val distanceEnabled get() = distanceRadius > 0 && distanceCenterWorld.isNotEmpty()
 
-    fun toggle(tagId: Int): TodoFilter = when {
-        tagId !in included && tagId !in excluded -> copy(included = included + tagId)
-        tagId in included -> copy(included = included - tagId, excluded = excluded + tagId)
-        else -> copy(excluded = excluded - tagId)
-    }
+    fun toggle(tagId: Int): TodoFilter =
+        when {
+            tagId !in included && tagId !in excluded -> copy(included = included + tagId)
+            tagId in included -> copy(included = included - tagId, excluded = excluded + tagId)
+            else -> copy(excluded = excluded - tagId)
+        }
 
-    fun stateOf(tagId: Int): TagFilterState = when {
-        tagId in included -> TagFilterState.INCLUDE
-        tagId in excluded -> TagFilterState.EXCLUDE
-        else -> TagFilterState.NEUTRAL
-    }
+    fun stateOf(tagId: Int): TagFilterState =
+        when {
+            tagId in included -> TagFilterState.INCLUDE
+            tagId in excluded -> TagFilterState.EXCLUDE
+            else -> TagFilterState.NEUTRAL
+        }
 
-    fun toggleAuthor(name: String): TodoFilter = when {
-        name !in authorIncluded && name !in authorExcluded -> copy(authorIncluded = authorIncluded + name)
-        name in authorIncluded -> copy(authorIncluded = authorIncluded - name, authorExcluded = authorExcluded + name)
-        else -> copy(authorExcluded = authorExcluded - name)
-    }
+    fun toggleAuthor(name: String): TodoFilter =
+        when {
+            name !in authorIncluded && name !in authorExcluded -> copy(authorIncluded = authorIncluded + name)
+            name in authorIncluded -> copy(authorIncluded = authorIncluded - name, authorExcluded = authorExcluded + name)
+            else -> copy(authorExcluded = authorExcluded - name)
+        }
 
-    fun authorStateOf(name: String): TagFilterState = when {
-        name in authorIncluded -> TagFilterState.INCLUDE
-        name in authorExcluded -> TagFilterState.EXCLUDE
-        else -> TagFilterState.NEUTRAL
-    }
+    fun authorStateOf(name: String): TagFilterState =
+        when {
+            name in authorIncluded -> TagFilterState.INCLUDE
+            name in authorExcluded -> TagFilterState.EXCLUDE
+            else -> TagFilterState.NEUTRAL
+        }
 
-    fun isEmpty() = included.isEmpty() && excluded.isEmpty()
-        && statusFilter == StatusFilter.DEFAULT
-        && authorIncluded.isEmpty() && authorExcluded.isEmpty()
-        && !distanceEnabled
+    fun isEmpty() =
+        included.isEmpty() && excluded.isEmpty() &&
+            statusFilter == StatusFilter.DEFAULT &&
+            authorIncluded.isEmpty() && authorExcluded.isEmpty() &&
+            !distanceEnabled
 
     /** Only checks tag and distance matching — status/author are evaluated in TodoManager.filteredIds. */
     fun matches(todoId: Int, locationId: Int? = null): Boolean {

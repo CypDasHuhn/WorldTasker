@@ -93,7 +93,12 @@ object TodoActions {
         }
         val cap = 10
         val shown = results.take(cap)
-        val countLabel = if (results.size > cap) "<yellow>${results.size}</yellow> <gold>found, showing first $cap" else "<yellow>${results.size}</yellow> <gold>found"
+        val countLabel = if (results.size >
+            cap) {
+            "<yellow>${results.size}</yellow> <gold>found, showing first $cap"
+        } else {
+            "<yellow>${results.size}</yellow> <gold>found"
+        }
         sender.msg("<gold>=== Todos $countLabel <gold>===")
         shown.forEach { row ->
             val id = row[TodoManager.Todos.id].value
@@ -120,7 +125,8 @@ object TodoActions {
         if (inherited.isNotEmpty()) sender.msg("<gray>Inherited: <dark_gray>${inherited.joinToString(", ")}")
         sender.msg("<gold>--- History ---")
         history.forEach { entry ->
-            val time = entry[HistoryManager.History.time].format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+            val time = entry[HistoryManager.History.time].format(java.time.format.DateTimeFormatter
+                .ofPattern("yyyy-MM-dd HH:mm"))
             val entryAuthor = entry[PlayerManager.Players.name]
             val status = entry[HistoryManager.History.status]
             val comment = entry[HistoryManager.History.comment]

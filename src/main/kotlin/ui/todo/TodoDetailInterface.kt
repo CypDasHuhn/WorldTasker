@@ -24,6 +24,7 @@ class TodoDetailContext(
 ) : Context()
 
 private val miniMessage = MiniMessage.miniMessage()
+
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
@@ -49,7 +50,6 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                         listOf(mm("<gray>Return to the todo list.")),
                     ),
                 ).routeTo(TodoListInterface),
-
             // Jump to location
             item()
                 .atSlot(4)
@@ -66,7 +66,6 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                     val location = transaction { LocationManager.Location.findById(locId)?.location() } ?: return@onClick
                     click.player.teleport(location)
                 },
-
             // Tag button — shows current tags in lore, opens assign mode
             item()
                 .atSlot(6)
@@ -81,7 +80,6 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                     }
                     createItem(Material.NAME_TAG, mm("<white>Tags"), lore)
                 }.routeTo(NamespaceAssignInterface) { NamespaceAssignContext(context.todoId) },
-
             // Rename button
             item()
                 .atSlot(0)
@@ -92,7 +90,6 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                         listOf(mm("<gray>Requires confirmation.")),
                     ),
                 ).routeTo(RenameTodoConfirmation) { TodoDetailContext(context.todoId) },
-
             // Delete button
             item()
                 .atSlot(2)
@@ -103,7 +100,6 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                         listOf(mm("<gray>Requires confirmation.")),
                     ),
                 ).routeTo(DeleteTodoConfirmation) { TodoDetailContext(context.todoId) },
-
             // History button
             item()
                 .atSlot(8)

@@ -1,17 +1,31 @@
 package dev.cypdashuhn.worldtasker.commands.query
 
 sealed class TagExpr {
-    data class Leaf(val name: String) : TagExpr()
-    data class And(val left: TagExpr, val right: TagExpr) : TagExpr()
-    data class Or(val left: TagExpr, val right: TagExpr) : TagExpr()
-    data class Not(val expr: TagExpr) : TagExpr()
+    data class Leaf(
+        val name: String
+    ) : TagExpr()
 
-    fun matches(tagNames: Set<String>): Boolean = when (this) {
-        is Leaf -> name in tagNames
-        is And  -> left.matches(tagNames) && right.matches(tagNames)
-        is Or   -> left.matches(tagNames) || right.matches(tagNames)
-        is Not  -> !expr.matches(tagNames)
-    }
+    data class And(
+        val left: TagExpr,
+        val right: TagExpr
+    ) : TagExpr()
+
+    data class Or(
+        val left: TagExpr,
+        val right: TagExpr
+    ) : TagExpr()
+
+    data class Not(
+        val expr: TagExpr
+    ) : TagExpr()
+
+    fun matches(tagNames: Set<String>): Boolean =
+        when (this) {
+            is Leaf -> name in tagNames
+            is And -> left.matches(tagNames) && right.matches(tagNames)
+            is Or -> left.matches(tagNames) || right.matches(tagNames)
+            is Not -> !expr.matches(tagNames)
+        }
 }
 
 fun parseTagDsl(input: String): TagExpr = TagDslParser(tokenizeTagDsl(input)).parse()
@@ -21,8 +35,15 @@ private fun tokenizeTagDsl(input: String): List<String> {
     var i = 0
     while (i < input.length) {
         when {
-            input[i].isWhitespace() -> i++
-            input[i] in "(),+-" -> { tokens.add(input[i].toString()); i++ }
+            input[i].isWhitespace() -> {
+                i++
+            }
+
+            input[i] in "(),+-" -> {
+                tokens.add(input[i].toString())
+                i++
+            }
+
             else -> {
                 val start = i
                 while (i < input.length && !input[i].isWhitespace() && input[i] !in "(),+-") i++
@@ -33,7 +54,9 @@ private fun tokenizeTagDsl(input: String): List<String> {
     return tokens
 }
 
-private class TagDslParser(private val tokens: List<String>) {
+private class TagDslParser(
+    private val tokens: List<String>
+) {
     private var pos = 0
 
     fun parse(): TagExpr {
@@ -76,8 +99,9 @@ private class TagDslParser(private val tokens: List<String>) {
         if (tokens[pos] == "(") {
             pos++
             val expr = parseOr()
-            if (pos >= tokens.size || tokens[pos] != ")")
+            if (pos >= tokens.size || tokens[pos] != ")") {
                 throw IllegalArgumentException("Expected ')'")
+            }
             pos++
             return expr
         }

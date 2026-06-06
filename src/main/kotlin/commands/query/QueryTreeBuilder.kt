@@ -15,6 +15,7 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
  */
 interface QueryFlag {
     val flagLiteral: String
+
     fun buildInner(remaining: List<Argument<*>>, executor: PlayerCommandExecutor): Argument<*>
 }
 
@@ -48,20 +49,20 @@ object TimeQueryFlag : QueryFlag {
     }
 }
 
-internal const val ARG_NEAR_RADIUS  = "nearRadius"
-internal const val ARG_TAGS         = "tags"
-internal const val ARG_NAME         = "name"
-internal const val ARG_AUTHOR       = "author"
-internal const val ARG_TIME_TYPE    = "timeType"
-internal const val ARG_TIME_OP      = "timeOperator"
-internal const val ARG_TIME_DATE    = "timeDate"
+internal const val ARG_NEAR_RADIUS = "nearRadius"
+internal const val ARG_TAGS = "tags"
+internal const val ARG_NAME = "name"
+internal const val ARG_AUTHOR = "author"
+internal const val ARG_TIME_TYPE = "timeType"
+internal const val ARG_TIME_OP = "timeOperator"
+internal const val ARG_TIME_DATE = "timeDate"
 
 /** Full recursive builder for the /todo get query branches. */
 object QueryTreeBuilder {
     private val flags: List<QueryFlag> = listOf(
-        SimpleQueryFlag("--near")   { IntegerArgument(ARG_NEAR_RADIUS) },
-        SimpleQueryFlag("--tags")   { TextArgument(ARG_TAGS).suggestTagNamesDsl() },
-        SimpleQueryFlag("--name")   { TextArgument(ARG_NAME) },
+        SimpleQueryFlag("--near") { IntegerArgument(ARG_NEAR_RADIUS) },
+        SimpleQueryFlag("--tags") { TextArgument(ARG_TAGS).suggestTagNamesDsl() },
+        SimpleQueryFlag("--name") { TextArgument(ARG_NAME) },
         SimpleQueryFlag("--author") { TextArgument(ARG_AUTHOR).suggestTodoAuthors() },
         TimeQueryFlag,
     )
@@ -72,6 +73,7 @@ object QueryTreeBuilder {
      */
     fun build(executor: PlayerCommandExecutor): List<Argument<*>> {
         val memo = mutableMapOf<Set<QueryFlag>, List<Argument<*>>>()
+
         fun subtrees(available: Set<QueryFlag>): List<Argument<*>> =
             memo.getOrPut(available) {
                 val branches = mutableListOf<Argument<*>>()
