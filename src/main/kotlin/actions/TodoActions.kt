@@ -22,11 +22,19 @@ object TodoActions {
     }
 
     fun complete(sender: Player, id: Int) {
+        if (TodoManager.stateOf(id) != TodoState.ACTIVE) {
+            sender.msg("<red>That todo is not active.")
+            return
+        }
         TodoManager.complete(id, sender)
         sender.msg("<green>Todo marked complete.")
     }
 
     fun reactivate(sender: Player, id: Int) {
+        if (TodoManager.stateOf(id) != TodoState.COMPLETED) {
+            sender.msg("<red>That todo is not completed.")
+            return
+        }
         TodoManager.reactivate(id, sender)
         sender.msg("<green>Todo reactivated.")
     }
@@ -42,6 +50,10 @@ object TodoActions {
     }
 
     fun work(sender: Player, id: Int, comment: String) {
+        if (TodoManager.stateOf(id) != TodoState.ACTIVE) {
+            sender.msg("<red>That todo is not active.")
+            return
+        }
         HistoryManager.record(id, sender, TodoStatus.WORK, comment)
         sender.msg("<green>Work entry recorded.")
     }

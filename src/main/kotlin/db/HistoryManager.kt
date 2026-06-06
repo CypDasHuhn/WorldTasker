@@ -4,6 +4,7 @@ import dev.rooster.db.utility_tables.PlayerManager
 import dev.rooster.db.utility_tables.PlayerManager.Companion.dbPlayer
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -37,7 +38,8 @@ object HistoryManager {
     }
 
     fun forTodo(todoId: Int): List<ResultRow> = transaction {
-        (History innerJoin PlayerManager.Players).selectAll()
+        History.join(PlayerManager.Players, JoinType.LEFT, History.playerId, PlayerManager.Players.id)
+            .selectAll()
             .where { History.todoId eq todoId }
             .orderBy(History.time, SortOrder.ASC)
             .toList()

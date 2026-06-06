@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.actions
 
 import dev.cypdashuhn.worldtasker.actions.isValidResourceName
 import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.db.NamespaceDeleteResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import org.bukkit.entity.Player
@@ -32,8 +33,10 @@ object NamespaceActions {
             sender.msg("<red>Namespace '<white>$name</white>' not found.")
             return
         }
-        NamespaceManager.delete(ns[NamespaceManager.Namespaces.id].value)
-        sender.msg("<green>Namespace '<white>$name</white>' removed.")
+        when (NamespaceManager.delete(ns[NamespaceManager.Namespaces.id].value)) {
+            NamespaceDeleteResult.DELETED -> sender.msg("<green>Namespace '<white>$name</white>' removed.")
+            NamespaceDeleteResult.BLOCKED_SCOPE -> sender.msg("<red>Namespace '<white>$name</white>' is the active todo scope and cannot be deleted.")
+        }
     }
 
     fun rename(sender: Player, oldName: String, newName: String) {

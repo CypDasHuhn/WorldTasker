@@ -31,15 +31,20 @@ object TagManager {
         override val primaryKey = PrimaryKey(childId, parentId)
     }
 
-    fun create(name: String, namespaceId: Int): Int = transaction {
-        Tags.insert {
-            it[Tags.name] = name
-            it[Tags.namespaceId] = namespaceId
-        }[Tags.id].value
+    fun create(name: String, namespaceId: Int): Int {
+        val id = transaction {
+            Tags.insert {
+                it[Tags.name] = name
+                it[Tags.namespaceId] = namespaceId
+            }[Tags.id].value
+        }
+        TodoScopeManager.onTagCreated(id, namespaceId, name)
+        return id
     }
 
-    fun rename(id: Int, name: String) = transaction {
-        Tags.update({ Tags.id eq id }) { it[Tags.name] = name }
+    fun rename(id: Int, name: String) {
+        transaction { Tags.update({ Tags.id eq id }) { it[Tags.name] = name } }
+        TodoScopeManager.onTagRenamed(id, name)
     }
 
     fun find(id: Int): ResultRow? = transaction {
@@ -80,8 +85,9 @@ object TagManager {
         Tags.update({ Tags.id eq id }) { it[Tags.material] = material }
     }
 
-    fun delete(id: Int) = transaction {
-        Tags.deleteWhere { Tags.id eq id }
+    fun delete(id: Int) {
+        transaction { Tags.deleteWhere { Tags.id eq id } }
+        TodoScopeManager.onTagDeleted(id)
     }
 
     fun addToTodo(todoId: Int, tagId: Int) = transaction {
@@ -178,6 +184,22 @@ object TagManager {
             .where { Tags.id inList allIds.toList() }
             .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
             .toSet()
+    }
+
+    /** All ancestor `namespace:name` labels for a tag (direct parents first, then transitive). */
+    fun ancestorLabelsOf(tagId: Int): List<String> = transaction {
+        val directIds = parentsOf(tagId).map { it[Tags.id].value }.toSet()
+        val allAncestorIds = expandTagIds(directIds)
+        if (allAncestorIds.isEmpty()) return@transaction emptyList()
+        val rows = (Tags innerJoin NamespaceManager.Namespaces)
+            .selectAll()
+            .where { Tags.id inList allAncestorIds.toList() }
+            .associateBy { it[Tags.id].value }
+        // direct parents first, then remaining transitive ancestors
+        val transitiveIds = allAncestorIds - directIds
+        (directIds + transitiveIds).mapNotNull { id ->
+            rows[id]?.let { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
+        }
     }
 
     /** namespace:name labels for tags inherited (but not directly assigned) to a todo. */

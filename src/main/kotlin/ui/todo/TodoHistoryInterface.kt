@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.todo
 
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.rooster.core.util.createItem
@@ -57,7 +58,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
             HistoryEntry(
                 status = it[HistoryManager.History.status],
                 comment = it[HistoryManager.History.comment],
-                author = it[PlayerManager.Players.name],
+                author = it.getOrNull(PlayerManager.Players.name) ?: "Unknown",
                 time = it[HistoryManager.History.time],
             )
         }
@@ -76,10 +77,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     TodoStatus.REACTIVATE -> Material.YELLOW_CONCRETE
                     TodoStatus.DELETE -> Material.BLACK_CONCRETE
                 }
-            val stateName =
-                data.status.name
-                    .lowercase()
-                    .replaceFirstChar { it.uppercase() }
+            val stateName = data.status.name.lowercase().replaceFirstChar { it.uppercase() }
             val lore =
                 buildList {
                     add(mm("<dark_gray>${data.author} · ${data.time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}"))
@@ -99,22 +97,15 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
             item()
                 .atSlot(bottomRow)
                 .displayAs(
-                    createItem(
-                        Material.FEATHER,
-                        mm("<white>Back"),
-                        listOf(mm("<gray>Return to todo detail.")),
-                    ),
+                    createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to todo detail."))),
                 ).routeTo(TodoDetailInterface) { TodoDetailContext(context.todoId) },
 
-            // Work button — chat input for comment
+            // Work — only when active
             item()
                 .atSlot(bottomRow + 3)
+                .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.ACTIVE }
                 .displayAs(
-                    createItem(
-                        Material.LIGHT_BLUE_CONCRETE,
-                        mm("<white>Work"),
-                        listOf(mm("<gray>Record work with a comment.")),
-                    ),
+                    createItem(Material.LIGHT_BLUE_CONCRETE, mm("<white>Work"), listOf(mm("<gray>Record work with a comment."))),
                 ).onClick {
                     val player = click.player
                     val todoId = context.todoId
@@ -124,17 +115,25 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     }
                 },
 
-            // Complete button
+            // Complete — only when active
             item()
-                .atSlot(bottomRow + 6)
+                .atSlot(bottomRow + 5)
+                .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.ACTIVE }
                 .displayAs(
-                    createItem(
-                        Material.RED_CONCRETE,
-                        mm("<white>Complete"),
-                        listOf(mm("<gray>Mark this todo as completed.")),
-                    ),
+                    createItem(Material.RED_CONCRETE, mm("<white>Complete"), listOf(mm("<gray>Mark this todo as completed."))),
                 ).onClick {
                     HistoryManager.record(context.todoId, click.player, TodoStatus.COMPLETE)
+                    TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
+                },
+
+            // Reactivate — only when completed
+            item()
+                .atSlot(bottomRow + 5)
+                .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.COMPLETED }
+                .displayAs(
+                    createItem(Material.YELLOW_CONCRETE, mm("<white>Reactivate"), listOf(mm("<gray>Mark this todo as active again."))),
+                ).onClick {
+                    HistoryManager.record(context.todoId, click.player, TodoStatus.REACTIVATE)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
                 },
         )

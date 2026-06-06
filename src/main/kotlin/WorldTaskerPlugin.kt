@@ -11,6 +11,7 @@ import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.initDb
 import org.bukkit.Bukkit
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
@@ -55,6 +56,7 @@ class WorldTaskerPlugin : JavaPlugin() {
             initUi()
         }
 
+        TodoScopeManager.load()
         CommandAPI.onEnable()
         initCommands()
         Bukkit.getPluginManager().registerEvents(ChatInputManager, this)

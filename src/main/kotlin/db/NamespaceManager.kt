@@ -9,6 +9,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
+enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE }
+
 object NamespaceManager {
     object Namespaces : IntIdTable() {
         val name = varchar("name", 64).uniqueIndex()
@@ -19,8 +21,9 @@ object NamespaceManager {
         Namespaces.insert { it[Namespaces.name] = name }[Namespaces.id].value
     }
 
-    fun rename(id: Int, name: String) = transaction {
-        Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.name] = name }
+    fun rename(id: Int, name: String) {
+        transaction { Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.name] = name } }
+        TodoScopeManager.onNamespaceRenamed(id, name)
     }
 
     fun updateMaterial(id: Int, material: String) = transaction {
@@ -39,7 +42,9 @@ object NamespaceManager {
         Namespaces.selectAll().toList()
     }
 
-    fun delete(id: Int) = transaction {
-        Namespaces.deleteWhere { Namespaces.id eq id }
+    fun delete(id: Int): NamespaceDeleteResult {
+        if (!TodoScopeManager.canDeleteNamespace(id)) return NamespaceDeleteResult.BLOCKED_SCOPE
+        transaction { Namespaces.deleteWhere { Namespaces.id eq id } }
+        return NamespaceDeleteResult.DELETED
     }
 }

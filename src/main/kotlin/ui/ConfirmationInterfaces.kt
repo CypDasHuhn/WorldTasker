@@ -1,5 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui
 
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.db.NamespaceDeleteResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
@@ -88,8 +90,13 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
     "DeleteNamespaceConfirmation",
     handler { DeleteNamespaceContext(0) },
     onConfirm = { info ->
-        NamespaceManager.delete(info.context.namespaceId)
-        NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+        when (NamespaceManager.delete(info.context.namespaceId)) {
+            NamespaceDeleteResult.DELETED -> NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+            NamespaceDeleteResult.BLOCKED_SCOPE -> {
+                info.click.player.msg("<red>This namespace is the active todo scope and cannot be deleted.")
+                NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+            }
+        }
     },
     onCancel = { info ->
         val player = info.player()

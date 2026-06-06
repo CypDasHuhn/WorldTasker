@@ -45,13 +45,13 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                 .atSlot(2)
                 .displayAs {
                     val f = context.filter
-                    val lore = buildList<TextComponent> {
+                    val lore = buildList {
                         if (f.included.isNotEmpty()) add(mm("<green>${f.included.size} included"))
                         if (f.excluded.isNotEmpty()) add(mm("<red>${f.excluded.size} excluded"))
                         if (f.included.isEmpty() && f.excluded.isEmpty()) add(mm("<gray>No tag filter active."))
                     }
                     createItem(
-                        if (f.included.isEmpty() && f.excluded.isEmpty()) Material.HOPPER else Material.COMPARATOR,
+                        if (f.included.isEmpty() && f.excluded.isEmpty()) Material.BOOKSHELF else Material.COMPARATOR,
                         mm("<white>Tag Filter"),
                         lore,
                     )

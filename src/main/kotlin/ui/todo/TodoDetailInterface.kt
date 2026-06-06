@@ -69,7 +69,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
 
             // Tag button — shows current tags in lore, opens assign mode
             item()
-                .atSlot(2)
+                .atSlot(6)
                 .displayAs {
                     val direct = TagManager.tagLabelsForTodo(context.todoId)
                     val inherited = TagManager.inheritedTagLabelsForTodo(context.todoId)
@@ -84,7 +84,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
 
             // Rename button
             item()
-                .atSlot(11)
+                .atSlot(0)
                 .displayAs(
                     createItem(
                         Material.NAME_TAG,
@@ -95,7 +95,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
 
             // Delete button
             item()
-                .atSlot(15)
+                .atSlot(2)
                 .displayAs(
                     createItem(
                         Material.TNT,

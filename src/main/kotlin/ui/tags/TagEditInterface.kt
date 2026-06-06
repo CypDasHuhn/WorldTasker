@@ -47,9 +47,12 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
         context: TagEditContext,
     ): InterfaceInfo<TagEditContext>.() -> ItemStack =
         {
-            val parents = TagManager.parentsOf(data.id)
+            val ancestors = TagManager.ancestorLabelsOf(data.id)
             val lore = buildList<TextComponent> {
-                if (parents.isNotEmpty()) add(mm("<gray>Inherits ${parents.size} parent(s)"))
+                if (ancestors.isNotEmpty()) {
+                    add(mm("<gray>Inherits:"))
+                    ancestors.forEach { add(mm("<dark_gray>  $it")) }
+                }
             }
             createItem(data.material, mm("<white>${data.name}"), lore)
         }
