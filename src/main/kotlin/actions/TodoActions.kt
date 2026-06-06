@@ -9,24 +9,25 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
 import dev.rooster.db.utility_tables.LocationManager
+import dev.rooster.db.utility_tables.PlayerManager
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object TodoActions {
     fun add(sender: Player, name: String, description: String, tagsStr: String?) {
-        val id = TodoManager.create(name, sender.name, description, sender.location)
+        val id = TodoManager.create(name, sender, description, sender.location)
         if (tagsStr != null) resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
         sender.msg("<green>Todo '<white>$name</white>' created (id $id).")
     }
 
     fun complete(sender: Player, id: Int) {
-        TodoManager.complete(id, sender.name)
+        TodoManager.complete(id, sender)
         sender.msg("<green>Todo marked complete.")
     }
 
     fun reactivate(sender: Player, id: Int) {
-        TodoManager.reactivate(id, sender.name)
+        TodoManager.reactivate(id, sender)
         sender.msg("<green>Todo reactivated.")
     }
 
@@ -36,12 +37,12 @@ object TodoActions {
     }
 
     fun delete(sender: Player, name: String, id: Int) {
-        TodoManager.delete(id, sender.name)
+        TodoManager.delete(id, sender)
         sender.msg("<green>Todo '<white>$name</white>' removed.")
     }
 
     fun work(sender: Player, id: Int, comment: String) {
-        HistoryManager.record(id, sender.name, TodoStatus.WORK, comment)
+        HistoryManager.record(id, sender, TodoStatus.WORK, comment)
         sender.msg("<green>Work entry recorded.")
     }
 
@@ -108,7 +109,7 @@ object TodoActions {
         sender.msg("<gold>--- History ---")
         history.forEach { entry ->
             val time = entry[HistoryManager.History.time].format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-            val entryAuthor = entry[HistoryManager.History.author]
+            val entryAuthor = entry[PlayerManager.Players.name]
             val status = entry[HistoryManager.History.status]
             val comment = entry[HistoryManager.History.comment]
             val commentPart = if (comment != null) " <gray>— <white>$comment" else ""

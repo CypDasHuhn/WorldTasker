@@ -1,6 +1,6 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
-import dev.cypdashuhn.worldtasker.ui.TodoListInterface
+import dev.cypdashuhn.worldtasker.ui.todo.TodoListInterface
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 

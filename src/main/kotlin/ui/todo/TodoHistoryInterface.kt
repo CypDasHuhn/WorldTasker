@@ -1,9 +1,11 @@
-package dev.cypdashuhn.worldtasker.ui
+package dev.cypdashuhn.worldtasker.ui.todo
 
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoStatus
+import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.rooster.core.util.createItem
+import dev.rooster.db.utility_tables.PlayerManager
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
@@ -32,7 +34,6 @@ class TodoHistoryContext(
 ) : ScrollContext()
 
 private val miniMessage = MiniMessage.miniMessage()
-
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
@@ -56,7 +57,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
             HistoryEntry(
                 status = it[HistoryManager.History.status],
                 comment = it[HistoryManager.History.comment],
-                author = it[HistoryManager.History.author],
+                author = it[PlayerManager.Players.name],
                 time = it[HistoryManager.History.time],
             )
         }
@@ -94,6 +95,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
 
     override fun getInterfaceItems(): List<InterfaceItem<TodoHistoryContext>> =
         listOf(
+            // Back
             item()
                 .atSlot(bottomRow)
                 .displayAs(
@@ -103,5 +105,37 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                         listOf(mm("<gray>Return to todo detail.")),
                     ),
                 ).routeTo(TodoDetailInterface) { TodoDetailContext(context.todoId) },
+
+            // Work button — chat input for comment
+            item()
+                .atSlot(bottomRow + 3)
+                .displayAs(
+                    createItem(
+                        Material.LIGHT_BLUE_CONCRETE,
+                        mm("<white>Work"),
+                        listOf(mm("<gray>Record work with a comment.")),
+                    ),
+                ).onClick {
+                    val player = click.player
+                    val todoId = context.todoId
+                    ChatInputManager.awaitInput(player, "<gray>Type a work comment (or leave blank):") { comment ->
+                        HistoryManager.record(todoId, player, TodoStatus.WORK, comment.ifBlank { null })
+                        TodoHistoryInterface.openInventory(player, TodoHistoryContext(todoId))
+                    }
+                },
+
+            // Complete button
+            item()
+                .atSlot(bottomRow + 6)
+                .displayAs(
+                    createItem(
+                        Material.RED_CONCRETE,
+                        mm("<white>Complete"),
+                        listOf(mm("<gray>Mark this todo as completed.")),
+                    ),
+                ).onClick {
+                    HistoryManager.record(context.todoId, click.player, TodoStatus.COMPLETE)
+                    TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
+                },
         )
 }

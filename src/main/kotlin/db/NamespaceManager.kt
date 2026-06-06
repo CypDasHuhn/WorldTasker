@@ -12,6 +12,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 object NamespaceManager {
     object Namespaces : IntIdTable() {
         val name = varchar("name", 64).uniqueIndex()
+        val material = varchar("material", 64).default("BOOKSHELF")
     }
 
     fun create(name: String): Int = transaction {
@@ -20,6 +21,10 @@ object NamespaceManager {
 
     fun rename(id: Int, name: String) = transaction {
         Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.name] = name }
+    }
+
+    fun updateMaterial(id: Int, material: String) = transaction {
+        Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.material] = material }
     }
 
     fun find(id: Int): ResultRow? = transaction {

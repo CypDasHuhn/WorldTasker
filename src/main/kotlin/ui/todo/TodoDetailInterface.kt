@@ -1,7 +1,11 @@
-package dev.cypdashuhn.worldtasker.ui
+package dev.cypdashuhn.worldtasker.ui.todo
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.ui.DeleteTodoConfirmation
+import dev.cypdashuhn.worldtasker.ui.RenameTodoConfirmation
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
 import dev.rooster.db.utility_tables.LocationManager
 import dev.rooster.ui.interfaces.Context
@@ -20,7 +24,6 @@ class TodoDetailContext(
 ) : Context()
 
 private val miniMessage = MiniMessage.miniMessage()
-
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
@@ -36,6 +39,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<TodoDetailContext>> =
         listOf(
+            // Back
             item()
                 .atSlot(9)
                 .displayAs(
@@ -45,6 +49,8 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                         listOf(mm("<gray>Return to the todo list.")),
                     ),
                 ).routeTo(TodoListInterface),
+
+            // Jump to location
             item()
                 .atSlot(4)
                 .usedWhen { transaction { TodoManager.findById(context.todoId)?.locationId } != null }
@@ -60,6 +66,45 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                     val location = transaction { LocationManager.Location.findById(locId)?.location() } ?: return@onClick
                     click.player.teleport(location)
                 },
+
+            // Tag button — shows current tags in lore, opens assign mode
+            item()
+                .atSlot(2)
+                .displayAs {
+                    val direct = TagManager.tagLabelsForTodo(context.todoId)
+                    val inherited = TagManager.inheritedTagLabelsForTodo(context.todoId)
+                    val lore = buildList<TextComponent> {
+                        if (direct.isNotEmpty()) add(mm("<gray>Tags: <white>${direct.joinToString(", ")}"))
+                        if (inherited.isNotEmpty()) add(mm("<dark_gray>Inherited: ${inherited.joinToString(", ")}"))
+                        if (direct.isEmpty() && inherited.isEmpty()) add(mm("<gray>No tags assigned."))
+                        add(mm("<dark_gray>Click to manage tags."))
+                    }
+                    createItem(Material.NAME_TAG, mm("<white>Tags"), lore)
+                }.routeTo(NamespaceAssignInterface) { NamespaceAssignContext(context.todoId) },
+
+            // Rename button
+            item()
+                .atSlot(11)
+                .displayAs(
+                    createItem(
+                        Material.NAME_TAG,
+                        mm("<white>Rename"),
+                        listOf(mm("<gray>Requires confirmation.")),
+                    ),
+                ).routeTo(RenameTodoConfirmation) { TodoDetailContext(context.todoId) },
+
+            // Delete button
+            item()
+                .atSlot(15)
+                .displayAs(
+                    createItem(
+                        Material.TNT,
+                        mm("<red>Delete"),
+                        listOf(mm("<gray>Requires confirmation.")),
+                    ),
+                ).routeTo(DeleteTodoConfirmation) { TodoDetailContext(context.todoId) },
+
+            // History button
             item()
                 .atSlot(8)
                 .displayAs(

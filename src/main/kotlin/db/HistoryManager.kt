@@ -1,5 +1,8 @@
 package dev.cypdashuhn.worldtasker.db
 
+import dev.rooster.db.utility_tables.PlayerManager
+import dev.rooster.db.utility_tables.PlayerManager.Companion.dbPlayer
+import org.bukkit.entity.Player
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
@@ -18,23 +21,23 @@ object HistoryManager {
     object History : IntIdTable() {
         val todoId = reference("todo_id", TodoManager.Todos)
         val time = datetime("time")
-        val author = text("author")
+        val playerId = reference("player_id", PlayerManager.Players)
         val status = enumerationByName<TodoStatus>("status", 16)
         val comment = text("comment").nullable()
     }
 
-    fun record(todoId: Int, author: String, status: TodoStatus, comment: String? = null) = transaction {
+    fun record(todoId: Int, player: Player, status: TodoStatus, comment: String? = null) = transaction {
         History.insert {
             it[History.todoId] = todoId
             it[History.time] = LocalDateTime.now()
-            it[History.author] = author
+            it[History.playerId] = player.dbPlayer().id
             it[History.status] = status
             it[History.comment] = comment
         }
     }
 
     fun forTodo(todoId: Int): List<ResultRow> = transaction {
-        History.selectAll()
+        (History innerJoin PlayerManager.Players).selectAll()
             .where { History.todoId eq todoId }
             .orderBy(History.time, SortOrder.ASC)
             .toList()
@@ -47,7 +50,7 @@ object HistoryManager {
             .firstOrNull()
     }
 
-    fun createdAtForTodo(todoId: Int): java.time.LocalDateTime? = transaction {
+    fun createdAtForTodo(todoId: Int): LocalDateTime? = transaction {
         History.selectAll()
             .where { (History.todoId eq todoId) and (History.status eq TodoStatus.CREATE) }
             .orderBy(History.time, SortOrder.ASC)

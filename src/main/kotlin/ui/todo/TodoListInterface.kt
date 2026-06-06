@@ -1,8 +1,13 @@
-package dev.cypdashuhn.worldtasker.ui
+package dev.cypdashuhn.worldtasker.ui.todo
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
+import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.InterfaceInfo
@@ -14,14 +19,17 @@ import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.SkullMeta
 import org.jetbrains.exposed.sql.transactions.transaction
 
 data class TodoData(
     val id: Int,
     val name: String,
     val description: String,
+    val author: String,
     val tags: List<String>,
     val inheritedTags: List<String>,
 )
@@ -31,7 +39,6 @@ class TodoListContext(
 ) : ScrollContext()
 
 private val miniMessage = MiniMessage.miniMessage()
-
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
@@ -55,6 +62,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                     id = todoId,
                     name = it.name,
                     description = it.description,
+                    author = it.author,
                     tags = TagManager.tagLabelsForTodo(todoId),
                     inheritedTags = TagManager.inheritedTagLabelsForTodo(todoId),
                 )
@@ -73,7 +81,14 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                     if (data.inheritedTags.isNotEmpty()) add(mm("<dark_gray>Inherited: ${data.inheritedTags.joinToString(", ")}"))
                     add(mm("<gray>\"${data.description}\""))
                 }
-            createItem(Material.WRITABLE_BOOK, mm("<white>${data.name}"), lore)
+            val skull = ItemStack(Material.PLAYER_HEAD)
+            val meta = skull.itemMeta as SkullMeta
+            @Suppress("DEPRECATION")
+            meta.owningPlayer = Bukkit.getOfflinePlayer(data.author)
+            meta.displayName(mm("<white>${data.name}"))
+            meta.lore(lore)
+            skull.itemMeta = meta
+            skull
         }
 
     override fun contentClick(
@@ -86,6 +101,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
 
     override fun getInterfaceItems() =
         listOf(
+            // Filters button → FiltersInterface
             item()
                 .atSlot(6, 0)
                 .displayAs {
@@ -101,9 +117,59 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         }
                     createItem(
                         if (filter.isEmpty()) Material.HOPPER else Material.COMPARATOR,
-                        mm("<white>Filter"),
+                        mm("<white>Filters"),
                         lore,
                     )
-                }.routeTo(NamespaceSelectInterface) { NamespaceSelectContext(context.filter) },
+                }.routeTo(FiltersInterface) { FiltersContext(context.filter) },
+
+            // New todo button
+            item()
+                .atSlot(6, 4)
+                .displayAs(
+                    createItem(
+                        Material.WRITABLE_BOOK,
+                        mm("<white>New Todo"),
+                        listOf(mm("<gray>Create a new todo.")),
+                    ),
+                ).onClick {
+                    val player = click.player
+                    ChatInputManager.awaitInput(player, "<gray>Type the todo <white>name<gray>:") { name ->
+                        if (name.isBlank()) {
+                            TodoListInterface.openInventory(player, context)
+                            return@awaitInput
+                        }
+                        ChatInputManager.awaitInput(player, "<gray>Type the todo <white>description<gray>:") { description ->
+                            TodoManager.create(name.trim(), player, description.trim(), player.location)
+                            TodoListInterface.openInventory(player, context)
+                        }
+                    }
+                },
+
+            // Namespace edit button
+            item()
+                .atSlot(6, 8)
+                .displayAs(
+                    createItem(
+                        Material.BOOKSHELF,
+                        mm("<white>Namespaces"),
+                        listOf(mm("<gray>Manage namespaces and tags.")),
+                    ),
+                ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
+
+            // Random todo button
+            item()
+                .atSlot(6, 7)
+                .displayAs(
+                    createItem(
+                        Material.ENDER_EYE,
+                        mm("<white>Random Todo"),
+                        listOf(mm("<gray>Open a random todo from the current list.")),
+                    ),
+                ).onClick {
+                    val ids = TodoManager.filteredIds(context.filter)
+                    if (ids.isEmpty()) return@onClick
+                    val randomId = ids.random()
+                    TodoDetailInterface.openInventory(click.player, TodoDetailContext(randomId))
+                },
         )
 }

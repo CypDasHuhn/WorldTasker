@@ -16,6 +16,7 @@ object TagManager {
     object Tags : IntIdTable() {
         val name = varchar("name", 64)
         val namespaceId = reference("namespace_id", NamespaceManager.Namespaces)
+        val material = varchar("material", 64).default("PAPER")
     }
 
     object TodoTags : Table() {
@@ -73,6 +74,10 @@ object TagManager {
 
     fun byNamespace(namespaceId: Int): List<ResultRow> = transaction {
         Tags.selectAll().where { Tags.namespaceId eq namespaceId }.toList()
+    }
+
+    fun updateMaterial(id: Int, material: String) = transaction {
+        Tags.update({ Tags.id eq id }) { it[Tags.material] = material }
     }
 
     fun delete(id: Int) = transaction {

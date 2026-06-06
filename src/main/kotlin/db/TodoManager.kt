@@ -3,10 +3,12 @@ package dev.cypdashuhn.worldtasker.db
 import dev.rooster.db.utility_tables.LocationManager
 import dev.cypdashuhn.worldtasker.WorldTaskerPlugin
 import org.bukkit.Location
+import org.bukkit.entity.Player
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
+import dev.cypdashuhn.worldtasker.db.StatusFilter
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -37,7 +39,7 @@ object TodoManager {
 
     fun create(
         name: String,
-        author: String,
+        player: Player,
         description: String,
         location: Location?,
     ): Int = transaction {
@@ -53,11 +55,11 @@ object TodoManager {
         }
         val id = Todos.insert {
             it[Todos.name] = name
-            it[Todos.author] = author
+            it[Todos.author] = player.name
             it[Todos.description] = description
             it[locationId] = locId
         }[Todos.id].value
-        HistoryManager.record(id, author, TodoStatus.CREATE)
+        HistoryManager.record(id, player, TodoStatus.CREATE)
         id
     }
 
@@ -69,18 +71,22 @@ object TodoManager {
         Todos.selectAll().where { Todos.id eq id }.firstOrNull().let{ if (it == null) null else TodoEntry.wrapRow(it) }
     }
 
+    fun updateName(id: Int, name: String) = transaction {
+        Todos.update({ Todos.id eq id }) { it[Todos.name] = name }
+    }
+
     fun updateDescription(id: Int, description: String) = transaction {
         Todos.update({ Todos.id eq id }) { it[Todos.description] = description }
     }
 
-    fun complete(id: Int, author: String) =
-        HistoryManager.record(id, author, TodoStatus.COMPLETE)
+    fun complete(id: Int, player: Player) =
+        HistoryManager.record(id, player, TodoStatus.COMPLETE)
 
-    fun reactivate(id: Int, author: String) =
-        HistoryManager.record(id, author, TodoStatus.REACTIVATE)
+    fun reactivate(id: Int, player: Player) =
+        HistoryManager.record(id, player, TodoStatus.REACTIVATE)
 
-    fun delete(id: Int, author: String) =
-        HistoryManager.record(id, author, TodoStatus.DELETE)
+    fun delete(id: Int, player: Player) =
+        HistoryManager.record(id, player, TodoStatus.DELETE)
 
     fun stateOf(todoId: Int): TodoState = transaction {
         val latest = HistoryManager.History.selectAll()
@@ -104,7 +110,21 @@ object TodoManager {
         Todos.selectAll().toList()
             .filter { row ->
                 val todoId = row[Todos.id].value
-                stateOf(todoId) != TodoState.DELETED && filter.matches(todoId)
+                val state = stateOf(todoId)
+
+                val statusOk = when (filter.statusFilter) {
+                    StatusFilter.DEFAULT -> state == TodoState.ACTIVE
+                    StatusFilter.ALL -> state != TodoState.DELETED
+                    StatusFilter.COMPLETED -> state == TodoState.COMPLETED
+                }
+                if (!statusOk) return@filter false
+
+                val author = row[Todos.author]
+                if (filter.authorIncluded.isNotEmpty() && author !in filter.authorIncluded) return@filter false
+                if (author in filter.authorExcluded) return@filter false
+
+                val locId = row[Todos.locationId]?.value
+                filter.matches(todoId, locId)
             }
             .map { it[Todos.id].value }
     }

@@ -5,19 +5,23 @@ import dev.rooster.core.RoosterServices
 import dev.rooster.core.initRooster
 import dev.rooster.db.db
 import dev.rooster.db.utility_tables.LocationManager
+import dev.rooster.db.utility_tables.PlayerManager
 import dev.cypdashuhn.worldtasker.commands.todo
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.initDb
-import dev.cypdashuhn.worldtasker.ui.TodoDetailInterface
-import dev.cypdashuhn.worldtasker.ui.TodoListInterface
+import org.bukkit.Bukkit
+import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.initUi
 import dev.rooster.ui.ui
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIPaperConfig
 import dev.rooster.localization.provider.YmlLocaleProvider
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
@@ -28,6 +32,7 @@ class WorldTaskerPlugin : JavaPlugin() {
         lateinit var plugin: JavaPlugin
         val services = RoosterServices()
         val locationManager by services.setDelegate(LocationManager())
+        val playerManager by services.setDelegate(PlayerManager())
     }
 
     override fun onLoad() {
@@ -52,5 +57,11 @@ class WorldTaskerPlugin : JavaPlugin() {
 
         CommandAPI.onEnable()
         initCommands()
+        Bukkit.getPluginManager().registerEvents(ChatInputManager, this)
+        Bukkit.getPluginManager().registerEvents(object : Listener {
+            @EventHandler
+            fun onJoin(event: PlayerJoinEvent) = playerManager.playerLogin(event.player)
+        }, this)
+        Bukkit.getOnlinePlayers().forEach { playerManager.playerLogin(it) }
     }
 }

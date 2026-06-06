@@ -1,10 +1,13 @@
-package dev.cypdashuhn.worldtasker.ui
+package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
+import dev.rooster.ui.interfaces.ContextHandler
 import dev.rooster.ui.interfaces.InterfaceInfo
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
@@ -22,37 +25,54 @@ import org.bukkit.inventory.ItemStack
 data class TagData(
     val id: Int,
     val name: String,
+    val material: Material,
 )
 
-class TagSelectContext(
-    val namespaceId: Int,
-    var filter: TodoFilter,
-) : ScrollContext()
+// ─── abstract base shared by all tag overview modes ──────────────────────────
 
 private val miniMessage = MiniMessage.miniMessage()
-
 private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
-object TagSelectInterface : ScrollInterface<TagSelectContext, TagData>(
+abstract class TagOverviewBase<C : ScrollContext>(
+    name: String,
+    handler: ContextHandler<C>,
+    options: ScrollInterfaceOptions<C>,
+) : ScrollInterface<C, TagData>(name, handler, options) {
+
+    abstract fun namespaceId(context: C): Int
+
+    override fun contentProvider(id: Int, context: C): TagData? =
+        TagManager.byNamespace(namespaceId(context)).getOrNull(id)?.let {
+            TagData(
+                it[TagManager.Tags.id].value,
+                it[TagManager.Tags.name],
+                Material.getMaterial(it[TagManager.Tags.material]) ?: Material.PAPER,
+            )
+        }
+}
+
+// ─── query mode (tag filter selection) ───────────────────────────────────────
+
+class TagQueryContext(
+    val namespaceId: Int,
+    var filter: TodoFilter,
+    val returnToFilters: Boolean = false,
+) : ScrollContext()
+
+object TagSelectInterface : TagOverviewBase<TagQueryContext>(
     "TagSelectInterface",
-    handler { TagSelectContext(0, TodoFilter()) },
-    ScrollInterfaceOptions<TagSelectContext>().apply {
+    handler { TagQueryContext(0, TodoFilter()) },
+    ScrollInterfaceOptions<TagQueryContext>().apply {
         inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Tags") }
         sizeFromRows(3)
     },
 ) {
-    override fun contentProvider(
-        id: Int,
-        context: TagSelectContext,
-    ): TagData? =
-        TagManager.byNamespace(context.namespaceId).getOrNull(id)?.let {
-            TagData(it[TagManager.Tags.id].value, it[TagManager.Tags.name])
-        }
+    override fun namespaceId(context: TagQueryContext) = context.namespaceId
 
     override fun contentDisplay(
         data: TagData,
-        context: TagSelectContext,
-    ): InterfaceInfo<TagSelectContext>.() -> ItemStack =
+        context: TagQueryContext,
+    ): InterfaceInfo<TagQueryContext>.() -> ItemStack =
         {
             val state = context.filter.stateOf(data.id)
             val (material, stateLabel, loreColor) =
@@ -76,14 +96,14 @@ object TagSelectInterface : ScrollInterface<TagSelectContext, TagData>(
 
     override fun contentClick(
         data: TagData,
-        context: TagSelectContext,
-    ): ClickInfo<TagSelectContext>.() -> Unit =
+        context: TagQueryContext,
+    ): ClickInfo<TagQueryContext>.() -> Unit =
         {
             context.filter = context.filter.toggle(data.id)
             TagSelectInterface.openInventory(click.player, context)
         }
 
-    override fun getInterfaceItems(): List<InterfaceItem<TagSelectContext>> =
+    override fun getInterfaceItems(): List<InterfaceItem<TagQueryContext>> =
         listOf(
             item()
                 .atSlot(2 * 9)
@@ -93,6 +113,8 @@ object TagSelectInterface : ScrollInterface<TagSelectContext, TagData>(
                         mm("<white>Back"),
                         listOf(mm("<gray>Return to namespace selection.")),
                     ),
-                ).routeTo(NamespaceSelectInterface) { NamespaceSelectContext(context.filter) },
+                ).routeTo(NamespaceSelectInterface) {
+                    NamespaceQueryContext(context.filter, context.returnToFilters)
+                },
         )
 }
