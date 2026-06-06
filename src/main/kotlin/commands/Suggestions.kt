@@ -6,8 +6,15 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
+import dev.jorel.commandapi.arguments.LiteralArgument
+import dev.jorel.commandapi.executors.CommandArguments
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+
+internal fun LiteralArgument.suggestedWhen(condition: (CommandArguments) -> Boolean): Argument<String> =
+    replaceSuggestions(ArgumentSuggestions.strings { info ->
+        if (condition(info.previousArgs())) arrayOf(nodeName) else arrayOf()
+    })
 
 internal fun <T> Argument<T>.suggestScopedTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->

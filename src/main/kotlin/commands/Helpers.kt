@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.commands
 
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.jorel.commandapi.arguments.Argument
+import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.cypdashuhn.worldtasker.db.TodoResolveResult
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.TodoState
@@ -8,7 +10,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
-internal enum class TodoNameFilter { ACTIVE, COMPLETED, ALL }
+enum class TodoNameFilter { ACTIVE, COMPLETED, ALL }
 
 internal fun TodoNameFilter.allowsState(state: TodoState): Boolean = when (this) {
     TodoNameFilter.ACTIVE -> state == TodoState.ACTIVE
@@ -18,6 +20,15 @@ internal fun TodoNameFilter.allowsState(state: TodoState): Boolean = when (this)
 
 private val mm = MiniMessage.miniMessage()
 internal fun Player.msg(text: String) = sendMessage(mm.deserialize(text))
+
+internal fun la(name: String) = LiteralArgument(name)
+
+internal fun LiteralArgument.withFilters(build: (TodoNameFilter) -> Argument<*>): LiteralArgument =
+    apply {
+        then(build(TodoNameFilter.ACTIVE))
+        then(la("--completed").then(build(TodoNameFilter.COMPLETED)))
+        then(la("--all").then(build(TodoNameFilter.ALL)))
+    }
 
 internal fun TodoNameFilter.toStates(): Set<TodoState> = when (this) {
     TodoNameFilter.ACTIVE -> setOf(TodoState.ACTIVE)
@@ -47,7 +58,12 @@ internal fun handleWithScopedTodo(
     }
 }
 
-internal fun handleWithTodo(sender: Player, name: String, filter: TodoNameFilter = TodoNameFilter.ACTIVE, block: (Int) -> Unit) {
+internal fun handleWithTodo(
+    sender: Player,
+    name: String,
+    filter: TodoNameFilter = TodoNameFilter.ACTIVE,
+    block: (Int) -> Unit
+) {
     val todo = TodoManager.findByName(name)
     if (todo == null) {
         sender.msg("<red>Todo '<white>$name</white>' not found.")

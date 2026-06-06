@@ -1,6 +1,7 @@
 package dev.cypdashuhn.worldtasker.commands.nodes
 
 import dev.cypdashuhn.worldtasker.actions.TodoActions
+import dev.cypdashuhn.worldtasker.commands.la
 import dev.cypdashuhn.worldtasker.commands.query.ARG_AUTHOR
 import dev.cypdashuhn.worldtasker.commands.query.ARG_NAME
 import dev.cypdashuhn.worldtasker.commands.query.ARG_NEAR_RADIUS
@@ -36,23 +37,14 @@ internal fun buildGetNode(): LiteralArgument {
         TodoActions.get(sender, query, random)
     }
 
-    val executor = makeExecutor(false)
-    val completedExecutor = makeExecutor(true)
-    val randomExecutor = makeExecutor(false, random = true)
+    fun queryBranch(name: String, showCompleted: Boolean, random: Boolean = false) = la(name).apply {
+        val exec = makeExecutor(showCompleted, random)
+        executesPlayer(exec)
+        QueryTreeBuilder.build(exec).forEach { then(it) }
+    }
 
-    val searchNode = LiteralArgument("search")
-    searchNode.executesPlayer(executor)
-    QueryTreeBuilder.build(executor).forEach { searchNode.then(it) }
-
-    val completedNode = LiteralArgument("--completed")
-    completedNode.executesPlayer(completedExecutor)
-    QueryTreeBuilder.build(completedExecutor).forEach { completedNode.then(it) }
-    searchNode.then(completedNode)
-
-    val randomNode = LiteralArgument("--random")
-    randomNode.executesPlayer(randomExecutor)
-    QueryTreeBuilder.build(randomExecutor).forEach { randomNode.then(it) }
-    searchNode.then(randomNode)
-
-    return searchNode
+    return queryBranch("search", false).apply {
+        then(queryBranch("--completed", true))
+        then(queryBranch("--random", false, random = true))
+    }
 }
