@@ -18,7 +18,7 @@ object TodoActions {
     fun add(sender: Player, name: String, description: String, tagsStr: String?) {
         val id = TodoManager.create(name, sender, description, sender.location)
         if (tagsStr != null) resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
-        sender.msg("<green>Todo '<white>$name</white>' created (id $id).")
+        sender.msg("<green>Todo '<white>$name</white>' created.")
     }
 
     fun complete(sender: Player, id: Int) {
