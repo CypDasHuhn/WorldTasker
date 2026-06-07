@@ -9,36 +9,27 @@ import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.NamespacedKeyArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.NamespacedKey
+import org.bukkit.entity.Player
 
 private const val CHILD = "inheritChild"
 private const val ADD_PARENT = "inheritAddParent"
 private const val SET_PARENTS = "inheritSetParents"
 private const val REM_PARENT = "inheritRemoveParent"
 
+private fun inheritBranch(literal: String, argKey: String, action: (Player, NamespacedKey, String) -> Unit) =
+    la(literal).then(
+        GreedyStringArgument(argKey)
+            .suggestTagNamesGreedy()
+            .executesPlayer(PlayerCommandExecutor { sender, args ->
+                action(sender, args.argsMap[CHILD] as NamespacedKey, args.argsMap[argKey] as String)
+            })
+    )
+
 internal fun buildInheritNode(): LiteralArgument =
     la("inherit").apply {
         then(NamespacedKeyArgument(CHILD).suggestTagNames().apply {
-            then(la("add").then(
-                NamespacedKeyArgument(ADD_PARENT)
-                    .suggestTagNames()
-                    .executesPlayer(PlayerCommandExecutor { sender, args ->
-                        TagActions.addInheritance(sender, args.argsMap[CHILD] as NamespacedKey, args.argsMap[ADD_PARENT] as NamespacedKey)
-                    })
-            ))
-            then(la("set").then(
-                GreedyStringArgument(SET_PARENTS)
-                    .suggestTagNamesGreedy()
-                    .executesPlayer(PlayerCommandExecutor { sender, args ->
-                        TagActions.setInheritance(sender, args.argsMap[CHILD] as NamespacedKey, args.argsMap[SET_PARENTS] as String)
-                    })
-            ))
-            then(la("remove").then(
-                NamespacedKeyArgument(REM_PARENT)
-                    .suggestTagNames()
-                    .executesPlayer(PlayerCommandExecutor { sender, args ->
-                        TagActions
-                            .removeInheritance(sender, args.argsMap[CHILD] as NamespacedKey, args.argsMap[REM_PARENT] as NamespacedKey)
-                    })
-            ))
+            then(inheritBranch("add", ADD_PARENT, TagActions::addInheritance))
+            then(inheritBranch("set", SET_PARENTS, TagActions::setInheritance))
+            then(inheritBranch("remove", REM_PARENT, TagActions::removeInheritance))
         })
     }
