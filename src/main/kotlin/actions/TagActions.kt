@@ -82,20 +82,17 @@ object TagActions {
         sender.msg("<green>Tag renamed to '<white>$newName</white>'.")
     }
 
-    fun addInheritance(sender: Player, childKey: NamespacedKey, parentKey: NamespacedKey) {
-        val child = TagManager.findByQualifiedName(childKey)
-        val parent = TagManager.findByQualifiedName(parentKey)
-        if (child == null) {
+    fun addInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
+        val child = TagManager.findByQualifiedName(childKey) ?: run {
             sender.msg("<red>Tag '<white>${childKey.namespace}:${childKey.key}</white>' not found.")
             return
         }
-        if (parent == null) {
-            sender.msg("<red>Tag '<white>${parentKey.namespace}:${parentKey.key}</white>' not found.")
-            return
+        val childId = child[TagManager.Tags.id].value
+        val parentIds = resolveTagIds(parentsStr, sender)
+        parentIds.forEach { TagManager.addInheritance(childId, it) }
+        if (parentIds.isNotEmpty()) {
+            sender.msg("<green>Added ${parentIds.size} parent(s) to '<white>${childKey.namespace}:${childKey.key}</white>'.")
         }
-        TagManager.addInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
-        sender
-            .msg("<green>'<white>${childKey.namespace}:${childKey.key}</white>' now inherits from '<white>${parentKey.namespace}:${parentKey.key}</white>'.")
     }
 
     fun setInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
@@ -108,19 +105,16 @@ object TagActions {
         sender.msg("<green>Inheritance for '<white>${childKey.namespace}:${childKey.key}</white>' updated.")
     }
 
-    fun removeInheritance(sender: Player, childKey: NamespacedKey, parentKey: NamespacedKey) {
-        val child = TagManager.findByQualifiedName(childKey)
-        val parent = TagManager.findByQualifiedName(parentKey)
-        if (child == null) {
+    fun removeInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
+        val child = TagManager.findByQualifiedName(childKey) ?: run {
             sender.msg("<red>Tag '<white>${childKey.namespace}:${childKey.key}</white>' not found.")
             return
         }
-        if (parent == null) {
-            sender.msg("<red>Tag '<white>${parentKey.namespace}:${parentKey.key}</white>' not found.")
-            return
+        val childId = child[TagManager.Tags.id].value
+        val parentIds = resolveTagIds(parentsStr, sender)
+        parentIds.forEach { TagManager.removeInheritance(childId, it) }
+        if (parentIds.isNotEmpty()) {
+            sender.msg("<green>Removed ${parentIds.size} parent(s) from '<white>${childKey.namespace}:${childKey.key}</white>'.")
         }
-        TagManager.removeInheritance(child[TagManager.Tags.id].value, parent[TagManager.Tags.id].value)
-        sender
-            .msg("<green>'<white>${childKey.namespace}:${childKey.key}</white>' no longer inherits from '<white>${parentKey.namespace}:${parentKey.key}</white>'.")
     }
 }
