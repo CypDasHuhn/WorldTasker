@@ -34,9 +34,41 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
         val ns = NamespaceManager.findByName(configured)
         if (ns == null) {
             Bukkit.getLogger().warning("[WorldTasker] todo-scope-namespace '$configured' not found — todo scope resolution disabled.")
+            val nonDeleted = transaction { TodoManager.Todos.selectAll().toList() }
+                .filter { TodoManager.stateOf(it[TodoManager.Todos.id].value) != TodoState.DELETED }
+            val conflicts = nonDeleted
+                .groupBy { it[TodoManager.Todos.name] }
+                .filter { (_, rows) -> rows.size > 1 }
+            if (conflicts.isNotEmpty()) {
+                Bukkit.getLogger().severe("[WorldTasker] CRITICAL: the following todo names are ambiguous without a scope namespace:")
+                conflicts.forEach { (name, rows) ->
+                    Bukkit.getLogger().severe("[WorldTasker]   '$name' — ${rows.size} todos share this name")
+                }
+                Bukkit.getLogger().severe("[WorldTasker] Disabling plugin to prevent data integrity issues.")
+                Bukkit.getPluginManager().getPlugin("WorldTasker")
+                    ?.let { Bukkit.getPluginManager().disablePlugin(it) }
+            }
             return
         }
-        namespaceId = ns[NamespaceManager.Namespaces.id].value
+        val nsId = ns[NamespaceManager.Namespaces.id].value
+        val scopeTagIds = TagManager.byNamespace(nsId).map { it[TagManager.Tags.id].value }.toSet()
+        if (scopeTagIds.isNotEmpty()) {
+            val nonDeleted = transaction { TodoManager.Todos.selectAll().toList() }
+                .filter { TodoManager.stateOf(it[TodoManager.Todos.id].value) != TodoState.DELETED }
+            val conflicts = nonDeleted.filter { row ->
+                val todoId = row[TodoManager.Todos.id].value
+                TagManager.tagsForTodo(todoId).count { it[TagManager.Tags.id].value in scopeTagIds } > 1
+            }
+            if (conflicts.isNotEmpty()) {
+                Bukkit.getLogger().warning("[WorldTasker] The following todos have multiple scope tags from namespace '$configured':")
+                conflicts.forEach { row ->
+                    Bukkit.getLogger().warning("[WorldTasker]   '${row[TodoManager.Todos.name]}' (id: ${row[TodoManager.Todos.id].value})")
+                }
+                Bukkit.getLogger().warning("[WorldTasker] Todo scope resolution disabled. Fix conflicts first.")
+                return
+            }
+        }
+        namespaceId = nsId
         reload()
     }
 
@@ -133,6 +165,8 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
     }
 
     fun scopeTagNameAmong(tagIds: Iterable<Int>): String? = tagIds.firstNotNullOfOrNull { tags[it] }
+
+    fun countScopeTagsAmong(tagIds: Iterable<Int>): Int = tagIds.count { it in tags }
 
     fun wouldCollide(todoName: String, newScopeTagName: String?, excludeTodoId: Int? = null): Boolean {
         if (!isActive()) return false

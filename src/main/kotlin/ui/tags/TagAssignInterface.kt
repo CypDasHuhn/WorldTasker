@@ -1,7 +1,9 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
@@ -64,7 +66,16 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
             if (assigned) {
                 TagManager.removeFromTodo(context.todoId, data.id)
             } else {
-                TagManager.addToTodo(context.todoId, data.id)
+                val wouldExceed = TodoScopeManager.isActive()
+                    && TodoScopeManager.isScopeTag(data.id)
+                    && TodoScopeManager.countScopeTagsAmong(
+                        TagManager.tagsForTodo(context.todoId).map { it[TagManager.Tags.id].value }
+                    ) >= 1
+                if (wouldExceed) {
+                    click.player.msg("<red>A todo can only have one scope tag.")
+                } else {
+                    TagManager.addToTodo(context.todoId, data.id)
+                }
             }
             TagAssignInterface.openInventory(click.player, context)
         }

@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
-enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE }
+enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE, BLOCKED_HAS_TAGS }
 
 object NamespaceManager {
     object Namespaces : IntIdTable() {
@@ -49,6 +49,7 @@ object NamespaceManager {
 
     fun delete(id: Int): NamespaceDeleteResult {
         if (!TodoScopeManager.canDeleteNamespace(id)) return NamespaceDeleteResult.BLOCKED_SCOPE
+        if (TagManager.byNamespace(id).isNotEmpty()) return NamespaceDeleteResult.BLOCKED_HAS_TAGS
         transaction { Namespaces.deleteWhere { Namespaces.id eq id } }
         return NamespaceDeleteResult.DELETED
     }

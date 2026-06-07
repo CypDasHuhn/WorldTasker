@@ -15,6 +15,8 @@ import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
+private fun Player.multipleScopeTags() = msg("<red>A todo can only have one scope tag.")
+
 private fun Player.scopeCollision(todoName: String, scopeTagName: String?) {
     val scopeDesc = if (scopeTagName != null) "scoped to '<white>$scopeTagName</white>'" else "with no scope tag"
     msg("<red>A todo named '<white>$todoName</white>' $scopeDesc already exists.")
@@ -23,6 +25,7 @@ private fun Player.scopeCollision(todoName: String, scopeTagName: String?) {
 object TodoActions {
     fun add(sender: Player, name: String, description: String, tagsStr: String?) {
         val tagIds = if (tagsStr != null) resolveTagIds(tagsStr, sender) else emptyList()
+        if (TodoScopeManager.countScopeTagsAmong(tagIds) > 1) { sender.multipleScopeTags(); return }
         val scopeTagName = TodoScopeManager.scopeTagNameAmong(tagIds)
         if (TodoScopeManager.wouldCollide(name, scopeTagName)) {
             sender.scopeCollision(name, scopeTagName)
@@ -72,6 +75,7 @@ object TodoActions {
 
     fun setTags(sender: Player, id: Int, tagsStr: String) {
         val newTagIds = resolveTagIds(tagsStr, sender)
+        if (TodoScopeManager.countScopeTagsAmong(newTagIds) > 1) { sender.multipleScopeTags(); return }
         val todoName = TodoManager.findById(id)?.name ?: return
         val scopeTagName = TodoScopeManager.scopeTagNameAmong(newTagIds)
         if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
@@ -87,6 +91,7 @@ object TodoActions {
         val newTagIds = resolveTagIds(tagsStr, sender)
         val todoName = TodoManager.findById(id)?.name ?: return
         val existingTagIds = TagManager.tagsForTodo(id).map { it[TagManager.Tags.id].value }
+        if (TodoScopeManager.countScopeTagsAmong(existingTagIds + newTagIds) > 1) { sender.multipleScopeTags(); return }
         val scopeTagName = TodoScopeManager.scopeTagNameAmong(existingTagIds + newTagIds)
         if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
             sender.scopeCollision(todoName, scopeTagName)

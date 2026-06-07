@@ -45,9 +45,8 @@ object NamespaceActions {
         }
         when (NamespaceManager.delete(ns[NamespaceManager.Namespaces.id].value)) {
             NamespaceDeleteResult.DELETED -> sender.msg("<green>Namespace '<white>$name</white>' removed.")
-
-            NamespaceDeleteResult.BLOCKED_SCOPE -> sender
-                .msg("<red>Namespace '<white>$name</white>' is the active todo scope and cannot be deleted.")
+            NamespaceDeleteResult.BLOCKED_SCOPE -> sender.msg("<red>Namespace '<white>$name</white>' is the active todo scope and cannot be deleted.")
+            NamespaceDeleteResult.BLOCKED_HAS_TAGS -> sender.msg("<red>Namespace '<white>$name</white>' still has tags. Remove all tags first.")
         }
     }
 

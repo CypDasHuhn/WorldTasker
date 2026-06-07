@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
@@ -91,7 +92,13 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
             item()
                 .atSlot(bottomRow + 7)
                 .displayAs { createItem(Material.TNT, mm("<red>Delete Namespace"), listOf(mm("<gray>Requires confirmation."))) }
-                .routeTo(DeleteNamespaceConfirmation) { DeleteNamespaceContext(context.namespaceId) },
+                .onClick {
+                    if (TagManager.byNamespace(context.namespaceId).isNotEmpty()) {
+                        click.player.msg("<red>Cannot delete a namespace that still has tags.")
+                        return@onClick
+                    }
+                    DeleteNamespaceConfirmation.openInventory(click.player, DeleteNamespaceContext(context.namespaceId))
+                },
             item()
                 .atSlot(bottomRow + 8)
                 .displayAs { createItem(Material.NAME_TAG, mm("<white>Rename Namespace"), listOf(mm("<gray>Requires confirmation."))) }

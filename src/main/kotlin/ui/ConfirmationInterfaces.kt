@@ -96,14 +96,17 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
     "DeleteNamespaceConfirmation",
     handler { DeleteNamespaceContext(0) },
     onConfirm = { info ->
+        val player = info.click.player
         when (NamespaceManager.delete(info.context.namespaceId)) {
-            NamespaceDeleteResult.DELETED -> {
-                NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
-            }
-
+            NamespaceDeleteResult.DELETED ->
+                NamespaceEditInterface.openInventory(player, NamespaceEditContext())
             NamespaceDeleteResult.BLOCKED_SCOPE -> {
-                info.click.player.msg("<red>This namespace is the active todo scope and cannot be deleted.")
-                NamespaceEditInterface.openInventory(info.click.player, NamespaceEditContext())
+                player.msg("<red>This namespace is the active todo scope and cannot be deleted.")
+                NamespaceEditInterface.openInventory(player, NamespaceEditContext())
+            }
+            NamespaceDeleteResult.BLOCKED_HAS_TAGS -> {
+                player.msg("<red>This namespace still has tags. Remove all tags first.")
+                NamespaceEditInterface.openInventory(player, NamespaceEditContext())
             }
         }
     },
@@ -117,7 +120,7 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
 
     override fun getOtherItems(): List<InterfaceItem<DeleteNamespaceContext>> =
         listOf(
-            item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>All tags in this namespace will also be deleted."))),
+            item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This namespace will be permanently deleted."))),
         )
 }
 
