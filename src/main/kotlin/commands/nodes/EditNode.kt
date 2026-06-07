@@ -6,28 +6,30 @@ import dev.cypdashuhn.worldtasker.commands.handleWithScopedTodo
 import dev.cypdashuhn.worldtasker.commands.la
 import dev.cypdashuhn.worldtasker.commands.suggestScopedTodoNames
 import dev.cypdashuhn.worldtasker.commands.suggestTagNamesGreedy
-import dev.cypdashuhn.worldtasker.commands.suggestedWhen
 import dev.cypdashuhn.worldtasker.commands.withFilters
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoResolveResult
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.jorel.commandapi.arguments.Argument
+import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.GreedyStringArgument
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.arguments.NamespacedKeyArgument
+import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.arguments.TextArgument
 import dev.jorel.commandapi.executors.CommandArguments
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
-private const val NAME = "editTodoName"
-private const val NEW_DESC = "editTodoNewDescription"
-private const val SET_TAGS = "editTodoSetTags"
-private const val ADD_TAGS = "editTodoAddTags"
-private const val REMOVE_TAGS = "editTodoRemoveTags"
-private const val WORK_COMMENT = "editTodoWorkComment"
+private const val NAME          = "editTodoName"
+private const val STATE_ACTION  = "editTodoStateAction"
+private const val NEW_DESC      = "editTodoNewDescription"
+private const val SET_TAGS      = "editTodoSetTags"
+private const val ADD_TAGS      = "editTodoAddTags"
+private const val REMOVE_TAGS   = "editTodoRemoveTags"
+private const val WORK_COMMENT  = "editTodoWorkComment"
 
 data class EditCtx(
     val sender: Player,
@@ -43,26 +45,38 @@ private fun <T> Argument<T>.handle(filter: TodoNameFilter, block: EditCtx.() -> 
         }
     })
 
-private fun todoInState(vararg states: TodoState): (CommandArguments) -> Boolean =
-    { prevArgs ->
-        val key = prevArgs.argsMap[NAME] as? NamespacedKey
-        if (key == null) {
-            true
-        } else {
-            val result = TodoScopeManager.resolveInput(key, TodoState.values().toSet() - setOf(TodoState.DELETED))
-            result is TodoResolveResult.Found && TodoManager.stateOf(result.id) in states
-        }
+private fun stateActionsFor(raw: Any?): Array<String> {
+    val key: NamespacedKey = when (raw) {
+        is NamespacedKey -> raw
+        is String -> runCatching {
+            if (':' in raw) NamespacedKey(raw.substringBefore(':'), raw.substringAfter(':'))
+            else NamespacedKey.minecraft(raw)
+        }.getOrNull()
+        else -> null
+    } ?: return arrayOf("complete", "reactivate")
+    val result = TodoScopeManager.resolveInput(key, setOf(TodoState.ACTIVE, TodoState.COMPLETED))
+    if (result !is TodoResolveResult.Found) return arrayOf("complete", "reactivate")
+    return when (TodoManager.stateOf(result.id)) {
+        TodoState.ACTIVE    -> arrayOf("complete")
+        TodoState.COMPLETED -> arrayOf("reactivate")
+        else                -> arrayOf()
     }
+}
 
 private fun buildEditNameArg(filter: TodoNameFilter): Argument<NamespacedKey> =
     NamespacedKeyArgument(NAME)
         .suggestScopedTodoNames(filter)
-        .then(la("complete").suggestedWhen(todoInState(TodoState.ACTIVE)).handle(filter) {
-            TodoActions.complete(sender, id)
-        })
-        .then(la("reactivate").suggestedWhen(todoInState(TodoState.COMPLETED)).handle(filter) {
-            TodoActions.reactivate(sender, id)
-        })
+        .then(StringArgument(STATE_ACTION)
+            .replaceSuggestions(ArgumentSuggestions.strings { info ->
+                stateActionsFor(info.previousArgs().argsMap[NAME])
+            })
+            .handle(filter) {
+                when (args.argsMap[STATE_ACTION] as String) {
+                    "complete"   -> TodoActions.complete(sender, id)
+                    "reactivate" -> TodoActions.reactivate(sender, id)
+                }
+            }
+        )
         .then(la("delete").handle(filter) {
             TodoActions.delete(sender, name, id)
         })
