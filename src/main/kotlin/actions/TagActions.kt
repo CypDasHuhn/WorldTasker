@@ -10,7 +10,10 @@ private val VALID_NAME = Regex("[a-z0-9_\\-]+")
 
 fun isValidResourceName(name: String) = name.matches(VALID_NAME)
 
+internal val RESERVED_NAMES = setOf("no-namespace")
+
 private fun Player.invalidName(name: String) = msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
+private fun Player.reservedName(name: String) = msg("<red>'<white>$name</white>' is reserved and cannot be used.")
 
 fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
     tagsStr.trim().split(Regex("\\s+")).mapNotNull { name ->
@@ -44,6 +47,10 @@ object TagActions {
             sender.invalidName(tagName)
             return
         }
+        if (tagName in RESERVED_NAMES) {
+            sender.reservedName(tagName)
+            return
+        }
         val ns = NamespaceManager.findByName(nsName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$nsName</white>' not found. Create it first with /todo tags namespaces add.")
@@ -71,6 +78,10 @@ object TagActions {
     fun rename(sender: Player, oldKey: NamespacedKey, newName: String) {
         if (!isValidResourceName(newName)) {
             sender.invalidName(newName)
+            return
+        }
+        if (newName in RESERVED_NAMES) {
+            sender.reservedName(newName)
             return
         }
         val tag = TagManager.findByQualifiedName(oldKey)

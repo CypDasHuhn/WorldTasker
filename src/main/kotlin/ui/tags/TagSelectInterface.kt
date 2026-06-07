@@ -9,12 +9,14 @@ import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.ContextHandler
 import dev.rooster.ui.interfaces.InterfaceInfo
+import dev.rooster.ui.interfaces.Slot
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollContext
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterface
 import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOptions
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
+import dev.rooster.ui.items.Slots
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
@@ -99,6 +101,8 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
 
     override fun getInterfaceItems(): List<InterfaceItem<TagQueryContext>> =
         listOf(
+            item()
+                .atSlots(Slots(bottomRow..bottomRow + 2)),
             item()
                 .atSlot(2 * 9)
                 .displayAs(

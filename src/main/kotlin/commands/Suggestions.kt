@@ -25,12 +25,10 @@ internal fun <T> Argument<T>.suggestScopedTodoNames(filter: TodoNameFilter = Tod
             }
             allTodos
                 .flatMap { (id, name) ->
-                    val scoped = if (TodoScopeManager.isActive()) {
-                        TodoScopeManager.scopeTagNameForTodo(id)?.let { tag -> "$tag:$name" }
-                    } else {
-                        null
-                    }
-                    listOfNotNull(name, scoped)
+                    val scopeTag = if (TodoScopeManager.isActive()) TodoScopeManager.scopeTagNameForTodo(id) else null
+                    val scoped = scopeTag?.let { "$it:$name" }
+                    val noNs = if (TodoScopeManager.isActive() && scopeTag == null) "no-namespace:$name" else null
+                    listOfNotNull(name, scoped, noNs)
                 }.distinct()
                 .toTypedArray()
         }

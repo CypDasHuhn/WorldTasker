@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.todo
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.DeleteTodoConfirmation
 import dev.cypdashuhn.worldtasker.ui.RenameTodoConfirmation
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
@@ -34,7 +35,9 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
         inventorySize = InventorySize.TWO_ROWS
         inventoryTitle = { _, context ->
             val name = transaction { TodoManager.findById(context.todoId)?.name } ?: "Todo"
-            mm("<white>$name")
+            val scopeTag = TodoScopeManager.scopeTagNameForTodo(context.todoId)
+            val title = if (scopeTag != null) "$scopeTag:$name" else name
+            mm("<white>$title")
         }
     },
 ) {

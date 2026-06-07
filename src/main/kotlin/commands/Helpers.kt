@@ -59,7 +59,7 @@ internal fun handleWithScopedTodo(
             if (result.scopedOptions.isNotEmpty()) {
                 sender.msg("<gray>Specify one of:")
                 result.scopedOptions.forEach { sender.msg("<yellow>  $it") }
-                if (result.hasUntagged) sender.msg("<gray>  (one match has no scope tag — assign one to disambiguate)")
+                if (result.hasUntagged) sender.msg("<gray>  (one match has no scope tag — use '<white>no-namespace:${result.todoName}</white>' to address it)")
             } else {
                 sender.msg("<gray>No scope namespace configured — cannot disambiguate.")
             }

@@ -84,10 +84,21 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
     fun resolveInput(key: NamespacedKey, allowedStates: Set<TodoState>): TodoResolveResult {
         val todoName = key.key
         val isBare = key.namespace == "minecraft"
+        val isExplicitNoNamespace = key.namespace == "no-namespace"
 
         val candidates = TodoManager
             .findAllByName(todoName)
             .filter { row -> TodoManager.stateOf(row[TodoManager.Todos.id].value) in allowedStates }
+
+        if (isExplicitNoNamespace) {
+            val unscoped = candidates.filter { row ->
+                scopeTagNameForTodo(row[TodoManager.Todos.id].value) == null
+            }
+            return when {
+                unscoped.isEmpty() -> TodoResolveResult.NotFound
+                else -> TodoResolveResult.Found(unscoped[0][TodoManager.Todos.id].value, todoName)
+            }
+        }
 
         if (!isBare) {
             val scoped = candidates.filter { row ->

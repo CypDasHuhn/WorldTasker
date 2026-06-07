@@ -3,6 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.todo
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
@@ -32,6 +33,7 @@ data class TodoData(
     val author: String,
     val tags: List<String>,
     val inheritedTags: List<String>,
+    val scopeTag: String?,
 )
 
 class TodoListContext(
@@ -63,6 +65,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                     author = it.author,
                     tags = TagManager.tagLabelsForTodo(todoId),
                     inheritedTags = TagManager.inheritedTagLabelsForTodo(todoId),
+                    scopeTag = TodoScopeManager.scopeTagNameForTodo(todoId),
                 )
             }
         }
@@ -80,7 +83,8 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
             val meta = skull.itemMeta as SkullMeta
             @Suppress("DEPRECATION")
             meta.owningPlayer = Bukkit.getOfflinePlayer(data.author)
-            meta.displayName(mm("<white>${data.name}"))
+            val displayName = if (data.scopeTag != null) "${data.scopeTag}:${data.name}" else data.name
+            meta.displayName(mm("<white>$displayName"))
             meta.lore(lore)
             skull.itemMeta = meta
             skull
