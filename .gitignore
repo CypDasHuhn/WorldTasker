@@ -46,3 +46,4 @@ bin/
 /.idea
 /run
 /dev/jorel/commandapi
+/kls_database.db
