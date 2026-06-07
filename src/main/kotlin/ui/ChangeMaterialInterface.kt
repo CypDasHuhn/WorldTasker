@@ -16,14 +16,8 @@ import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.options
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.entity.Player
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 private const val MATERIAL_SLOT = 13 // center slot of a 3-row inventory
 

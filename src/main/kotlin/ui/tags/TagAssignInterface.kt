@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
@@ -14,17 +15,11 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOpt
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class TagAssignContext(
     val namespaceId: Int,

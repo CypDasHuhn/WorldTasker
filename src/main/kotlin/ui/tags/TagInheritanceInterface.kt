@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceInheritanceContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceInheritanceInterface
 import dev.rooster.core.util.createItem
@@ -13,14 +14,8 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOpt
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 data class InheritedTagData(
     val parentTagId: Int,

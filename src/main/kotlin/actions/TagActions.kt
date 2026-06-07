@@ -6,14 +6,8 @@ import dev.cypdashuhn.worldtasker.db.TagManager
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
-private val VALID_NAME = Regex("[a-z0-9_\\-]+")
-
-fun isValidResourceName(name: String) = name.matches(VALID_NAME)
-
-internal val RESERVED_NAMES = setOf("no-namespace")
-
-private fun Player.invalidName(name: String) = msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
-private fun Player.reservedName(name: String) = msg("<red>'<white>$name</white>' is reserved and cannot be used.")
+private fun Player.invalidName(name: String) =
+    msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
 
 fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
     tagsStr.trim().split(Regex("\\s+")).mapNotNull { name ->

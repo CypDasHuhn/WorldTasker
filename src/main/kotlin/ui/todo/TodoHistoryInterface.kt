@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.db.utility_tables.PlayerManager
 import dev.rooster.ui.interfaces.ClickInfo
@@ -15,8 +16,6 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOpt
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -33,10 +32,6 @@ data class HistoryEntry(
 class TodoHistoryContext(
     val todoId: Int,
 ) : ScrollContext()
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
     "TodoHistoryInterface",

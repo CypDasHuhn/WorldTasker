@@ -1,7 +1,5 @@
 package dev.cypdashuhn.worldtasker.actions
 
-import dev.cypdashuhn.worldtasker.actions.isValidResourceName
-import dev.cypdashuhn.worldtasker.actions.RESERVED_NAMES
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceDeleteResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
@@ -10,8 +8,6 @@ import org.bukkit.entity.Player
 
 private fun Player.invalidName(name: String) =
     msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '.', '-'.")
-
-private fun Player.reservedName(name: String) = msg("<red>'<white>$name</white>' is reserved and cannot be used.")
 
 object NamespaceActions {
     fun list(sender: Player) {

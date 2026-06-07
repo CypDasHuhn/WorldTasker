@@ -3,8 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.todo
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
-import dev.cypdashuhn.worldtasker.ui.DeleteTodoConfirmation
-import dev.cypdashuhn.worldtasker.ui.RenameTodoConfirmation
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
@@ -16,17 +15,12 @@ import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.options
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class TodoDetailContext(
     val todoId: Int,
 ) : Context()
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
     "TodoDetailInterface",

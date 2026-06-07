@@ -2,16 +2,17 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
-import dev.cypdashuhn.worldtasker.ui.DeleteNamespaceConfirmation
-import dev.cypdashuhn.worldtasker.ui.DeleteNamespaceContext
-import dev.cypdashuhn.worldtasker.ui.RenameNamespaceConfirmation
-import dev.cypdashuhn.worldtasker.ui.RenameNamespaceContext
+import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
+import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
+import dev.cypdashuhn.worldtasker.ui.namespaces.RenameNamespaceConfirmation
+import dev.cypdashuhn.worldtasker.ui.namespaces.RenameNamespaceContext
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
 import dev.rooster.ui.interfaces.InterfaceInfo
@@ -21,13 +22,8 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class TagEditContext(
     val namespaceId: Int

@@ -6,6 +6,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
@@ -19,7 +20,6 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -39,10 +39,6 @@ data class TodoData(
 class TodoListContext(
     var filter: TodoFilter = TodoFilter(),
 ) : ScrollContext()
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
     "TodoListInterface",

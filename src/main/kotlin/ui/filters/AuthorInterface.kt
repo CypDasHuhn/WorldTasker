@@ -1,6 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui.filters
 
 import dev.cypdashuhn.worldtasker.WorldTaskerPlugin
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.rooster.core.util.createItem
@@ -12,8 +13,6 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOpt
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -21,10 +20,6 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import java.util.UUID
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class AuthorContext(
     var filter: TodoFilter = TodoFilter()

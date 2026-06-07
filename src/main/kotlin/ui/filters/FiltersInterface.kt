@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.filters
 
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.db.TodoFilter
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
 import dev.cypdashuhn.worldtasker.ui.todo.TodoListContext
@@ -14,12 +15,7 @@ import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.options
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class FiltersContext(
     var filter: TodoFilter = TodoFilter()

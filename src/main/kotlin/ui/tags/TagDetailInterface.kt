@@ -2,12 +2,9 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
-import dev.cypdashuhn.worldtasker.ui.DeleteTagConfirmation
-import dev.cypdashuhn.worldtasker.ui.DeleteTagContext
-import dev.cypdashuhn.worldtasker.ui.RenameTagConfirmation
-import dev.cypdashuhn.worldtasker.ui.RenameTagContext
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
 import dev.rooster.ui.interfaces.InventorySize
@@ -16,13 +13,8 @@ import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.interfaces.options
 import dev.rooster.ui.items.InterfaceItem
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.jetbrains.exposed.sql.transactions.transaction
-
-private val miniMessage = MiniMessage.miniMessage()
-
-private fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 class TagDetailContext(
     val tagId: Int,
