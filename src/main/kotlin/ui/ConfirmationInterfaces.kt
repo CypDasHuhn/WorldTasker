@@ -7,6 +7,7 @@ import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
+import dev.cypdashuhn.worldtasker.ui.tags.TagDeleteConflictInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagDetailContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagDetailInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditContext
@@ -176,6 +177,55 @@ object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
     override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> =
         listOf(
             item().atSlot(4).displayAs(createItem(Material.BARRIER, mm("<red>This tag will be removed from all todos."))),
+        )
+}
+
+// ─── Delete Tag: conflict resolution ─────────────────────────────────────────
+
+object RemoveTaggingsDeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
+    "RemoveTaggingsDeleteTagConfirmation",
+    handler { DeleteTagContext(0, 0) },
+    onConfirm = { info ->
+        TagManager.delete(info.context.tagId)
+        TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+    },
+    onCancel = { info ->
+        val player = info.player()
+        if (player != null) TagDeleteConflictInterface.openInventory(player, DeleteTagContext(info.context.tagId, info.context.namespaceId))
+    },
+) {
+    override fun getInventory(player: Player, context: DeleteTagContext): Inventory =
+        Bukkit.createInventory(null, 9, mm("<yellow>Remove taggings and delete tag?"))
+
+    override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.SHEARS, mm("<yellow>Todos will be kept. This tag will be removed from them."))),
+        )
+}
+
+object RemoveTodosDeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
+    "RemoveTodosDeleteTagConfirmation",
+    handler { DeleteTagContext(0, 0) },
+    onConfirm = { info ->
+        val player = info.click.player
+        val tagId = info.context.tagId
+        TagManager.todosForTag(tagId).forEach { row ->
+            TodoManager.delete(row[TodoManager.Todos.id].value, player)
+        }
+        TagManager.delete(tagId)
+        TagEditInterface.openInventory(player, TagEditContext(info.context.namespaceId))
+    },
+    onCancel = { info ->
+        val player = info.player()
+        if (player != null) TagDeleteConflictInterface.openInventory(player, DeleteTagContext(info.context.tagId, info.context.namespaceId))
+    },
+) {
+    override fun getInventory(player: Player, context: DeleteTagContext): Inventory =
+        Bukkit.createInventory(null, 9, mm("<red>Delete all tagged todos and tag?"))
+
+    override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> =
+        listOf(
+            item().atSlot(4).displayAs(createItem(Material.TNT, mm("<red>All todos tagged with this tag will be permanently deleted."))),
         )
 }
 

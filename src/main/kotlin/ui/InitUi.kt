@@ -1,5 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui
 
+import dev.cypdashuhn.worldtasker.ui.RemoveTaggingsDeleteTagConfirmation
+import dev.cypdashuhn.worldtasker.ui.RemoveTodosDeleteTagConfirmation
 import dev.cypdashuhn.worldtasker.ui.filters.AuthorInterface
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
@@ -7,6 +9,7 @@ import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceInheritanceInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagAssignInterface
+import dev.cypdashuhn.worldtasker.ui.tags.TagDeleteConflictInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagDetailInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceInterface
@@ -39,6 +42,7 @@ fun RoosterModuleBuilder.initUi() {
             TagEditInterface,
             TagAssignInterface,
             // Tag detail & inheritance
+            TagDeleteConflictInterface,
             TagDetailInterface,
             TagInheritanceInterface,
             NamespaceInheritanceInterface,
@@ -53,6 +57,8 @@ fun RoosterModuleBuilder.initUi() {
             RenameNamespaceConfirmation,
             DeleteTagConfirmation,
             RenameTagConfirmation,
+            RemoveTaggingsDeleteTagConfirmation,
+            RemoveTodosDeleteTagConfirmation,
         ),
     )
 }

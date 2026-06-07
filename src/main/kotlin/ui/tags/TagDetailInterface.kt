@@ -89,6 +89,13 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                         mm("<red>Delete Tag"),
                         listOf(mm("<gray>Requires confirmation.")),
                     ),
-                ).routeTo(DeleteTagConfirmation) { DeleteTagContext(context.tagId, context.namespaceId) },
+                ).onClick {
+                    val ctx = DeleteTagContext(context.tagId, context.namespaceId)
+                    if (TagManager.todosForTag(context.tagId).isEmpty()) {
+                        DeleteTagConfirmation.openInventory(click.player, ctx)
+                    } else {
+                        TagDeleteConflictInterface.openInventory(click.player, ctx)
+                    }
+                },
         )
 }
