@@ -6,6 +6,7 @@ import dev.cypdashuhn.worldtasker.commands.query.executeTodoQuery
 import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
 import dev.rooster.db.utility_tables.LocationManager
@@ -14,10 +15,21 @@ import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
+private fun Player.scopeCollision(todoName: String, scopeTagName: String?) {
+    val scopeDesc = if (scopeTagName != null) "scoped to '<white>$scopeTagName</white>'" else "with no scope tag"
+    msg("<red>A todo named '<white>$todoName</white>' $scopeDesc already exists.")
+}
+
 object TodoActions {
     fun add(sender: Player, name: String, description: String, tagsStr: String?) {
+        val tagIds = if (tagsStr != null) resolveTagIds(tagsStr, sender) else emptyList()
+        val scopeTagName = TodoScopeManager.scopeTagNameAmong(tagIds)
+        if (TodoScopeManager.wouldCollide(name, scopeTagName)) {
+            sender.scopeCollision(name, scopeTagName)
+            return
+        }
         val id = TodoManager.create(name, sender, description, sender.location)
-        if (tagsStr != null) resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        tagIds.forEach { TagManager.addToTodo(id, it) }
         sender.msg("<green>Todo '<white>$name</white>' created.")
     }
 
@@ -59,18 +71,41 @@ object TodoActions {
     }
 
     fun setTags(sender: Player, id: Int, tagsStr: String) {
+        val newTagIds = resolveTagIds(tagsStr, sender)
+        val todoName = TodoManager.findById(id)?.name ?: return
+        val scopeTagName = TodoScopeManager.scopeTagNameAmong(newTagIds)
+        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
+            sender.scopeCollision(todoName, scopeTagName)
+            return
+        }
         TagManager.removeAllForTodo(id)
-        resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        newTagIds.forEach { TagManager.addToTodo(id, it) }
         sender.msg("<green>Tags set.")
     }
 
     fun addTags(sender: Player, id: Int, tagsStr: String) {
-        resolveTagIds(tagsStr, sender).forEach { TagManager.addToTodo(id, it) }
+        val newTagIds = resolveTagIds(tagsStr, sender)
+        val todoName = TodoManager.findById(id)?.name ?: return
+        val existingTagIds = TagManager.tagsForTodo(id).map { it[TagManager.Tags.id].value }
+        val scopeTagName = TodoScopeManager.scopeTagNameAmong(existingTagIds + newTagIds)
+        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
+            sender.scopeCollision(todoName, scopeTagName)
+            return
+        }
+        newTagIds.forEach { TagManager.addToTodo(id, it) }
         sender.msg("<green>Tags added.")
     }
 
     fun removeTags(sender: Player, id: Int, tagsStr: String) {
-        resolveTagIds(tagsStr, sender).forEach { TagManager.removeFromTodo(id, it) }
+        val removeTagIds = resolveTagIds(tagsStr, sender)
+        val todoName = TodoManager.findById(id)?.name ?: return
+        val existingTagIds = TagManager.tagsForTodo(id).map { it[TagManager.Tags.id].value }
+        val scopeTagName = TodoScopeManager.scopeTagNameAmong(existingTagIds - removeTagIds.toSet())
+        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
+            sender.scopeCollision(todoName, scopeTagName)
+            return
+        }
+        removeTagIds.forEach { TagManager.removeFromTodo(id, it) }
         sender.msg("<green>Tags removed.")
     }
 

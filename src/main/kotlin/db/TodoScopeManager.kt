@@ -84,7 +84,7 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
     fun resolveInput(key: NamespacedKey, allowedStates: Set<TodoState>): TodoResolveResult {
         val todoName = key.key
         val isBare = key.namespace == "minecraft"
-        val isExplicitNoNamespace = key.namespace == "no-namespace"
+        val isExplicitNoNamespace = isActive() && key.namespace == "no-namespace"
 
         val candidates = TodoManager
             .findAllByName(todoName)
@@ -129,6 +129,18 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
                 }
                 TodoResolveResult.Ambiguous(todoName, scopedOptions, hasUntagged)
             }
+        }
+    }
+
+    fun scopeTagNameAmong(tagIds: Iterable<Int>): String? = tagIds.firstNotNullOfOrNull { tags[it] }
+
+    fun wouldCollide(todoName: String, newScopeTagName: String?, excludeTodoId: Int? = null): Boolean {
+        if (!isActive()) return false
+        val candidates = TodoManager.findAllByName(todoName)
+        return candidates.any { row ->
+            val id = row[TodoManager.Todos.id].value
+            if (id == excludeTodoId) return@any false
+            scopeTagNameForTodo(id) == newScopeTagName
         }
     }
 
