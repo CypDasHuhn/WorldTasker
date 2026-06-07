@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.ui.todo
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TodoCreateResult
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
@@ -130,7 +132,18 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                             return@awaitInput
                         }
                         ChatInputManager.awaitInput(player, "<gray>Type the todo <white>description<gray>:") { description ->
-                            TodoManager.create(name.trim(), player, description.trim(), player.location)
+                            val trimmedName = name.trim()
+                            when (val result = TodoManager.create(trimmedName, player, description.trim(), player.location)) {
+                                is TodoCreateResult.Created -> { }
+                                TodoCreateResult.MultipleScopeTags ->
+                                    player.msg("<red>A todo can only have one scope tag.")
+                                is TodoCreateResult.ScopeCollision -> {
+                                    val scopeDesc = if (result.scopeTagName != null)
+                                        "scoped to '<white>${result.scopeTagName}</white>'"
+                                    else "with no scope tag"
+                                    player.msg("<red>A todo named '<white>$trimmedName</white>' $scopeDesc already exists.")
+                                }
+                            }
                             TodoListInterface.openInventory(player, context)
                         }
                     }

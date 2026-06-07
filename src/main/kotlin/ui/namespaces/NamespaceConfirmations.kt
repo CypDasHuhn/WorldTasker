@@ -3,6 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.namespaces
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceDeleteResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.db.NamespaceRenameResult
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.player
@@ -61,7 +62,16 @@ object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceCo
         val player = info.click.player
         val nsId = info.context.namespaceId
         ChatInputManager.awaitInput(player, "<gray>Type the new namespace name:") { newName ->
-            if (newName.isNotBlank()) NamespaceManager.rename(nsId, newName.trim())
+            if (newName.isNotBlank()) {
+                val trimmed = newName.trim()
+                when (NamespaceManager.rename(nsId, trimmed)) {
+                    NamespaceRenameResult.RENAMED -> { }
+                    NamespaceRenameResult.RESERVED_NAME ->
+                        player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
+                    NamespaceRenameResult.DUPLICATE_NAME ->
+                        player.msg("<red>Namespace '<white>$trimmed</white>' already exists.")
+                }
+            }
             TagEditInterface.openInventory(player, TagEditContext(nsId))
         }
     },

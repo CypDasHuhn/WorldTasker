@@ -4,11 +4,13 @@ import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.commands.query.TodoQuery
 import dev.cypdashuhn.worldtasker.commands.query.executeTodoQuery
 import dev.cypdashuhn.worldtasker.db.HistoryManager
+import dev.cypdashuhn.worldtasker.db.TagAssignResult
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TodoCreateResult
 import dev.cypdashuhn.worldtasker.db.TodoManager
-import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.TodoState
-import dev.cypdashuhn.worldtasker.db.TodoStatus
+import dev.cypdashuhn.worldtasker.db.TodoStateResult
+import dev.cypdashuhn.worldtasker.db.TodoUpdateNameResult
 import dev.rooster.db.utility_tables.LocationManager
 import dev.rooster.db.utility_tables.PlayerManager
 import org.bukkit.entity.Player
@@ -25,33 +27,25 @@ private fun Player.scopeCollision(todoName: String, scopeTagName: String?) {
 object TodoActions {
     fun add(sender: Player, name: String, description: String, tagsStr: String?) {
         val tagIds = if (tagsStr != null) resolveTagIds(tagsStr, sender) else emptyList()
-        if (TodoScopeManager.countScopeTagsAmong(tagIds) > 1) { sender.multipleScopeTags(); return }
-        val scopeTagName = TodoScopeManager.scopeTagNameAmong(tagIds)
-        if (TodoScopeManager.wouldCollide(name, scopeTagName)) {
-            sender.scopeCollision(name, scopeTagName)
-            return
+        when (val result = TodoManager.create(name, sender, description, sender.location, tagIds)) {
+            is TodoCreateResult.Created -> sender.msg("<green>Todo '<white>$name</white>' created.")
+            TodoCreateResult.MultipleScopeTags -> sender.multipleScopeTags()
+            is TodoCreateResult.ScopeCollision -> sender.scopeCollision(name, result.scopeTagName)
         }
-        val id = TodoManager.create(name, sender, description, sender.location)
-        tagIds.forEach { TagManager.addToTodo(id, it) }
-        sender.msg("<green>Todo '<white>$name</white>' created.")
     }
 
     fun complete(sender: Player, id: Int) {
-        if (TodoManager.stateOf(id) != TodoState.ACTIVE) {
-            sender.msg("<red>That todo is not active.")
-            return
+        when (TodoManager.complete(id, sender)) {
+            TodoStateResult.SUCCESS -> sender.msg("<green>Todo marked complete.")
+            TodoStateResult.WRONG_STATE -> sender.msg("<red>That todo is not active.")
         }
-        TodoManager.complete(id, sender)
-        sender.msg("<green>Todo marked complete.")
     }
 
     fun reactivate(sender: Player, id: Int) {
-        if (TodoManager.stateOf(id) != TodoState.COMPLETED) {
-            sender.msg("<red>That todo is not completed.")
-            return
+        when (TodoManager.reactivate(id, sender)) {
+            TodoStateResult.SUCCESS -> sender.msg("<green>Todo reactivated.")
+            TodoStateResult.WRONG_STATE -> sender.msg("<red>That todo is not completed.")
         }
-        TodoManager.reactivate(id, sender)
-        sender.msg("<green>Todo reactivated.")
     }
 
     fun updateDescription(sender: Player, id: Int, description: String) {
@@ -65,53 +59,37 @@ object TodoActions {
     }
 
     fun work(sender: Player, id: Int, comment: String) {
-        if (TodoManager.stateOf(id) != TodoState.ACTIVE) {
-            sender.msg("<red>That todo is not active.")
-            return
+        when (TodoManager.work(id, sender, comment.ifBlank { null })) {
+            TodoStateResult.SUCCESS -> sender.msg("<green>Work entry recorded.")
+            TodoStateResult.WRONG_STATE -> sender.msg("<red>That todo is not active.")
         }
-        HistoryManager.record(id, sender, TodoStatus.WORK, comment)
-        sender.msg("<green>Work entry recorded.")
     }
 
     fun setTags(sender: Player, id: Int, tagsStr: String) {
         val newTagIds = resolveTagIds(tagsStr, sender)
-        if (TodoScopeManager.countScopeTagsAmong(newTagIds) > 1) { sender.multipleScopeTags(); return }
-        val todoName = TodoManager.findById(id)?.name ?: return
-        val scopeTagName = TodoScopeManager.scopeTagNameAmong(newTagIds)
-        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
-            sender.scopeCollision(todoName, scopeTagName)
-            return
+        when (val result = TagManager.setTagsForTodo(id, newTagIds)) {
+            TagAssignResult.Success -> sender.msg("<green>Tags set.")
+            TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
+            is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
         }
-        TagManager.removeAllForTodo(id)
-        newTagIds.forEach { TagManager.addToTodo(id, it) }
-        sender.msg("<green>Tags set.")
     }
 
     fun addTags(sender: Player, id: Int, tagsStr: String) {
         val newTagIds = resolveTagIds(tagsStr, sender)
-        val todoName = TodoManager.findById(id)?.name ?: return
-        val existingTagIds = TagManager.tagsForTodo(id).map { it[TagManager.Tags.id].value }
-        if (TodoScopeManager.countScopeTagsAmong(existingTagIds + newTagIds) > 1) { sender.multipleScopeTags(); return }
-        val scopeTagName = TodoScopeManager.scopeTagNameAmong(existingTagIds + newTagIds)
-        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
-            sender.scopeCollision(todoName, scopeTagName)
-            return
+        when (val result = TagManager.addTagsToTodo(id, newTagIds)) {
+            TagAssignResult.Success -> sender.msg("<green>Tags added.")
+            TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
+            is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
         }
-        newTagIds.forEach { TagManager.addToTodo(id, it) }
-        sender.msg("<green>Tags added.")
     }
 
     fun removeTags(sender: Player, id: Int, tagsStr: String) {
         val removeTagIds = resolveTagIds(tagsStr, sender)
-        val todoName = TodoManager.findById(id)?.name ?: return
-        val existingTagIds = TagManager.tagsForTodo(id).map { it[TagManager.Tags.id].value }
-        val scopeTagName = TodoScopeManager.scopeTagNameAmong(existingTagIds - removeTagIds.toSet())
-        if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = id)) {
-            sender.scopeCollision(todoName, scopeTagName)
-            return
+        when (val result = TagManager.removeTagsFromTodo(id, removeTagIds)) {
+            TagAssignResult.Success -> sender.msg("<green>Tags removed.")
+            TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
+            is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
         }
-        removeTagIds.forEach { TagManager.removeFromTodo(id, it) }
-        sender.msg("<green>Tags removed.")
     }
 
     fun get(sender: Player, query: TodoQuery, random: Boolean = false) {
@@ -133,8 +111,7 @@ object TodoActions {
         }
         val cap = 10
         val shown = results.take(cap)
-        val countLabel = if (results.size >
-            cap) {
+        val countLabel = if (results.size > cap) {
             "<yellow>${results.size}</yellow> <gold>found, showing first $cap"
         } else {
             "<yellow>${results.size}</yellow> <gold>found"
@@ -165,8 +142,9 @@ object TodoActions {
         if (inherited.isNotEmpty()) sender.msg("<gray>Inherited: <dark_gray>${inherited.joinToString(", ")}")
         sender.msg("<gold>--- History ---")
         history.forEach { entry ->
-            val time = entry[HistoryManager.History.time].format(java.time.format.DateTimeFormatter
-                .ofPattern("yyyy-MM-dd HH:mm"))
+            val time = entry[HistoryManager.History.time].format(
+                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            )
             val entryAuthor = entry[PlayerManager.Players.name]
             val status = entry[HistoryManager.History.status]
             val comment = entry[HistoryManager.History.comment]
@@ -189,10 +167,9 @@ object TodoActions {
         }
         sender.teleport(location)
         sender.msg("<green>Teleported to todo '<white>$name</white>'.")
-        val description = todo[TodoManager.Todos.description]
         val tags = TagManager.tagLabelsForTodo(id)
         if (tags.isNotEmpty()) sender.msg("<green>Tags:<gray> ${tags.joinToString(", ")}")
-        sender.msg("<gray>\"$description\"")
+        sender.msg("<gray>\"${todo[TodoManager.Todos.description]}\"")
     }
 
     fun jumpRandom(sender: Player) {
@@ -208,17 +185,15 @@ object TodoActions {
         }
         val id = todo[TodoManager.Todos.id].value
         val name = todo[TodoManager.Todos.name]
-        val locId = todo[TodoManager.Todos.locationId]!!
-        val location = transaction { LocationManager.Location.findById(locId)?.location() }
+        val location = transaction { LocationManager.Location.findById(todo[TodoManager.Todos.locationId]!!)?.location() }
         if (location == null) {
             sender.msg("<red>Location data for '<white>$name</white>' is missing.")
             return
         }
         sender.teleport(location)
         sender.msg("<green>Teleported to random todo '<white>$name</white>'.")
-        val description = todo[TodoManager.Todos.description]
         val tags = TagManager.tagLabelsForTodo(id)
         if (tags.isNotEmpty()) sender.msg("<green>Tags:<gray> ${tags.joinToString(", ")}")
-        sender.msg("<gray>\"$description\"")
+        sender.msg("<gray>\"${todo[TodoManager.Todos.description]}\"")
     }
 }

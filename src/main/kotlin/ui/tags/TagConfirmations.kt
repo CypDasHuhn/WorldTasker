@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TagRenameResult
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -48,7 +50,16 @@ object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
         val tagId = info.context.tagId
         val nsId = info.context.namespaceId
         ChatInputManager.awaitInput(player, "<gray>Type the new tag name:") { newName ->
-            if (newName.isNotBlank()) TagManager.rename(tagId, newName.trim())
+            if (newName.isNotBlank()) {
+                val trimmed = newName.trim()
+                when (TagManager.rename(tagId, trimmed)) {
+                    TagRenameResult.RENAMED -> { }
+                    TagRenameResult.RESERVED_NAME ->
+                        player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
+                    TagRenameResult.DUPLICATE_NAME ->
+                        player.msg("<red>A tag named '<white>$trimmed</white>' already exists in this namespace.")
+                }
+            }
             TagDetailInterface.openInventory(player, TagDetailContext(tagId, nsId))
         }
     },

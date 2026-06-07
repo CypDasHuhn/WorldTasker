@@ -2,8 +2,9 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
-import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.db.TagCreateResult
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
@@ -81,7 +82,16 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                 .onClick {
                     val nsId = context.namespaceId
                     ChatInputManager.awaitInput(click.player, "<gray>Type the new tag name:") { name ->
-                        if (name.isNotBlank()) TagManager.create(name.trim(), nsId)
+                        if (name.isNotBlank()) {
+                            val trimmed = name.trim()
+                            when (TagManager.create(trimmed, nsId)) {
+                                is TagCreateResult.Created -> { }
+                                TagCreateResult.ReservedName ->
+                                    click.player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
+                                TagCreateResult.DuplicateName ->
+                                    click.player.msg("<red>Tag '<white>$trimmed</white>' already exists in this namespace.")
+                            }
+                        }
                         TagEditInterface.openInventory(click.player, TagEditContext(nsId))
                     }
                 },

@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.ui.todo
 
+import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoUpdateNameResult
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.player
@@ -41,7 +43,18 @@ object RenameTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
         val player = info.click.player
         val todoId = info.context.todoId
         ChatInputManager.awaitInput(player, "<gray>Type the new todo name:") { newName ->
-            if (newName.isNotBlank()) TodoManager.updateName(todoId, newName.trim())
+            if (newName.isNotBlank()) {
+                val trimmed = newName.trim()
+                when (val result = TodoManager.updateName(todoId, trimmed)) {
+                    TodoUpdateNameResult.Updated -> { }
+                    is TodoUpdateNameResult.ScopeCollision -> {
+                        val scopeDesc = if (result.scopeTagName != null)
+                            "scoped to '<white>${result.scopeTagName}</white>'"
+                        else "with no scope tag"
+                        player.msg("<red>A todo named '<white>$trimmed</white>' $scopeDesc already exists.")
+                    }
+                }
+            }
             TodoDetailInterface.openInventory(player, TodoDetailContext(todoId))
         }
     },

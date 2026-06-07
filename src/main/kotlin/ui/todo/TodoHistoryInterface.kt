@@ -98,7 +98,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                     val player = click.player
                     val todoId = context.todoId
                     ChatInputManager.awaitInput(player, "<gray>Type a work comment (or leave blank):") { comment ->
-                        HistoryManager.record(todoId, player, TodoStatus.WORK, comment.ifBlank { null })
+                        TodoManager.work(todoId, player, comment.ifBlank { null })
                         TodoHistoryInterface.openInventory(player, TodoHistoryContext(todoId))
                     }
                 },
@@ -109,7 +109,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .displayAs(
                     createItem(Material.FIREWORK_ROCKET, mm("<white>Complete"), listOf(mm("<gray>Mark this todo as completed."))),
                 ).onClick {
-                    HistoryManager.record(context.todoId, click.player, TodoStatus.COMPLETE)
+                    TodoManager.complete(context.todoId, click.player)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
                 },
             // Reactivate — only when completed
@@ -119,7 +119,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 .displayAs(
                     createItem(Material.LANTERN, mm("<white>Reactivate"), listOf(mm("<gray>Mark this todo as active again."))),
                 ).onClick {
-                    HistoryManager.record(context.todoId, click.player, TodoStatus.REACTIVATE)
+                    TodoManager.reactivate(context.todoId, click.player)
                     TodoHistoryInterface.openInventory(click.player, TodoHistoryContext(context.todoId))
                 },
         )

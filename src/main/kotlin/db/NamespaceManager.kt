@@ -11,20 +11,34 @@ import org.jetbrains.exposed.sql.update
 
 enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE, BLOCKED_HAS_TAGS }
 
+sealed class NamespaceCreateResult {
+    data class Created(val id: Int) : NamespaceCreateResult()
+    object ReservedName : NamespaceCreateResult()
+    object DuplicateName : NamespaceCreateResult()
+}
+
+enum class NamespaceRenameResult { RENAMED, RESERVED_NAME, DUPLICATE_NAME }
+
 object NamespaceManager {
     object Namespaces : IntIdTable() {
         val name = varchar("name", 64).uniqueIndex()
         val material = varchar("material", 64).default("BOOKSHELF")
     }
 
-    fun create(name: String): Int =
-        transaction {
-            Namespaces.insert { it[Namespaces.name] = name }[Namespaces.id].value
-        }
+    fun create(name: String): NamespaceCreateResult {
+        if (name in RESERVED_NAMES) return NamespaceCreateResult.ReservedName
+        if (findByName(name) != null) return NamespaceCreateResult.DuplicateName
+        val id = transaction { Namespaces.insert { it[Namespaces.name] = name }[Namespaces.id].value }
+        return NamespaceCreateResult.Created(id)
+    }
 
-    fun rename(id: Int, name: String) {
+    fun rename(id: Int, name: String): NamespaceRenameResult {
+        if (name in RESERVED_NAMES) return NamespaceRenameResult.RESERVED_NAME
+        val existing = findByName(name)
+        if (existing != null && existing[Namespaces.id].value != id) return NamespaceRenameResult.DUPLICATE_NAME
         transaction { Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.name] = name } }
         TodoScopeManager.onNamespaceRenamed(id, name)
+        return NamespaceRenameResult.RENAMED
     }
 
     fun updateMaterial(id: Int, material: String) =

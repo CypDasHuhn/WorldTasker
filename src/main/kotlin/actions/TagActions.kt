@@ -2,7 +2,9 @@ package dev.cypdashuhn.worldtasker.actions
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.db.TagCreateResult
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.db.TagRenameResult
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
@@ -24,10 +26,7 @@ fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
 object TagActions {
     fun list(sender: Player) {
         val tags = TagManager.all()
-        if (tags.isEmpty()) {
-            sender.msg("<gray>No tags found.")
-            return
-        }
+        if (tags.isEmpty()) { sender.msg("<gray>No tags found."); return }
         sender.msg("<gold>=== Tags ===")
         tags.forEach { row ->
             val nsId = row[TagManager.Tags.namespaceId].value
@@ -37,26 +36,17 @@ object TagActions {
     }
 
     fun add(sender: Player, nsName: String, tagName: String) {
-        if (!isValidResourceName(tagName)) {
-            sender.invalidName(tagName)
-            return
-        }
-        if (tagName in RESERVED_NAMES) {
-            sender.reservedName(tagName)
-            return
-        }
+        if (!isValidResourceName(tagName)) { sender.invalidName(tagName); return }
         val ns = NamespaceManager.findByName(nsName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$nsName</white>' not found. Create it first with /todo tags namespaces add.")
             return
         }
-        val nsId = ns[NamespaceManager.Namespaces.id].value
-        if (TagManager.findByName(tagName, nsId) != null) {
-            sender.msg("<red>Tag '<white>$nsName:$tagName</white>' already exists.")
-            return
+        when (TagManager.create(tagName, ns[NamespaceManager.Namespaces.id].value)) {
+            is TagCreateResult.Created -> sender.msg("<green>Tag '<white>$nsName:$tagName</white>' created.")
+            TagCreateResult.ReservedName -> sender.reservedName(tagName)
+            TagCreateResult.DuplicateName -> sender.msg("<red>Tag '<white>$nsName:$tagName</white>' already exists.")
         }
-        TagManager.create(tagName, nsId)
-        sender.msg("<green>Tag '<white>$nsName:$tagName</white>' created.")
     }
 
     fun remove(sender: Player, key: NamespacedKey) {
@@ -70,21 +60,18 @@ object TagActions {
     }
 
     fun rename(sender: Player, oldKey: NamespacedKey, newName: String) {
-        if (!isValidResourceName(newName)) {
-            sender.invalidName(newName)
-            return
-        }
-        if (newName in RESERVED_NAMES) {
-            sender.reservedName(newName)
-            return
-        }
+        if (!isValidResourceName(newName)) { sender.invalidName(newName); return }
         val tag = TagManager.findByQualifiedName(oldKey)
         if (tag == null) {
             sender.msg("<red>Tag '<white>${oldKey.namespace}:${oldKey.key}</white>' not found.")
             return
         }
-        TagManager.rename(tag[TagManager.Tags.id].value, newName)
-        sender.msg("<green>Tag renamed to '<white>$newName</white>'.")
+        when (TagManager.rename(tag[TagManager.Tags.id].value, newName)) {
+            TagRenameResult.RENAMED -> sender.msg("<green>Tag renamed to '<white>$newName</white>'.")
+            TagRenameResult.RESERVED_NAME -> sender.reservedName(newName)
+            TagRenameResult.DUPLICATE_NAME ->
+                sender.msg("<red>A tag named '<white>$newName</white>' already exists in this namespace.")
+        }
     }
 
     fun addInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
@@ -95,9 +82,8 @@ object TagActions {
         val childId = child[TagManager.Tags.id].value
         val parentIds = resolveTagIds(parentsStr, sender)
         parentIds.forEach { TagManager.addInheritance(childId, it) }
-        if (parentIds.isNotEmpty()) {
+        if (parentIds.isNotEmpty())
             sender.msg("<green>Added ${parentIds.size} parent(s) to '<white>${childKey.namespace}:${childKey.key}</white>'.")
-        }
     }
 
     fun setInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
@@ -118,8 +104,7 @@ object TagActions {
         val childId = child[TagManager.Tags.id].value
         val parentIds = resolveTagIds(parentsStr, sender)
         parentIds.forEach { TagManager.removeInheritance(childId, it) }
-        if (parentIds.isNotEmpty()) {
+        if (parentIds.isNotEmpty())
             sender.msg("<green>Removed ${parentIds.size} parent(s) from '<white>${childKey.namespace}:${childKey.key}</white>'.")
-        }
     }
 }

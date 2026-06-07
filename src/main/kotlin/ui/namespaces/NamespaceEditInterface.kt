@@ -1,9 +1,11 @@
 package dev.cypdashuhn.worldtasker.ui.namespaces
 
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.db.NamespaceCreateResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
 import dev.cypdashuhn.worldtasker.ui.todo.TodoListInterface
@@ -56,7 +58,16 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
                     ),
                 ).onClick {
                     ChatInputManager.awaitInput(click.player, "<gray>Type the new namespace name:") { name ->
-                        if (name.isNotBlank()) NamespaceManager.create(name.trim())
+                        if (name.isNotBlank()) {
+                            val trimmed = name.trim()
+                            when (NamespaceManager.create(trimmed)) {
+                                is NamespaceCreateResult.Created -> { }
+                                NamespaceCreateResult.ReservedName ->
+                                    click.player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
+                                NamespaceCreateResult.DuplicateName ->
+                                    click.player.msg("<red>Namespace '<white>$trimmed</white>' already exists.")
+                            }
+                        }
                         NamespaceEditInterface.openInventory(click.player, NamespaceEditContext())
                     }
                 },
