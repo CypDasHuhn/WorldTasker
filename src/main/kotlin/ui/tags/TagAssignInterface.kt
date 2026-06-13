@@ -67,6 +67,10 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
                         click.player.msg("<red>A todo can only have one scope tag.")
                     is TagAssignResult.ScopeCollision ->
                         click.player.msg("<red>A todo named '<white>${result.todoName}</white>' scoped to '${result.scopeTagName}' already exists.")
+                    is TagAssignResult.NamespaceSingleTagViolation -> {
+                        val nsList = result.namespaceNames.joinToString(", ")
+                        click.player.msg("<red>This todo already has a tag from <white>$nsList</white> (single-tag namespace). Remove it first.")
+                    }
                 }
             }
             TagAssignInterface.openInventory(click.player, context)

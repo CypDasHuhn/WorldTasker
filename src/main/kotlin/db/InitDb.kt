@@ -11,5 +11,6 @@ fun RoosterModuleBuilder.initDb() {
         TagManager.TodoTags,
         TagManager.TagInheritance,
         HistoryManager.History,
+        QueryProfileManager.QueryProfiles,
     ))
 }

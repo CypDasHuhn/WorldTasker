@@ -33,7 +33,11 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
     override fun contentDisplay(data: NamespaceData, context: NamespaceEditContext,): InterfaceInfo<NamespaceEditContext>.() -> ItemStack =
         {
             val tagCount = TagManager.byNamespace(data.id).size
-            createItem(data.material, mm("<white>${data.name}"), listOf(mm("<gray>$tagCount tag(s)")))
+            val mode = if (data.allowsMultiple) "multiple" else "single"
+            createItem(data.material, mm("<white>${data.name}"), listOf(
+                mm("<gray>$tagCount tag(s) · Tag mode: $mode"),
+                mm("<dark_gray>Click to edit tags · Toggle mode in tag editor"),
+            ))
         }
 
     override fun contentClick(data: NamespaceData, context: NamespaceEditContext,): ClickInfo<NamespaceEditContext>.() -> Unit =

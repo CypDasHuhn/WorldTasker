@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui
 
 import dev.cypdashuhn.worldtasker.ui.filters.AuthorInterface
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
+import dev.cypdashuhn.worldtasker.ui.filters.ProfileListInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
@@ -38,6 +39,7 @@ fun RoosterModuleBuilder.initUi() {
             TodoHistoryInterface,
             // Filters
             FiltersInterface,
+            ProfileListInterface,
             AuthorInterface,
             // Namespace overview modes
             NamespaceSelectInterface,

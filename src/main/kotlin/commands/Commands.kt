@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.commands.nodes.buildEditNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildGetNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildInfoNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildJumpNode
+import dev.cypdashuhn.worldtasker.commands.nodes.buildProfilesNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildRemoveNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildUiNode
 import dev.cypdashuhn.worldtasker.commands.nodes.tags.buildTodoTagsNode
@@ -23,6 +24,7 @@ fun todo() {
         .then(buildRemoveNode())
         .then(buildJumpNode())
         .then(buildTodoTagsNode())
+        .then(buildProfilesNode())
         .then(buildUiNode())
         .register()
 }

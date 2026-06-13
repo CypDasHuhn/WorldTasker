@@ -24,6 +24,7 @@ sealed class TagAssignResult {
     object Success : TagAssignResult()
     object MultipleScopeTags : TagAssignResult()
     data class ScopeCollision(val todoName: String, val scopeTagName: String?) : TagAssignResult()
+    data class NamespaceSingleTagViolation(val namespaceNames: List<String>) : TagAssignResult()
 }
 
 object TagManager {
@@ -56,6 +57,32 @@ object TagManager {
             TagAssignResult.ScopeCollision(todoName, scopeTagName)
         else
             TagAssignResult.Success
+    }
+
+    private fun validateSingleTagNamespaces(tagIds: List<Int>): TagAssignResult {
+        val singleTagNsIds = NamespaceManager.singleTagNamespaceIds()
+        if (singleTagNsIds.isEmpty()) return TagAssignResult.Success
+        val tagNsMap = transaction {
+            Tags.selectAll().where { Tags.id inList tagIds }
+                .groupBy { it[Tags.namespaceId].value }
+        }
+        val violatingNamespaces = mutableListOf<String>()
+        for ((nsId, tags) in tagNsMap) {
+            if (nsId in singleTagNsIds && tags.size > 1) {
+                val nsName = NamespaceManager.find(nsId)?.get(NamespaceManager.Namespaces.name) ?: "?"
+                violatingNamespaces.add(nsName)
+            }
+        }
+        return if (violatingNamespaces.isNotEmpty())
+            TagAssignResult.NamespaceSingleTagViolation(violatingNamespaces)
+        else
+            TagAssignResult.Success
+    }
+
+    private fun validateTagAssignments(todoId: Int, tagIds: List<Int>): TagAssignResult {
+        val s = validateScopeConstraints(todoId, tagIds)
+        if (s != TagAssignResult.Success) return s
+        return validateSingleTagNamespaces(tagIds)
     }
 
     // ── tag CRUD ───────────────────────────────────────────────────────────
@@ -127,7 +154,8 @@ object TagManager {
     fun addToTodo(todoId: Int, tagId: Int): TagAssignResult =
         transaction {
             val currentTagIds = tagsForTodo(todoId).map { it[Tags.id].value }
-            val check = validateScopeConstraints(todoId, currentTagIds + tagId)
+            val combinedIds = (currentTagIds + tagId).distinct()
+            val check = validateTagAssignments(todoId, combinedIds)
             if (check != TagAssignResult.Success) return@transaction check
             if (tagId !in currentTagIds) {
                 TodoTags.insert { it[TodoTags.todoId] = todoId; it[TodoTags.tagId] = tagId }
@@ -138,7 +166,8 @@ object TagManager {
     fun addTagsToTodo(todoId: Int, tagIds: List<Int>): TagAssignResult =
         transaction {
             val currentTagIds = tagsForTodo(todoId).map { it[Tags.id].value }
-            val check = validateScopeConstraints(todoId, currentTagIds + tagIds)
+            val combinedIds = (currentTagIds + tagIds).distinct()
+            val check = validateTagAssignments(todoId, combinedIds)
             if (check != TagAssignResult.Success) return@transaction check
             tagIds.forEach { tagId ->
                 if (tagId !in currentTagIds) {
@@ -150,10 +179,11 @@ object TagManager {
 
     fun setTagsForTodo(todoId: Int, tagIds: List<Int>): TagAssignResult =
         transaction {
-            val check = validateScopeConstraints(todoId, tagIds)
+            val distinctIds = tagIds.distinct()
+            val check = validateTagAssignments(todoId, distinctIds)
             if (check != TagAssignResult.Success) return@transaction check
             TodoTags.deleteWhere { TodoTags.todoId eq todoId }
-            tagIds.forEach { tagId ->
+            distinctIds.forEach { tagId ->
                 TodoTags.insert { it[TodoTags.todoId] = todoId; it[TodoTags.tagId] = tagId }
             }
             TagAssignResult.Success
@@ -162,10 +192,10 @@ object TagManager {
     fun removeTagsFromTodo(todoId: Int, tagIds: List<Int>): TagAssignResult =
         transaction {
             val currentTagIds = tagsForTodo(todoId).map { it[Tags.id].value }
-            val remainingTagIds = currentTagIds - tagIds.toSet()
-            val check = validateScopeConstraints(todoId, remainingTagIds)
+            val remainingTagIds = (currentTagIds - tagIds.toSet()).distinct()
+            val check = validateTagAssignments(todoId, remainingTagIds)
             if (check != TagAssignResult.Success) return@transaction check
-            tagIds.forEach { tagId ->
+            tagIds.distinct().forEach { tagId ->
                 TodoTags.deleteWhere { (TodoTags.todoId eq todoId) and (TodoTags.tagId eq tagId) }
             }
             TagAssignResult.Success

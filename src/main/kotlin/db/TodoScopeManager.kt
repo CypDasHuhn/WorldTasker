@@ -51,6 +51,10 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
             return
         }
         val nsId = ns[NamespaceManager.Namespaces.id].value
+        if (ns[NamespaceManager.Namespaces.allowsMultiple]) {
+            Bukkit.getLogger().warning("[WorldTasker] todo-scope-namespace '$configured' allows multiple tags — scope resolution disabled. The namespace must only allow one tag at a time.")
+            return
+        }
         val scopeTagIds = TagManager.byNamespace(nsId).map { it[TagManager.Tags.id].value }.toSet()
         if (scopeTagIds.isNotEmpty()) {
             val nonDeleted = transaction { TodoManager.Todos.selectAll().toList() }

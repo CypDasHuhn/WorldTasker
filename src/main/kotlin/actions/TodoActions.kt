@@ -19,6 +19,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 private fun Player.multipleScopeTags() = msg("<red>A todo can only have one scope tag.")
 
+private fun Player.singleTagViolation(namespaces: List<String>) {
+    val nsList = namespaces.joinToString(", ")
+    msg("<red>Namespace(s) <white>$nsList</white> only allow one tag per todo. Remove the existing tag first.")
+}
+
 private fun Player.scopeCollision(todoName: String, scopeTagName: String?) {
     val scopeDesc = if (scopeTagName != null) "scoped to '<white>$scopeTagName</white>'" else "with no scope tag"
     msg("<red>A todo named '<white>$todoName</white>' $scopeDesc already exists.")
@@ -71,6 +76,7 @@ object TodoActions {
             TagAssignResult.Success -> sender.msg("<green>Tags set.")
             TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
             is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
+            is TagAssignResult.NamespaceSingleTagViolation -> sender.singleTagViolation(result.namespaceNames)
         }
     }
 
@@ -80,6 +86,7 @@ object TodoActions {
             TagAssignResult.Success -> sender.msg("<green>Tags added.")
             TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
             is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
+            is TagAssignResult.NamespaceSingleTagViolation -> sender.singleTagViolation(result.namespaceNames)
         }
     }
 
@@ -89,6 +96,7 @@ object TodoActions {
             TagAssignResult.Success -> sender.msg("<green>Tags removed.")
             TagAssignResult.MultipleScopeTags -> sender.multipleScopeTags()
             is TagAssignResult.ScopeCollision -> sender.scopeCollision(result.todoName, result.scopeTagName)
+            is TagAssignResult.NamespaceSingleTagViolation -> sender.singleTagViolation(result.namespaceNames)
         }
     }
 

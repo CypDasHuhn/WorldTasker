@@ -19,10 +19,13 @@ object NamespaceActions {
         namespaces.forEach { sender.msg("<white>${it[NamespaceManager.Namespaces.name]}") }
     }
 
-    fun add(sender: Player, name: String) {
+    fun add(sender: Player, name: String, allowsMultiple: Boolean = true) {
         if (!isValidResourceName(name)) { sender.invalidName(name); return }
-        when (NamespaceManager.create(name)) {
-            is NamespaceCreateResult.Created -> sender.msg("<green>Namespace '<white>$name</white>' created.")
+        when (NamespaceManager.create(name, allowsMultiple)) {
+            is NamespaceCreateResult.Created -> {
+                val mode = if (allowsMultiple) "multiple" else "single"
+                sender.msg("<green>Namespace '<white>$name</white>' created ($mode tag).")
+            }
             NamespaceCreateResult.ReservedName -> sender.reservedName(name)
             NamespaceCreateResult.DuplicateName -> sender.msg("<red>Namespace '<white>$name</white>' already exists.")
         }
@@ -56,8 +59,10 @@ object NamespaceActions {
         val ns = NamespaceManager.findByName(name)
         if (ns == null) { sender.msg("<red>Namespace '<white>$name</white>' not found."); return }
         val nsId = ns[NamespaceManager.Namespaces.id].value
+        val allowsMultiple = ns[NamespaceManager.Namespaces.allowsMultiple]
         val tags = TagManager.byNamespace(nsId)
         sender.msg("<gold>=== $name ===")
+        sender.msg("<gray>Tag mode: <white>${if (allowsMultiple) "multiple" else "single"}")
         if (tags.isEmpty()) { sender.msg("<gray>No tags in this namespace."); return }
         tags.forEach { row ->
             val tagId = row[TagManager.Tags.id].value

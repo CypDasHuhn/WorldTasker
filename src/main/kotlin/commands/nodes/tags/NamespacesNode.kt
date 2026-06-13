@@ -17,9 +17,14 @@ internal fun buildNamespacesNode(): LiteralArgument =
     la("namespaces").apply {
         then(la("list").executesPlayer(PlayerCommandExecutor { sender, _ -> NamespaceActions.list(sender) }))
         then(la("add").then(
-            StringArgument(ADD_NAME).executesPlayer(PlayerCommandExecutor { sender, args ->
-                NamespaceActions.add(sender, args.argsMap[ADD_NAME] as String)
-            })
+            StringArgument(ADD_NAME).apply {
+                then(la("--single").executesPlayer(PlayerCommandExecutor { sender, args ->
+                    NamespaceActions.add(sender, args.argsMap[ADD_NAME] as String, allowsMultiple = false)
+                }))
+                executesPlayer(PlayerCommandExecutor { sender, args ->
+                    NamespaceActions.add(sender, args.argsMap[ADD_NAME] as String)
+                })
+            }
         ))
         then(la("remove").then(
             StringArgument(REMOVE_NAME)

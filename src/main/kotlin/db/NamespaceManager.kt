@@ -23,12 +23,18 @@ object NamespaceManager {
     object Namespaces : IntIdTable() {
         val name = varchar("name", 64).uniqueIndex()
         val material = varchar("material", 64).default("BOOKSHELF")
+        val allowsMultiple = bool("allows_multiple").default(true)
     }
 
-    fun create(name: String): NamespaceCreateResult {
+    fun create(name: String, allowsMultiple: Boolean = true): NamespaceCreateResult {
         if (name in RESERVED_NAMES) return NamespaceCreateResult.ReservedName
         if (findByName(name) != null) return NamespaceCreateResult.DuplicateName
-        val id = transaction { Namespaces.insert { it[Namespaces.name] = name }[Namespaces.id].value }
+        val id = transaction {
+            Namespaces.insert {
+                it[Namespaces.name] = name
+                it[Namespaces.allowsMultiple] = allowsMultiple
+            }[Namespaces.id].value
+        }
         return NamespaceCreateResult.Created(id)
     }
 
@@ -44,6 +50,23 @@ object NamespaceManager {
     fun updateMaterial(id: Int, material: String) =
         transaction {
             Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.material] = material }
+        }
+
+    fun setAllowsMultiple(id: Int, allowsMultiple: Boolean) =
+        transaction {
+            Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.allowsMultiple] = allowsMultiple }
+        }
+
+    fun isSingleTagNamespace(id: Int): Boolean =
+        transaction {
+            Namespaces.selectAll().where { Namespaces.id eq id }
+                .firstOrNull()?.get(Namespaces.allowsMultiple)?.not() ?: false
+        }
+
+    fun singleTagNamespaceIds(): Set<Int> =
+        transaction {
+            Namespaces.selectAll().where { Namespaces.allowsMultiple eq false }
+                .map { it[Namespaces.id].value }.toSet()
         }
 
     fun find(id: Int): ResultRow? =

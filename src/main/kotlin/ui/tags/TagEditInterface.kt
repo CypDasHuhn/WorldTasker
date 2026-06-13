@@ -72,6 +72,23 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     ),
                 ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
             item()
+                .atSlot(bottomRow + 3)
+                .displayAs {
+                    val ns = NamespaceManager.find(context.namespaceId)
+                    val allowsMultiple = ns?.get(NamespaceManager.Namespaces.allowsMultiple) ?: true
+                    val mode = if (allowsMultiple) "multiple" else "single"
+                    createItem(
+                        if (allowsMultiple) Material.OAK_SIGN else Material.IRON_DOOR,
+                        mm("<white>Tag Mode: $mode"),
+                        listOf(mm("<gray>Click to toggle between single/multiple tag assignment.")),
+                    )
+                }.onClick {
+                    val ns = NamespaceManager.find(context.namespaceId) ?: return@onClick
+                    val current = ns[NamespaceManager.Namespaces.allowsMultiple]
+                    NamespaceManager.setAllowsMultiple(context.namespaceId, !current)
+                    TagEditInterface.openInventory(click.player, context)
+                },
+            item()
                 .atSlot(bottomRow + 5)
                 .displayAs {
                     createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material.")))

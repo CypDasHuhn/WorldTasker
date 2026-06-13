@@ -1,7 +1,11 @@
 package dev.cypdashuhn.worldtasker.ui.filters
 
+import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.db.ProfileSaveResult
+import dev.cypdashuhn.worldtasker.db.QueryProfileManager
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.db.TodoFilter
+import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
@@ -135,6 +139,33 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                         }
                     }
                     FiltersInterface.openInventory(click.player, context)
+                },
+            // Query profiles button
+            item()
+                .atSlot(8)
+                .displayAs(
+                    createItem(Material.WRITTEN_BOOK, mm("<white>Query Profiles"), listOf(mm("<gray>Load or manage saved filters."))),
+                ).routeTo(ProfileListInterface) { ProfileListContext() },
+            // Save as profile button
+            item()
+                .atSlot(bottomRow + 6)
+                .displayAs(
+                    createItem(Material.WRITABLE_BOOK, mm("<white>Save as Profile"), listOf(mm("<gray>Save the current filter state."))),
+                ).onClick {
+                    ChatInputManager.awaitInput(click.player, "<gray>Type a name for this profile:") { name ->
+                        val trimmed = name.trim()
+                        if (trimmed.isEmpty()) {
+                            FiltersInterface.openInventory(click.player, context)
+                            return@awaitInput
+                        }
+                        when (QueryProfileManager.save(trimmed, context.filter)) {
+                            ProfileSaveResult.Saved ->
+                                click.player.msg("<green>Profile '<white>$trimmed</white>' saved.")
+                            ProfileSaveResult.DuplicateName ->
+                                click.player.msg("<red>A profile named '<white>$trimmed</white>' already exists.")
+                        }
+                        FiltersInterface.openInventory(click.player, context)
+                    }
                 },
         )
 }

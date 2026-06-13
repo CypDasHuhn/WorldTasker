@@ -11,6 +11,7 @@ data class NamespaceData(
     val id: Int,
     val name: String,
     val material: Material,
+    val allowsMultiple: Boolean,
 )
 
 abstract class NamespaceOverviewBase<C : ScrollContext>(
@@ -24,6 +25,7 @@ abstract class NamespaceOverviewBase<C : ScrollContext>(
                 it[NamespaceManager.Namespaces.id].value,
                 it[NamespaceManager.Namespaces.name],
                 Material.getMaterial(it[NamespaceManager.Namespaces.material]) ?: Material.BOOKSHELF,
+                it[NamespaceManager.Namespaces.allowsMultiple],
             )
         }
 }
