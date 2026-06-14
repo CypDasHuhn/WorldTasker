@@ -3,6 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.todo
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
@@ -37,16 +38,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<TodoDetailContext>> =
         listOf(
-            // Back
-            item()
-                .atSlot(9)
-                .displayAs(
-                    createItem(
-                        Material.FEATHER,
-                        mm("<white>Back"),
-                        listOf(mm("<gray>Return to the todo list.")),
-                    ),
-                ).routeTo(TodoListInterface),
+            backItem(TodoListInterface),
             // Jump to location
             item()
                 .atSlot(4)

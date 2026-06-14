@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.db.ProfileSaveResult
 import dev.cypdashuhn.worldtasker.db.QueryProfileManager
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.db.TodoFilter
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
@@ -35,13 +36,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<FiltersContext>> =
         listOf(
-            // Back → TodoList with current filter
-            item()
-                .atSlot(bottomRow)
-                .displayAs(createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to todo list."))))
-                .onClick {
-                    TodoListInterface.openInventory(click.player, TodoListContext(filter = context.filter))
-                },
+            backItem(TodoListInterface) { TodoListContext(filter = context.filter) },
             // Tag filter button → namespace query mode
             item()
                 .atSlot(2)

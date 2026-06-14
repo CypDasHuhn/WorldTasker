@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagAssignResult
@@ -85,14 +86,6 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
 
     override fun getInterfaceItems(): List<InterfaceItem<TagAssignContext>> =
         listOf(
-            item()
-                .atSlot(2 * 9)
-                .displayAs(
-                    createItem(
-                        Material.FEATHER,
-                        mm("<white>Back"),
-                        listOf(mm("<gray>Return to namespace selection.")),
-                    ),
-                ).routeTo(NamespaceAssignInterface) { NamespaceAssignContext(context.todoId) },
+            backItem(NamespaceAssignInterface) { NamespaceAssignContext(context.todoId) },
         )
 }

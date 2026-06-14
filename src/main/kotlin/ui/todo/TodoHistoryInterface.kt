@@ -4,6 +4,7 @@ import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
@@ -82,12 +83,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
 
     override fun getInterfaceItems(): List<InterfaceItem<TodoHistoryContext>> =
         listOf(
-            // Back
-            item()
-                .atSlot(bottomRow)
-                .displayAs(
-                    createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to todo detail."))),
-                ).routeTo(TodoDetailInterface) { TodoDetailContext(context.todoId) },
+            backItem(TodoDetailInterface) { TodoDetailContext(context.todoId) },
             // Work — only when active
             item()
                 .atSlot(bottomRow + 3)

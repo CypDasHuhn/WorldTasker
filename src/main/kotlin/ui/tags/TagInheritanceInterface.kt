@@ -1,5 +1,6 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -75,11 +76,7 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
 
     override fun getInterfaceItems(): List<InterfaceItem<TagInheritanceContext>> =
         listOf(
-            item()
-                .atSlot(bottomRow)
-                .displayAs(
-                    createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to tag detail."))),
-                ).routeTo(TagDetailInterface) { TagDetailContext(context.tagId, context.namespaceId) },
+            backItem(TagDetailInterface) { TagDetailContext(context.tagId, context.namespaceId) },
             item()
                 .atSlot(bottomRow + 8)
                 .displayAs(
@@ -136,11 +133,6 @@ object TagInheritanceSelectInterface : TagOverviewBase<TagInheritanceSelectConte
 
     override fun getInterfaceItems(): List<InterfaceItem<TagInheritanceSelectContext>> =
         listOf(
-            item()
-                .atSlot(2 * 9)
-                .displayAs(createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to namespace."))))
-                .routeTo(NamespaceInheritanceInterface) {
-                    NamespaceInheritanceContext(context.childTagId, context.childNsId)
-                },
+            backItem(NamespaceInheritanceInterface) { NamespaceInheritanceContext(context.childTagId, context.childNsId) },
         )
 }

@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -35,11 +36,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<TagDetailContext>> =
         listOf(
-            item()
-                .atSlot(bottomRow)
-                .displayAs(
-                    createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return to tag list."))),
-                ).routeTo(TagEditInterface) { TagEditContext(context.namespaceId) },
+            backItem(TagEditInterface) { TagEditContext(context.namespaceId) },
             item()
                 .atSlot(2)
                 .displayAs(

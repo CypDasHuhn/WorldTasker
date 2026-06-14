@@ -6,6 +6,7 @@ import dev.cypdashuhn.worldtasker.db.TagCreateResult
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
@@ -62,15 +63,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
 
     override fun getInterfaceItems(): List<InterfaceItem<TagEditContext>> =
         listOf(
-            item()
-                .atSlot(bottomRow)
-                .displayAs(
-                    createItem(
-                        Material.FEATHER,
-                        mm("<white>Back"),
-                        listOf(mm("<gray>Return to namespaces.")),
-                    ),
-                ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
+            backItem(NamespaceEditInterface) { NamespaceEditContext() },
             item()
                 .atSlot(bottomRow + 3)
                 .displayAs {

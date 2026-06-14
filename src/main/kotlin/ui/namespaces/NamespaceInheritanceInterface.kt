@@ -1,6 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui.namespaces
 
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceInterface
@@ -52,9 +53,6 @@ object NamespaceInheritanceInterface : NamespaceOverviewBase<NamespaceInheritanc
 
     override fun getInterfaceItems(): List<InterfaceItem<NamespaceInheritanceContext>> =
         listOf(
-            item()
-                .atSlot(9 * 2)
-                .displayAs(createItem(Material.FEATHER, mm("<white>Back"), listOf(mm("<gray>Return."))))
-                .routeTo(TagInheritanceInterface) { TagInheritanceContext(context.childTagId, context.childNsId) },
+            backItem(TagInheritanceInterface) { TagInheritanceContext(context.childTagId, context.childNsId) },
         )
 }

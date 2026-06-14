@@ -4,6 +4,7 @@ import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
+import dev.cypdashuhn.worldtasker.ui.backItemBase
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagQueryContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagSelectInterface
@@ -62,15 +63,8 @@ object NamespaceSelectInterface : NamespaceOverviewBase<NamespaceQueryContext>(
 
     override fun getInterfaceItems(): List<InterfaceItem<NamespaceQueryContext>> =
         listOf(
-            item()
-                .atSlot(9 * 2)
-                .displayAs(
-                    createItem(
-                        Material.FEATHER,
-                        mm("<white>Back"),
-                        listOf(mm("<gray>Apply filter and return.")),
-                    ),
-                ).onClick {
+            backItemBase()
+                .onClick {
                     if (context.returnToFilters) {
                         FiltersInterface.openInventory(click.player, FiltersContext(context.filter))
                     } else {
