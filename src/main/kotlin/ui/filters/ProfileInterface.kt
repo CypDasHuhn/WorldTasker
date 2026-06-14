@@ -31,8 +31,7 @@ object ProfileListInterface : ScrollInterface<ProfileListContext, ProfileData>(
         sizeFromRows(4)
     },
 ) {
-    override fun contentProvider(id: Int, context: ProfileListContext): ProfileData? =
-        QueryProfileManager.all().getOrNull(id)
+    override fun contentProvider(id: Int, context: ProfileListContext): ProfileData? = QueryProfileManager.all().getOrNull(id)
 
     override fun contentDisplay(data: ProfileData, context: ProfileListContext): InterfaceInfo<ProfileListContext>.() -> ItemStack =
         {

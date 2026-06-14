@@ -22,14 +22,23 @@ enum class TodoState { ACTIVE, COMPLETED, DELETED }
 enum class TodoStateResult { SUCCESS, WRONG_STATE }
 
 sealed class TodoCreateResult {
-    data class Created(val id: Int) : TodoCreateResult()
+    data class Created(
+        val id: Int
+    ) : TodoCreateResult()
+
     object MultipleScopeTags : TodoCreateResult()
-    data class ScopeCollision(val scopeTagName: String?) : TodoCreateResult()
+
+    data class ScopeCollision(
+        val scopeTagName: String?
+    ) : TodoCreateResult()
 }
 
 sealed class TodoUpdateNameResult {
     object Updated : TodoUpdateNameResult()
-    data class ScopeCollision(val scopeTagName: String?) : TodoUpdateNameResult()
+
+    data class ScopeCollision(
+        val scopeTagName: String?
+    ) : TodoUpdateNameResult()
 }
 
 object TodoManager {
@@ -40,21 +49,18 @@ object TodoManager {
         val locationId = reference("location_id", LocationManager.Locations).nullable()
     }
 
-    class TodoEntry(id: EntityID<Int>) : IntEntity(id) {
+    class TodoEntry(
+        id: EntityID<Int>
+    ) : IntEntity(id) {
         companion object : IntEntityClass<TodoEntry>(Todos)
+
         val name by Todos.name
         val author by Todos.author
         val description by Todos.description
         val locationId by Todos.locationId
     }
 
-    fun create(
-        name: String,
-        player: Player,
-        description: String,
-        location: Location?,
-        tagIds: List<Int> = emptyList(),
-    ): TodoCreateResult {
+    fun create(name: String, player: Player, description: String, location: Location?, tagIds: List<Int> = emptyList(),): TodoCreateResult {
         if (TodoScopeManager.isActive()) {
             if (TodoScopeManager.countScopeTagsAmong(tagIds) > 1) return TodoCreateResult.MultipleScopeTags
             val scopeTagName = TodoScopeManager.scopeTagNameAmong(tagIds)
@@ -71,14 +77,17 @@ object TodoManager {
                             (LocationManager.Locations.y eq it.y) and
                             (LocationManager.Locations.z eq it.z) and
                             (LocationManager.Locations.worldName eq it.world.name)
-                    }.first().id
+                    }.first()
+                    .id
             }
-            val id = Todos.insert {
-                it[Todos.name] = name
-                it[Todos.author] = player.name
-                it[Todos.description] = description
-                it[locationId] = locId
-            }[Todos.id].value
+            val id = Todos
+                .insert {
+                    it[Todos.name] = name
+                    it[Todos.author] = player.name
+                    it[Todos.description] = description
+                    it[locationId] = locId
+                }[Todos.id]
+                .value
             HistoryManager.record(id, player, TodoStatus.CREATE)
             tagIds.forEach { tagId ->
                 TagManager.TodoTags.insert {
@@ -91,15 +100,16 @@ object TodoManager {
         return TodoCreateResult.Created(id)
     }
 
-    fun findByName(name: String): ResultRow? =
-        transaction { Todos.selectAll().where { Todos.name eq name }.firstOrNull() }
+    fun findByName(name: String): ResultRow? = transaction { Todos.selectAll().where { Todos.name eq name }.firstOrNull() }
 
-    fun findAllByName(name: String): List<ResultRow> =
-        transaction { Todos.selectAll().where { Todos.name eq name }.toList() }
+    fun findAllByName(name: String): List<ResultRow> = transaction { Todos.selectAll().where { Todos.name eq name }.toList() }
 
     fun findById(id: Int): TodoEntry? =
         transaction {
-            Todos.selectAll().where { Todos.id eq id }.firstOrNull()
+            Todos
+                .selectAll()
+                .where { Todos.id eq id }
+                .firstOrNull()
                 ?.let { TodoEntry.wrapRow(it) }
         }
 
@@ -159,20 +169,23 @@ object TodoManager {
 
     fun filteredIds(filter: TodoFilter): List<Int> =
         transaction {
-            Todos.selectAll().toList().filter { row ->
-                val todoId = row[Todos.id].value
-                val state = stateOf(todoId)
-                val statusOk = when (filter.statusFilter) {
-                    StatusFilter.DEFAULT -> state == TodoState.ACTIVE
-                    StatusFilter.ALL -> state != TodoState.DELETED
-                    StatusFilter.COMPLETED -> state == TodoState.COMPLETED
-                }
-                if (!statusOk) return@filter false
-                val author = row[Todos.author]
-                if (filter.authorIncluded.isNotEmpty() && author !in filter.authorIncluded) return@filter false
-                if (author in filter.authorExcluded) return@filter false
-                filter.matches(todoId, row[Todos.locationId]?.value)
-            }.map { it[Todos.id].value }
+            Todos
+                .selectAll()
+                .toList()
+                .filter { row ->
+                    val todoId = row[Todos.id].value
+                    val state = stateOf(todoId)
+                    val statusOk = when (filter.statusFilter) {
+                        StatusFilter.DEFAULT -> state == TodoState.ACTIVE
+                        StatusFilter.ALL -> state != TodoState.DELETED
+                        StatusFilter.COMPLETED -> state == TodoState.COMPLETED
+                    }
+                    if (!statusOk) return@filter false
+                    val author = row[Todos.author]
+                    if (filter.authorIncluded.isNotEmpty() && author !in filter.authorIncluded) return@filter false
+                    if (author in filter.authorExcluded) return@filter false
+                    filter.matches(todoId, row[Todos.locationId]?.value)
+                }.map { it[Todos.id].value }
         }
 
     fun findNear(playerLocation: Location, chunkRadius: Int): List<LocationManager.Location> {

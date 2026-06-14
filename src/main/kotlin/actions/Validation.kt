@@ -7,5 +7,4 @@ private val VALID_NAME = Regex("[a-z0-9_\\-]+")
 
 fun isValidResourceName(name: String) = name.matches(VALID_NAME)
 
-internal fun Player.reservedName(name: String) =
-    msg("<red>'<white>$name</white>' is reserved and cannot be used.")
+internal fun Player.reservedName(name: String) = msg("<red>'<white>$name</white>' is reserved and cannot be used.")

@@ -20,6 +20,7 @@ import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceSelectInterface
 import dev.cypdashuhn.worldtasker.ui.tags.TagSelectInterface
+import dev.cypdashuhn.worldtasker.ui.tags.ToggleTagModeConfirmation
 import dev.cypdashuhn.worldtasker.ui.todo.DeleteTodoConfirmation
 import dev.cypdashuhn.worldtasker.ui.todo.RenameTodoConfirmation
 import dev.cypdashuhn.worldtasker.ui.todo.TodoDetailInterface
@@ -67,6 +68,7 @@ fun RoosterModuleBuilder.initUi() {
             RenameTagConfirmation,
             RemoveTaggingsDeleteTagConfirmation,
             RemoveTodosDeleteTagConfirmation,
+            ToggleTagModeConfirmation,
         ),
     )
 }

@@ -45,14 +45,18 @@ object TodoScopeManager : YmlOperations by YmlShell("config.yml") {
                     Bukkit.getLogger().severe("[WorldTasker]   '$name' — ${rows.size} todos share this name")
                 }
                 Bukkit.getLogger().severe("[WorldTasker] Disabling plugin to prevent data integrity issues.")
-                Bukkit.getPluginManager().getPlugin("WorldTasker")
+                Bukkit
+                    .getPluginManager()
+                    .getPlugin("WorldTasker")
                     ?.let { Bukkit.getPluginManager().disablePlugin(it) }
             }
             return
         }
         val nsId = ns[NamespaceManager.Namespaces.id].value
         if (ns[NamespaceManager.Namespaces.allowsMultiple]) {
-            Bukkit.getLogger().warning("[WorldTasker] todo-scope-namespace '$configured' allows multiple tags — scope resolution disabled. The namespace must only allow one tag at a time.")
+            Bukkit
+                .getLogger()
+                .warning("[WorldTasker] todo-scope-namespace '$configured' allows multiple tags — scope resolution disabled. The namespace must only allow one tag at a time.")
             return
         }
         val scopeTagIds = TagManager.byNamespace(nsId).map { it[TagManager.Tags.id].value }.toSet()

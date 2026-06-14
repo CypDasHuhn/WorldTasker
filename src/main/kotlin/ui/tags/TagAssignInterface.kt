@@ -3,8 +3,8 @@ package dev.cypdashuhn.worldtasker.ui.tags
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagAssignResult
-import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.db.TagManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
@@ -63,13 +63,20 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
             } else {
                 when (val result = TagManager.addToTodo(context.todoId, data.id)) {
                     TagAssignResult.Success -> { }
-                    TagAssignResult.MultipleScopeTags ->
+
+                    TagAssignResult.MultipleScopeTags -> {
                         click.player.msg("<red>A todo can only have one scope tag.")
-                    is TagAssignResult.ScopeCollision ->
-                        click.player.msg("<red>A todo named '<white>${result.todoName}</white>' scoped to '${result.scopeTagName}' already exists.")
+                    }
+
+                    is TagAssignResult.ScopeCollision -> {
+                        click.player
+                            .msg("<red>A todo named '<white>${result.todoName}</white>' scoped to '${result.scopeTagName}' already exists.")
+                    }
+
                     is TagAssignResult.NamespaceSingleTagViolation -> {
                         val nsList = result.namespaceNames.joinToString(", ")
-                        click.player.msg("<red>This todo already has a tag from <white>$nsList</white> (single-tag namespace). Remove it first.")
+                        click.player
+                            .msg("<red>This todo already has a tag from <white>$nsList</white> (single-tag namespace). Remove it first.")
                     }
                 }
             }

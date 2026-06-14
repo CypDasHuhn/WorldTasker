@@ -13,8 +13,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
 sealed class TagCreateResult {
-    data class Created(val id: Int) : TagCreateResult()
+    data class Created(
+        val id: Int
+    ) : TagCreateResult()
+
     object ReservedName : TagCreateResult()
+
     object DuplicateName : TagCreateResult()
 }
 
@@ -22,9 +26,17 @@ enum class TagRenameResult { RENAMED, RESERVED_NAME, DUPLICATE_NAME }
 
 sealed class TagAssignResult {
     object Success : TagAssignResult()
+
     object MultipleScopeTags : TagAssignResult()
-    data class ScopeCollision(val todoName: String, val scopeTagName: String?) : TagAssignResult()
-    data class NamespaceSingleTagViolation(val namespaceNames: List<String>) : TagAssignResult()
+
+    data class ScopeCollision(
+        val todoName: String,
+        val scopeTagName: String?
+    ) : TagAssignResult()
+
+    data class NamespaceSingleTagViolation(
+        val namespaceNames: List<String>
+    ) : TagAssignResult()
 }
 
 object TagManager {
@@ -53,17 +65,20 @@ object TagManager {
         if (TodoScopeManager.countScopeTagsAmong(tagIds) > 1) return TagAssignResult.MultipleScopeTags
         val scopeTagName = TodoScopeManager.scopeTagNameAmong(tagIds)
         val todoName = TodoManager.findById(todoId)?.name ?: return TagAssignResult.Success
-        return if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = todoId))
+        return if (TodoScopeManager.wouldCollide(todoName, scopeTagName, excludeTodoId = todoId)) {
             TagAssignResult.ScopeCollision(todoName, scopeTagName)
-        else
+        } else {
             TagAssignResult.Success
+        }
     }
 
     private fun validateSingleTagNamespaces(tagIds: List<Int>): TagAssignResult {
         val singleTagNsIds = NamespaceManager.singleTagNamespaceIds()
         if (singleTagNsIds.isEmpty()) return TagAssignResult.Success
         val tagNsMap = transaction {
-            Tags.selectAll().where { Tags.id inList tagIds }
+            Tags
+                .selectAll()
+                .where { Tags.id inList tagIds }
                 .groupBy { it[Tags.namespaceId].value }
         }
         val violatingNamespaces = mutableListOf<String>()
@@ -73,10 +88,11 @@ object TagManager {
                 violatingNamespaces.add(nsName)
             }
         }
-        return if (violatingNamespaces.isNotEmpty())
+        return if (violatingNamespaces.isNotEmpty()) {
             TagAssignResult.NamespaceSingleTagViolation(violatingNamespaces)
-        else
+        } else {
             TagAssignResult.Success
+        }
     }
 
     private fun validateTagAssignments(todoId: Int, tagIds: List<Int>): TagAssignResult {
@@ -91,7 +107,12 @@ object TagManager {
         if (name in RESERVED_NAMES) return TagCreateResult.ReservedName
         if (findByName(name, namespaceId) != null) return TagCreateResult.DuplicateName
         val id = transaction {
-            Tags.insert { it[Tags.name] = name; it[Tags.namespaceId] = namespaceId }[Tags.id].value
+            Tags
+                .insert {
+                    it[Tags.name] = name
+                    it[Tags.namespaceId] = namespaceId
+                }[Tags.id]
+                .value
         }
         TodoScopeManager.onTagCreated(id, namespaceId, name)
         return TagCreateResult.Created(id)
@@ -108,16 +129,14 @@ object TagManager {
         return TagRenameResult.RENAMED
     }
 
-    fun find(id: Int): ResultRow? =
-        transaction { Tags.selectAll().where { Tags.id eq id }.firstOrNull() }
+    fun find(id: Int): ResultRow? = transaction { Tags.selectAll().where { Tags.id eq id }.firstOrNull() }
 
     fun findByName(name: String, namespaceId: Int): ResultRow? =
         transaction {
             Tags.selectAll().where { (Tags.name eq name) and (Tags.namespaceId eq namespaceId) }.firstOrNull()
         }
 
-    fun findByName(name: String): ResultRow? =
-        transaction { Tags.selectAll().where { Tags.name eq name }.firstOrNull() }
+    fun findByName(name: String): ResultRow? = transaction { Tags.selectAll().where { Tags.name eq name }.firstOrNull() }
 
     fun findByQualifiedName(key: NamespacedKey): ResultRow? {
         val ns = NamespaceManager.findByName(key.namespace) ?: return null
@@ -133,11 +152,9 @@ object TagManager {
 
     fun all(): List<ResultRow> = transaction { Tags.selectAll().toList() }
 
-    fun byNamespace(namespaceId: Int): List<ResultRow> =
-        transaction { Tags.selectAll().where { Tags.namespaceId eq namespaceId }.toList() }
+    fun byNamespace(namespaceId: Int): List<ResultRow> = transaction { Tags.selectAll().where { Tags.namespaceId eq namespaceId }.toList() }
 
-    fun updateMaterial(id: Int, material: String) =
-        transaction { Tags.update({ Tags.id eq id }) { it[Tags.material] = material } }
+    fun updateMaterial(id: Int, material: String) = transaction { Tags.update({ Tags.id eq id }) { it[Tags.material] = material } }
 
     fun delete(id: Int) {
         transaction {
@@ -158,7 +175,10 @@ object TagManager {
             val check = validateTagAssignments(todoId, combinedIds)
             if (check != TagAssignResult.Success) return@transaction check
             if (tagId !in currentTagIds) {
-                TodoTags.insert { it[TodoTags.todoId] = todoId; it[TodoTags.tagId] = tagId }
+                TodoTags.insert {
+                    it[TodoTags.todoId] = todoId
+                    it[TodoTags.tagId] = tagId
+                }
             }
             TagAssignResult.Success
         }
@@ -171,7 +191,10 @@ object TagManager {
             if (check != TagAssignResult.Success) return@transaction check
             tagIds.forEach { tagId ->
                 if (tagId !in currentTagIds) {
-                    TodoTags.insert { it[TodoTags.todoId] = todoId; it[TodoTags.tagId] = tagId }
+                    TodoTags.insert {
+                        it[TodoTags.todoId] = todoId
+                        it[TodoTags.tagId] = tagId
+                    }
                 }
             }
             TagAssignResult.Success
@@ -184,7 +207,10 @@ object TagManager {
             if (check != TagAssignResult.Success) return@transaction check
             TodoTags.deleteWhere { TodoTags.todoId eq todoId }
             distinctIds.forEach { tagId ->
-                TodoTags.insert { it[TodoTags.todoId] = todoId; it[TodoTags.tagId] = tagId }
+                TodoTags.insert {
+                    it[TodoTags.todoId] = todoId
+                    it[TodoTags.tagId] = tagId
+                }
             }
             TagAssignResult.Success
         }
@@ -201,8 +227,7 @@ object TagManager {
             TagAssignResult.Success
         }
 
-    fun removeAllForTodo(todoId: Int) =
-        transaction { TodoTags.deleteWhere { TodoTags.todoId eq todoId } }
+    fun removeAllForTodo(todoId: Int) = transaction { TodoTags.deleteWhere { TodoTags.todoId eq todoId } }
 
     fun tagsForTodo(todoId: Int): List<ResultRow> =
         transaction {
@@ -226,11 +251,15 @@ object TagManager {
 
     fun addInheritance(childId: Int, parentId: Int) =
         transaction {
-            val exists = TagInheritance.selectAll()
+            val exists = TagInheritance
+                .selectAll()
                 .where { (TagInheritance.childId eq childId) and (TagInheritance.parentId eq parentId) }
                 .firstOrNull() != null
             if (!exists) {
-                TagInheritance.insert { it[TagInheritance.childId] = childId; it[TagInheritance.parentId] = parentId }
+                TagInheritance.insert {
+                    it[TagInheritance.childId] = childId
+                    it[TagInheritance.parentId] = parentId
+                }
             }
         }
 
@@ -245,17 +274,24 @@ object TagManager {
         transaction {
             TagInheritance.deleteWhere { TagInheritance.childId eq childId }
             parentIds.forEach { parentId ->
-                TagInheritance.insert { it[TagInheritance.childId] = childId; it[TagInheritance.parentId] = parentId }
+                TagInheritance.insert {
+                    it[TagInheritance.childId] = childId
+                    it[TagInheritance.parentId] = parentId
+                }
             }
         }
 
     fun parentsOf(tagId: Int): List<ResultRow> =
         transaction {
-            val parentIds = TagInheritance.selectAll()
+            val parentIds = TagInheritance
+                .selectAll()
                 .where { TagInheritance.childId eq tagId }
                 .map { it[TagInheritance.parentId].value }
-            if (parentIds.isEmpty()) emptyList()
-            else Tags.selectAll().where { Tags.id inList parentIds }.toList()
+            if (parentIds.isEmpty()) {
+                emptyList()
+            } else {
+                Tags.selectAll().where { Tags.id inList parentIds }.toList()
+            }
         }
 
     /** BFS expansion: returns the given IDs plus all ancestor IDs, cycle-safe. */
@@ -265,11 +301,15 @@ object TagManager {
             val queue = ArrayDeque(directIds.toList())
             while (queue.isNotEmpty()) {
                 val tagId = queue.removeFirst()
-                TagInheritance.selectAll()
+                TagInheritance
+                    .selectAll()
                     .where { TagInheritance.childId eq tagId }
                     .map { it[TagInheritance.parentId].value }
                     .filter { it !in visited }
-                    .forEach { visited.add(it); queue.add(it) }
+                    .forEach {
+                        visited.add(it)
+                        queue.add(it)
+                    }
             }
             visited
         }
@@ -278,10 +318,15 @@ object TagManager {
         transaction {
             val directIds = tagsForTodo(todoId).map { it[Tags.id].value }.toSet()
             val allIds = expandTagIds(directIds)
-            if (allIds.isEmpty()) emptySet()
-            else (Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll().where { Tags.id inList allIds.toList() }
-                .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }.toSet()
+            if (allIds.isEmpty()) {
+                emptySet()
+            } else {
+                (Tags innerJoin NamespaceManager.Namespaces)
+                    .selectAll()
+                    .where { Tags.id inList allIds.toList() }
+                    .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
+                    .toSet()
+            }
         }
 
     fun ancestorLabelsOf(tagId: Int): List<String> =
@@ -290,7 +335,8 @@ object TagManager {
             val allAncestorIds = expandTagIds(directIds)
             if (allAncestorIds.isEmpty()) return@transaction emptyList()
             val rows = (Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll().where { Tags.id inList allAncestorIds.toList() }
+                .selectAll()
+                .where { Tags.id inList allAncestorIds.toList() }
                 .associateBy { it[Tags.id].value }
             val transitiveIds = allAncestorIds - directIds
             (directIds + transitiveIds).mapNotNull { id ->
@@ -302,9 +348,13 @@ object TagManager {
         transaction {
             val directIds = tagsForTodo(todoId).map { it[Tags.id].value }.toSet()
             val inheritedIds = expandTagIds(directIds) - directIds
-            if (inheritedIds.isEmpty()) emptyList()
-            else (Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll().where { Tags.id inList inheritedIds.toList() }
-                .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
+            if (inheritedIds.isEmpty()) {
+                emptyList()
+            } else {
+                (Tags innerJoin NamespaceManager.Namespaces)
+                    .selectAll()
+                    .where { Tags.id inList inheritedIds.toList() }
+                    .map { "${it[NamespaceManager.Namespaces.name]}:${it[Tags.name]}" }
+            }
         }
 }

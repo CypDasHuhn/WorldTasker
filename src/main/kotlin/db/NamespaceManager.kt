@@ -12,8 +12,12 @@ import org.jetbrains.exposed.sql.update
 enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE, BLOCKED_HAS_TAGS }
 
 sealed class NamespaceCreateResult {
-    data class Created(val id: Int) : NamespaceCreateResult()
+    data class Created(
+        val id: Int
+    ) : NamespaceCreateResult()
+
     object ReservedName : NamespaceCreateResult()
+
     object DuplicateName : NamespaceCreateResult()
 }
 
@@ -30,10 +34,12 @@ object NamespaceManager {
         if (name in RESERVED_NAMES) return NamespaceCreateResult.ReservedName
         if (findByName(name) != null) return NamespaceCreateResult.DuplicateName
         val id = transaction {
-            Namespaces.insert {
-                it[Namespaces.name] = name
-                it[Namespaces.allowsMultiple] = allowsMultiple
-            }[Namespaces.id].value
+            Namespaces
+                .insert {
+                    it[Namespaces.name] = name
+                    it[Namespaces.allowsMultiple] = allowsMultiple
+                }[Namespaces.id]
+                .value
         }
         return NamespaceCreateResult.Created(id)
     }
@@ -59,14 +65,21 @@ object NamespaceManager {
 
     fun isSingleTagNamespace(id: Int): Boolean =
         transaction {
-            Namespaces.selectAll().where { Namespaces.id eq id }
-                .firstOrNull()?.get(Namespaces.allowsMultiple)?.not() ?: false
+            Namespaces
+                .selectAll()
+                .where { Namespaces.id eq id }
+                .firstOrNull()
+                ?.get(Namespaces.allowsMultiple)
+                ?.not() ?: false
         }
 
     fun singleTagNamespaceIds(): Set<Int> =
         transaction {
-            Namespaces.selectAll().where { Namespaces.allowsMultiple eq false }
-                .map { it[Namespaces.id].value }.toSet()
+            Namespaces
+                .selectAll()
+                .where { Namespaces.allowsMultiple eq false }
+                .map { it[Namespaces.id].value }
+                .toSet()
         }
 
     fun find(id: Int): ResultRow? =

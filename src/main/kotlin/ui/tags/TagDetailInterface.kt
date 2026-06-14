@@ -2,9 +2,9 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
 import dev.rooster.ui.interfaces.InventorySize

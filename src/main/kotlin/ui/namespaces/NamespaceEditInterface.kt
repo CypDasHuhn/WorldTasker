@@ -66,10 +66,14 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
                             val trimmed = name.trim()
                             when (NamespaceManager.create(trimmed)) {
                                 is NamespaceCreateResult.Created -> { }
-                                NamespaceCreateResult.ReservedName ->
+
+                                NamespaceCreateResult.ReservedName -> {
                                     click.player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
-                                NamespaceCreateResult.DuplicateName ->
+                                }
+
+                                NamespaceCreateResult.DuplicateName -> {
                                     click.player.msg("<red>Namespace '<white>$trimmed</white>' already exists.")
+                                }
                             }
                         }
                         NamespaceEditInterface.openInventory(click.player, NamespaceEditContext())

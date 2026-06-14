@@ -8,8 +8,7 @@ import dev.cypdashuhn.worldtasker.db.TagRenameResult
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
-private fun Player.invalidName(name: String) =
-    msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
+private fun Player.invalidName(name: String) = msg("<red>'<white>$name</white>' is invalid. Use only lowercase letters, numbers, '_', '-'.")
 
 fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
     tagsStr.trim().split(Regex("\\s+")).mapNotNull { name ->
@@ -26,7 +25,10 @@ fun resolveTagIds(tagsStr: String, sender: Player): List<Int> =
 object TagActions {
     fun list(sender: Player) {
         val tags = TagManager.all()
-        if (tags.isEmpty()) { sender.msg("<gray>No tags found."); return }
+        if (tags.isEmpty()) {
+            sender.msg("<gray>No tags found.")
+            return
+        }
         sender.msg("<gold>=== Tags ===")
         tags.forEach { row ->
             val nsId = row[TagManager.Tags.namespaceId].value
@@ -36,7 +38,10 @@ object TagActions {
     }
 
     fun add(sender: Player, nsName: String, tagName: String) {
-        if (!isValidResourceName(tagName)) { sender.invalidName(tagName); return }
+        if (!isValidResourceName(tagName)) {
+            sender.invalidName(tagName)
+            return
+        }
         val ns = NamespaceManager.findByName(nsName)
         if (ns == null) {
             sender.msg("<red>Namespace '<white>$nsName</white>' not found. Create it first with /todo tags namespaces add.")
@@ -60,17 +65,27 @@ object TagActions {
     }
 
     fun rename(sender: Player, oldKey: NamespacedKey, newName: String) {
-        if (!isValidResourceName(newName)) { sender.invalidName(newName); return }
+        if (!isValidResourceName(newName)) {
+            sender.invalidName(newName)
+            return
+        }
         val tag = TagManager.findByQualifiedName(oldKey)
         if (tag == null) {
             sender.msg("<red>Tag '<white>${oldKey.namespace}:${oldKey.key}</white>' not found.")
             return
         }
         when (TagManager.rename(tag[TagManager.Tags.id].value, newName)) {
-            TagRenameResult.RENAMED -> sender.msg("<green>Tag renamed to '<white>$newName</white>'.")
-            TagRenameResult.RESERVED_NAME -> sender.reservedName(newName)
-            TagRenameResult.DUPLICATE_NAME ->
+            TagRenameResult.RENAMED -> {
+                sender.msg("<green>Tag renamed to '<white>$newName</white>'.")
+            }
+
+            TagRenameResult.RESERVED_NAME -> {
+                sender.reservedName(newName)
+            }
+
+            TagRenameResult.DUPLICATE_NAME -> {
                 sender.msg("<red>A tag named '<white>$newName</white>' already exists in this namespace.")
+            }
         }
     }
 
@@ -82,8 +97,9 @@ object TagActions {
         val childId = child[TagManager.Tags.id].value
         val parentIds = resolveTagIds(parentsStr, sender)
         parentIds.forEach { TagManager.addInheritance(childId, it) }
-        if (parentIds.isNotEmpty())
+        if (parentIds.isNotEmpty()) {
             sender.msg("<green>Added ${parentIds.size} parent(s) to '<white>${childKey.namespace}:${childKey.key}</white>'.")
+        }
     }
 
     fun setInheritance(sender: Player, childKey: NamespacedKey, parentsStr: String) {
@@ -104,7 +120,8 @@ object TagActions {
         val childId = child[TagManager.Tags.id].value
         val parentIds = resolveTagIds(parentsStr, sender)
         parentIds.forEach { TagManager.removeInheritance(childId, it) }
-        if (parentIds.isNotEmpty())
+        if (parentIds.isNotEmpty()) {
             sender.msg("<green>Removed ${parentIds.size} parent(s) from '<white>${childKey.namespace}:${childKey.key}</white>'.")
+        }
     }
 }

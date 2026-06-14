@@ -23,13 +23,13 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 
-private const val NAME          = "editTodoName"
-private const val STATE_ACTION  = "editTodoStateAction"
-private const val NEW_DESC      = "editTodoNewDescription"
-private const val SET_TAGS      = "editTodoSetTags"
-private const val ADD_TAGS      = "editTodoAddTags"
-private const val REMOVE_TAGS   = "editTodoRemoveTags"
-private const val WORK_COMMENT  = "editTodoWorkComment"
+private const val NAME = "editTodoName"
+private const val STATE_ACTION = "editTodoStateAction"
+private const val NEW_DESC = "editTodoNewDescription"
+private const val SET_TAGS = "editTodoSetTags"
+private const val ADD_TAGS = "editTodoAddTags"
+private const val REMOVE_TAGS = "editTodoRemoveTags"
+private const val WORK_COMMENT = "editTodoWorkComment"
 
 data class EditCtx(
     val sender: Player,
@@ -48,18 +48,23 @@ private fun <T> Argument<T>.handle(filter: TodoNameFilter, block: EditCtx.() -> 
 private fun stateActionsFor(raw: Any?): Array<String> {
     val key: NamespacedKey = when (raw) {
         is NamespacedKey -> raw
+
         is String -> runCatching {
-            if (':' in raw) NamespacedKey(raw.substringBefore(':'), raw.substringAfter(':'))
-            else NamespacedKey.minecraft(raw)
+            if (':' in raw) {
+                NamespacedKey(raw.substringBefore(':'), raw.substringAfter(':'))
+            } else {
+                NamespacedKey.minecraft(raw)
+            }
         }.getOrNull()
+
         else -> null
     } ?: return arrayOf("complete", "reactivate")
     val result = TodoScopeManager.resolveInput(key, setOf(TodoState.ACTIVE, TodoState.COMPLETED))
     if (result !is TodoResolveResult.Found) return arrayOf("complete", "reactivate")
     return when (TodoManager.stateOf(result.id)) {
-        TodoState.ACTIVE    -> arrayOf("complete")
+        TodoState.ACTIVE -> arrayOf("complete")
         TodoState.COMPLETED -> arrayOf("reactivate")
-        else                -> arrayOf()
+        else -> arrayOf()
     }
 }
 
@@ -72,12 +77,11 @@ private fun buildEditNameArg(filter: TodoNameFilter): Argument<NamespacedKey> =
             })
             .handle(filter) {
                 when (args.argsMap[STATE_ACTION] as String) {
-                    "complete"   -> TodoActions.complete(sender, id)
+                    "complete" -> TodoActions.complete(sender, id)
                     "reactivate" -> TodoActions.reactivate(sender, id)
                 }
             }
-        )
-        .then(la("delete").handle(filter) {
+        ).then(la("delete").handle(filter) {
             TodoActions.delete(sender, name, id)
         })
         .then(TextArgument(NEW_DESC).handle(filter) {

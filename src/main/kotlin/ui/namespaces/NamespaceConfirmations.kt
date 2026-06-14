@@ -19,7 +19,9 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
-class DeleteNamespaceContext(val namespaceId: Int) : Context()
+class DeleteNamespaceContext(
+    val namespaceId: Int
+) : Context()
 
 object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceContext>(
     "DeleteNamespaceConfirmation",
@@ -27,12 +29,15 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
     onConfirm = { info ->
         val player = info.click.player
         when (NamespaceManager.delete(info.context.namespaceId)) {
-            NamespaceDeleteResult.DELETED ->
+            NamespaceDeleteResult.DELETED -> {
                 NamespaceEditInterface.openInventory(player, NamespaceEditContext())
+            }
+
             NamespaceDeleteResult.BLOCKED_SCOPE -> {
                 player.msg("<red>This namespace is the active todo scope and cannot be deleted.")
                 NamespaceEditInterface.openInventory(player, NamespaceEditContext())
             }
+
             NamespaceDeleteResult.BLOCKED_HAS_TAGS -> {
                 player.msg("<red>This namespace still has tags. Remove all tags first.")
                 NamespaceEditInterface.openInventory(player, NamespaceEditContext())
@@ -53,7 +58,9 @@ object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceCo
         )
 }
 
-class RenameNamespaceContext(val namespaceId: Int) : Context()
+class RenameNamespaceContext(
+    val namespaceId: Int
+) : Context()
 
 object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceContext>(
     "RenameNamespaceConfirmation",
@@ -66,10 +73,14 @@ object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceCo
                 val trimmed = newName.trim()
                 when (NamespaceManager.rename(nsId, trimmed)) {
                     NamespaceRenameResult.RENAMED -> { }
-                    NamespaceRenameResult.RESERVED_NAME ->
+
+                    NamespaceRenameResult.RESERVED_NAME -> {
                         player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
-                    NamespaceRenameResult.DUPLICATE_NAME ->
+                    }
+
+                    NamespaceRenameResult.DUPLICATE_NAME -> {
                         player.msg("<red>Namespace '<white>$trimmed</white>' already exists.")
+                    }
                 }
             }
             TagEditInterface.openInventory(player, TagEditContext(nsId))

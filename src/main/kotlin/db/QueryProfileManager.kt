@@ -18,6 +18,7 @@ data class ProfileData(
 
 sealed class ProfileSaveResult {
     object Saved : ProfileSaveResult()
+
     object DuplicateName : ProfileSaveResult()
 }
 
@@ -72,8 +73,7 @@ object QueryProfileManager {
         transaction { QueryProfiles.deleteWhere { QueryProfiles.id eq id } }
     }
 
-    fun findByName(name: String): ResultRow? =
-        transaction { QueryProfiles.selectAll().where { QueryProfiles.name eq name }.firstOrNull() }
+    fun findByName(name: String): ResultRow? = transaction { QueryProfiles.selectAll().where { QueryProfiles.name eq name }.firstOrNull() }
 
     fun all(): List<ProfileData> =
         transaction {

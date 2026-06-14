@@ -159,10 +159,13 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                             return@awaitInput
                         }
                         when (QueryProfileManager.save(trimmed, context.filter)) {
-                            ProfileSaveResult.Saved ->
+                            ProfileSaveResult.Saved -> {
                                 click.player.msg("<green>Profile '<white>$trimmed</white>' saved.")
-                            ProfileSaveResult.DuplicateName ->
+                            }
+
+                            ProfileSaveResult.DuplicateName -> {
                                 click.player.msg("<red>A profile named '<white>$trimmed</white>' already exists.")
+                            }
                         }
                         FiltersInterface.openInventory(click.player, context)
                     }

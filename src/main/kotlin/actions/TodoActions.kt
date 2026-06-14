@@ -151,7 +151,8 @@ object TodoActions {
         sender.msg("<gold>--- History ---")
         history.forEach { entry ->
             val time = entry[HistoryManager.History.time].format(
-                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                java.time.format.DateTimeFormatter
+                    .ofPattern("yyyy-MM-dd HH:mm")
             )
             val entryAuthor = entry[PlayerManager.Players.name]
             val status = entry[HistoryManager.History.status]

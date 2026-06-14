@@ -47,10 +47,13 @@ object RenameTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
                 val trimmed = newName.trim()
                 when (val result = TodoManager.updateName(todoId, trimmed)) {
                     TodoUpdateNameResult.Updated -> { }
+
                     is TodoUpdateNameResult.ScopeCollision -> {
-                        val scopeDesc = if (result.scopeTagName != null)
+                        val scopeDesc = if (result.scopeTagName != null) {
                             "scoped to '<white>${result.scopeTagName}</white>'"
-                        else "with no scope tag"
+                        } else {
+                            "with no scope tag"
+                        }
                         player.msg("<red>A todo named '<white>$trimmed</white>' $scopeDesc already exists.")
                     }
                 }

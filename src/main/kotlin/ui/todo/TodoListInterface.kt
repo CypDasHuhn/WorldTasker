@@ -8,8 +8,8 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
-import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
 import dev.rooster.core.util.createItem
@@ -135,12 +135,17 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                             val trimmedName = name.trim()
                             when (val result = TodoManager.create(trimmedName, player, description.trim(), player.location)) {
                                 is TodoCreateResult.Created -> { }
-                                TodoCreateResult.MultipleScopeTags ->
+
+                                TodoCreateResult.MultipleScopeTags -> {
                                     player.msg("<red>A todo can only have one scope tag.")
+                                }
+
                                 is TodoCreateResult.ScopeCollision -> {
-                                    val scopeDesc = if (result.scopeTagName != null)
+                                    val scopeDesc = if (result.scopeTagName != null) {
                                         "scoped to '<white>${result.scopeTagName}</white>'"
-                                    else "with no scope tag"
+                                    } else {
+                                        "with no scope tag"
+                                    }
                                     player.msg("<red>A todo named '<white>$trimmedName</white>' $scopeDesc already exists.")
                                 }
                             }

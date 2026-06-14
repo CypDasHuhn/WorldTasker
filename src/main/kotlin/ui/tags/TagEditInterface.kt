@@ -4,10 +4,10 @@ import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagCreateResult
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
@@ -85,8 +85,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                 }.onClick {
                     val ns = NamespaceManager.find(context.namespaceId) ?: return@onClick
                     val current = ns[NamespaceManager.Namespaces.allowsMultiple]
-                    NamespaceManager.setAllowsMultiple(context.namespaceId, !current)
-                    TagEditInterface.openInventory(click.player, context)
+                    ToggleTagModeConfirmation.openInventory(click.player, ToggleTagModeContext(context.namespaceId, !current))
                 },
             item()
                 .atSlot(bottomRow + 5)
@@ -103,10 +102,14 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                             val trimmed = name.trim()
                             when (TagManager.create(trimmed, nsId)) {
                                 is TagCreateResult.Created -> { }
-                                TagCreateResult.ReservedName ->
+
+                                TagCreateResult.ReservedName -> {
                                     click.player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
-                                TagCreateResult.DuplicateName ->
+                                }
+
+                                TagCreateResult.DuplicateName -> {
                                     click.player.msg("<red>Tag '<white>$trimmed</white>' already exists in this namespace.")
+                                }
                             }
                         }
                         TagEditInterface.openInventory(click.player, TagEditContext(nsId))

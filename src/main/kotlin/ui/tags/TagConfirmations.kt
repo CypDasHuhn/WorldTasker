@@ -1,6 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.commands.msg
+import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TagRenameResult
 import dev.cypdashuhn.worldtasker.db.TodoManager
@@ -17,7 +18,10 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
-class DeleteTagContext(val tagId: Int, val namespaceId: Int) : Context()
+class DeleteTagContext(
+    val tagId: Int,
+    val namespaceId: Int
+) : Context()
 
 object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
     "DeleteTagConfirmation",
@@ -40,7 +44,10 @@ object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
         )
 }
 
-class RenameTagContext(val tagId: Int, val namespaceId: Int) : Context()
+class RenameTagContext(
+    val tagId: Int,
+    val namespaceId: Int
+) : Context()
 
 object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
     "RenameTagConfirmation",
@@ -54,10 +61,14 @@ object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
                 val trimmed = newName.trim()
                 when (TagManager.rename(tagId, trimmed)) {
                     TagRenameResult.RENAMED -> { }
-                    TagRenameResult.RESERVED_NAME ->
+
+                    TagRenameResult.RESERVED_NAME -> {
                         player.msg("<red>'<white>$trimmed</white>' is reserved and cannot be used.")
-                    TagRenameResult.DUPLICATE_NAME ->
+                    }
+
+                    TagRenameResult.DUPLICATE_NAME -> {
                         player.msg("<red>A tag named '<white>$trimmed</white>' already exists in this namespace.")
+                    }
                 }
             }
             TagDetailInterface.openInventory(player, TagDetailContext(tagId, nsId))
@@ -121,5 +132,46 @@ object RemoveTodosDeleteTagConfirmation : BaseConfirmationInterface<DeleteTagCon
     override fun getOtherItems(): List<InterfaceItem<DeleteTagContext>> =
         listOf(
             item().atSlot(4).displayAs(createItem(Material.TNT, mm("<red>All todos tagged with this tag will be permanently deleted."))),
+        )
+}
+
+class ToggleTagModeContext(
+    val namespaceId: Int,
+    val newAllowsMultiple: Boolean
+) : Context()
+
+object ToggleTagModeConfirmation : BaseConfirmationInterface<ToggleTagModeContext>(
+    "ToggleTagModeConfirmation",
+    handler { ToggleTagModeContext(0, true) },
+    onConfirm = { info ->
+        NamespaceManager.setAllowsMultiple(info.context.namespaceId, info.context.newAllowsMultiple)
+        TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+    },
+    onCancel = { info ->
+        val player = info.player()
+        if (player != null) TagEditInterface.openInventory(player, TagEditContext(info.context.namespaceId))
+    },
+) {
+    override fun getInventory(player: Player, context: ToggleTagModeContext): Inventory =
+        Bukkit.createInventory(null, 9, mm("<yellow>Change tag mode?"))
+
+    override fun getOtherItems(): List<InterfaceItem<ToggleTagModeContext>> =
+        listOf(
+            item().atSlot(4).displayAs {
+                val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
+                if (context.newAllowsMultiple) {
+                    createItem(
+                        Material.OAK_SIGN,
+                        mm("<white>Switch namespace $nsName to <green>multiple</green> tag mode?"),
+                        listOf(mm("<gray>Multiple tags from this namespace can be assigned to a todo.")),
+                    )
+                } else {
+                    createItem(
+                        Material.IRON_DOOR,
+                        mm("<white>Switch namespace $nsName to <yellow>single</yellow> tag mode?"),
+                        listOf(mm("<gray>Only one tag from this namespace can be assigned to a todo.")),
+                    )
+                }
+            },
         )
 }
