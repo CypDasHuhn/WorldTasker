@@ -7,6 +7,7 @@ import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.backgroundPane
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -115,6 +116,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         lore,
                     )
                 }.routeTo(FiltersInterface) { FiltersContext(context.filter) },
+            backgroundPane(),
             // New todo button
             item()
                 .atSlot(6, 4)
