@@ -2,6 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
+import dev.cypdashuhn.worldtasker.db.NamespaceModeChangeResult
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TagRenameResult
 import dev.cypdashuhn.worldtasker.db.TodoManager
@@ -144,8 +145,15 @@ object ToggleTagModeConfirmation : BaseConfirmationInterface<ToggleTagModeContex
     "ToggleTagModeConfirmation",
     handler { ToggleTagModeContext(0, true) },
     onConfirm = { info ->
-        NamespaceManager.setAllowsMultiple(info.context.namespaceId, info.context.newAllowsMultiple)
-        TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+        when (val result = NamespaceManager.setAllowsMultiple(info.context.namespaceId, info.context.newAllowsMultiple)) {
+            is NamespaceModeChangeResult.Changed -> {
+                TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+            }
+            is NamespaceModeChangeResult.MultipleTagsViolation -> {
+                info.click.player.msg("<red>Cannot switch to single-tag mode: ${result.todoCount} todo(s) have multiple tags from this namespace. Remove extra tags first.")
+                TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+            }
+        }
     },
     onCancel = { info ->
         val player = info.player()

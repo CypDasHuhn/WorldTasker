@@ -4,8 +4,8 @@ import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceCreateResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
@@ -50,7 +50,7 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
         listOf(
             backItem(TodoListInterface),
             item()
-                .atSlot(bottomRow + 8)
+                .atSlot(bottomRow + 4)
                 .displayAs(
                     createItem(
                         Material.WRITABLE_BOOK,

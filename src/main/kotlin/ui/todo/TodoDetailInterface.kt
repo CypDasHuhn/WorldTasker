@@ -74,7 +74,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                 .atSlot(0)
                 .displayAs(
                     createItem(
-                        Material.NAME_TAG,
+                        Material.OAK_SIGN,
                         mm("<white>Rename"),
                         listOf(mm("<gray>Requires confirmation.")),
                     ),

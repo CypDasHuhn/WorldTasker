@@ -4,8 +4,8 @@ import dev.cypdashuhn.worldtasker.db.HistoryManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
-import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.db.utility_tables.PlayerManager
@@ -100,7 +100,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 },
             // Complete — only when active
             item()
-                .atSlot(bottomRow + 5)
+                .atSlot(bottomRow + 4)
                 .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.ACTIVE }
                 .displayAs(
                     createItem(Material.FIREWORK_ROCKET, mm("<white>Complete"), listOf(mm("<gray>Mark this todo as completed."))),
@@ -110,7 +110,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
                 },
             // Reactivate — only when completed
             item()
-                .atSlot(bottomRow + 5)
+                .atSlot(bottomRow + 4)
                 .usedWhen { TodoManager.stateOf(context.todoId) == TodoState.COMPLETED }
                 .displayAs(
                     createItem(Material.LANTERN, mm("<white>Reactivate"), listOf(mm("<gray>Mark this todo as active again."))),

@@ -3,6 +3,7 @@ package dev.cypdashuhn.worldtasker.db
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -10,6 +11,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
 enum class NamespaceDeleteResult { DELETED, BLOCKED_SCOPE, BLOCKED_HAS_TAGS }
+
+sealed class NamespaceModeChangeResult {
+    object Changed : NamespaceModeChangeResult()
+    data class MultipleTagsViolation(val todoCount: Int) : NamespaceModeChangeResult()
+}
 
 sealed class NamespaceCreateResult {
     data class Created(
@@ -58,9 +64,29 @@ object NamespaceManager {
             Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.material] = material }
         }
 
-    fun setAllowsMultiple(id: Int, allowsMultiple: Boolean) =
+    fun setAllowsMultiple(id: Int, allowsMultiple: Boolean): NamespaceModeChangeResult {
+        if (!allowsMultiple) {
+            val violatingCount = countTodosWithMultipleTagsFromNamespace(id)
+            if (violatingCount > 0) return NamespaceModeChangeResult.MultipleTagsViolation(violatingCount)
+        }
         transaction {
             Namespaces.update({ Namespaces.id eq id }) { it[Namespaces.allowsMultiple] = allowsMultiple }
+        }
+        return NamespaceModeChangeResult.Changed
+    }
+
+    fun countTodosWithMultipleTagsFromNamespace(namespaceId: Int): Int =
+        transaction {
+            val tagIds = TagManager.Tags
+                .selectAll()
+                .where { TagManager.Tags.namespaceId eq namespaceId }
+                .map { it[TagManager.Tags.id].value }
+            if (tagIds.isEmpty()) return@transaction 0
+            TagManager.TodoTags
+                .selectAll()
+                .where { TagManager.TodoTags.tagId inList tagIds }
+                .groupBy { it[TagManager.TodoTags.todoId].value }
+                .count { it.value.size > 1 }
         }
 
     fun isSingleTagNamespace(id: Int): Boolean =

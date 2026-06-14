@@ -119,7 +119,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
             backgroundPane(),
             // New todo button
             item()
-                .atSlot(6, 4)
+                .atSlot(6, 3)
                 .displayAs(
                     createItem(
                         Material.WRITABLE_BOOK,
@@ -157,7 +157,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                 },
             // Namespace edit button
             item()
-                .atSlot(6, 8)
+                .atSlot(6, 5)
                 .displayAs(
                     createItem(
                         Material.BOOKSHELF,
@@ -167,7 +167,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                 ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
             // Random todo button
             item()
-                .atSlot(6, 7)
+                .atSlot(6, 4)
                 .displayAs(
                     createItem(
                         Material.ENDER_EYE,

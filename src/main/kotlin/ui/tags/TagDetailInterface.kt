@@ -2,9 +2,9 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
+import dev.cypdashuhn.worldtasker.ui.backItem
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
@@ -26,7 +26,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
     "TagDetailInterface",
     handler { TagDetailContext(0, 0) },
     options {
-        inventorySize = InventorySize.THREE_ROWS
+        inventorySize = InventorySize.TWO_ROWS
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
             val tagName = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
