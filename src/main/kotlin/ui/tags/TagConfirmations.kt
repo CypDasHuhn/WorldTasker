@@ -26,7 +26,6 @@ class DeleteTagContext(
 ) : Context()
 
 object DeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
-    "DeleteTagConfirmation",
     handler { DeleteTagContext(0, 0) },
     onConfirm = { info ->
         TagManager.delete(info.context.tagId)
@@ -52,7 +51,6 @@ class RenameTagContext(
 ) : Context()
 
 object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
-    "RenameTagConfirmation",
     handler { RenameTagContext(0, 0) },
     onConfirm = { info ->
         val player = info.click.player
@@ -91,7 +89,6 @@ object RenameTagConfirmation : BaseConfirmationInterface<RenameTagContext>(
 }
 
 object RemoveTaggingsDeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
-    "RemoveTaggingsDeleteTagConfirmation",
     handler { DeleteTagContext(0, 0) },
     onConfirm = { info ->
         TagManager.delete(info.context.tagId)
@@ -112,7 +109,6 @@ object RemoveTaggingsDeleteTagConfirmation : BaseConfirmationInterface<DeleteTag
 }
 
 object RemoveTodosDeleteTagConfirmation : BaseConfirmationInterface<DeleteTagContext>(
-    "RemoveTodosDeleteTagConfirmation",
     handler { DeleteTagContext(0, 0) },
     onConfirm = { info ->
         val player = info.click.player
@@ -143,7 +139,6 @@ class ToggleTagModeContext(
 ) : Context()
 
 object ToggleTagModeConfirmation : BaseConfirmationInterface<ToggleTagModeContext>(
-    "ToggleTagModeConfirmation",
     handler { ToggleTagModeContext(0, true) },
     onConfirm = { info ->
         when (val result = NamespaceManager.setAllowsMultiple(info.context.namespaceId, info.context.newAllowsMultiple)) {

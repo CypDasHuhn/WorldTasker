@@ -24,11 +24,9 @@ private const val MATERIAL_SLOT = 13 // center slot of a 3-row inventory
 // ─── abstract base ────────────────────────────────────────────────────────────
 
 abstract class ChangeMaterialBase<C : Context>(
-    name: String,
     handler: ContextHandler<C>,
     titleFn: (Player, C) -> Component,
 ) : RoosterInterface<C>(
-        name,
         handler,
         options {
             inventorySize = InventorySize.THREE_ROWS
@@ -73,7 +71,6 @@ class ChangeTagMaterialContext(
 ) : Context()
 
 object ChangeTagMaterialInterface : ChangeMaterialBase<ChangeTagMaterialContext>(
-    "ChangeTagMaterialInterface",
     handler { ChangeTagMaterialContext(0, 0) },
     { _, context ->
         val name = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
@@ -93,7 +90,6 @@ class ChangeNamespaceMaterialContext(
 ) : Context()
 
 object ChangeNamespaceMaterialInterface : ChangeMaterialBase<ChangeNamespaceMaterialContext>(
-    "ChangeNamespaceMaterialInterface",
     handler { ChangeNamespaceMaterialContext(0) },
     { _, context ->
         val name = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "Namespace"

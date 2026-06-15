@@ -31,7 +31,6 @@ class NamespaceQueryContext(
 ) : ScrollContext()
 
 object NamespaceSelectInterface : NamespaceOverviewBase<NamespaceQueryContext>(
-    "NamespaceSelectInterface",
     handler { NamespaceQueryContext() },
     ScrollInterfaceOptions<NamespaceQueryContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Namespaces") }

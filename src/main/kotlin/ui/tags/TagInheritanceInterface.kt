@@ -33,7 +33,6 @@ class TagInheritanceContext(
 ) : ScrollContext()
 
 object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, InheritedTagData>(
-    "TagInheritanceInterface",
     handler { TagInheritanceContext(0, 0) },
     ScrollInterfaceOptions<TagInheritanceContext>().apply {
         inventoryTitle = { _, context ->
@@ -99,7 +98,6 @@ class TagInheritanceSelectContext(
 ) : ScrollContext()
 
 object TagInheritanceSelectInterface : TagOverviewBase<TagInheritanceSelectContext>(
-    "TagInheritanceSelectInterface",
     handler { TagInheritanceSelectContext(0, 0, 0) },
     ScrollInterfaceOptions<TagInheritanceSelectContext>().apply {
         inventoryTitle = { _, context ->

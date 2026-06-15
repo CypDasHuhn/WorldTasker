@@ -25,7 +25,6 @@ class NamespaceAssignContext(
 ) : ScrollContext()
 
 object NamespaceAssignInterface : NamespaceOverviewBase<NamespaceAssignContext>(
-    "NamespaceAssignInterface",
     handler { NamespaceAssignContext(0) },
     ScrollInterfaceOptions<NamespaceAssignContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Assign Tags ${secondaryColor}· Namespaces") }

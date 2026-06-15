@@ -16,7 +16,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
 object DeleteTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
-    "DeleteTodoConfirmation",
     handler { TodoDetailContext(0) },
     onConfirm = { info ->
         TodoManager.delete(info.context.todoId, info.click.player)
@@ -37,7 +36,6 @@ object DeleteTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
 }
 
 object RenameTodoConfirmation : BaseConfirmationInterface<TodoDetailContext>(
-    "RenameTodoConfirmation",
     handler { TodoDetailContext(0) },
     onConfirm = { info ->
         val player = info.click.player

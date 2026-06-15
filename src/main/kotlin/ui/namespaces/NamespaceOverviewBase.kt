@@ -15,10 +15,9 @@ data class NamespaceData(
 )
 
 abstract class NamespaceOverviewBase<C : ScrollContext>(
-    name: String,
     handler: ContextHandler<C>,
     options: ScrollInterfaceOptions<C>,
-) : ScrollInterface<C, NamespaceData>(name, handler, options) {
+) : ScrollInterface<C, NamespaceData>(handler, options) {
     override fun contentProvider(id: Int, context: C): NamespaceData? =
         NamespaceManager.all().getOrNull(id)?.let {
             NamespaceData(

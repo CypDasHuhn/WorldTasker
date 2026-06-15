@@ -45,7 +45,6 @@ class TodoListContext(
 ) : ScrollContext()
 
 object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
-    "TodoListInterface",
     handler { TodoListContext() },
     ScrollInterfaceOptions<TodoListContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}<bold>Todos") }

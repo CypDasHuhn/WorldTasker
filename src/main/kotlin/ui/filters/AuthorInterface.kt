@@ -34,7 +34,6 @@ data class AuthorEntry(
 )
 
 object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
-    "AuthorInterface",
     handler { AuthorContext() },
     ScrollInterfaceOptions<AuthorContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Authors") }

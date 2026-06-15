@@ -30,7 +30,6 @@ class TagAssignContext(
 ) : ScrollContext()
 
 object TagAssignInterface : TagOverviewBase<TagAssignContext>(
-    "TagAssignInterface",
     handler { TagAssignContext(0, 0) },
     ScrollInterfaceOptions<TagAssignContext>().apply {
         inventoryTitle = { _, context ->

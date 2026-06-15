@@ -28,7 +28,6 @@ class FiltersContext(
 ) : Context()
 
 object FiltersInterface : RoosterInterface<FiltersContext>(
-    "FiltersInterface",
     handler { FiltersContext() },
     options {
         inventorySize = InventorySize.THREE_ROWS

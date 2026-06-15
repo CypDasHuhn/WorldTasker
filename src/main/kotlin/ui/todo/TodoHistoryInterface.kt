@@ -37,7 +37,6 @@ class TodoHistoryContext(
 ) : ScrollContext()
 
 object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
-    "TodoHistoryInterface",
     handler { TodoHistoryContext(0) },
     ScrollInterfaceOptions<TodoHistoryContext>().apply {
         scrollDirection = ScrollDirection.LEFT_RIGHT

@@ -24,7 +24,6 @@ class DeleteNamespaceContext(
 ) : Context()
 
 object DeleteNamespaceConfirmation : BaseConfirmationInterface<DeleteNamespaceContext>(
-    "DeleteNamespaceConfirmation",
     handler { DeleteNamespaceContext(0) },
     onConfirm = { info ->
         val player = info.click.player
@@ -63,7 +62,6 @@ class RenameNamespaceContext(
 ) : Context()
 
 object RenameNamespaceConfirmation : BaseConfirmationInterface<RenameNamespaceContext>(
-    "RenameNamespaceConfirmation",
     handler { RenameNamespaceContext(0) },
     onConfirm = { info ->
         val player = info.click.player

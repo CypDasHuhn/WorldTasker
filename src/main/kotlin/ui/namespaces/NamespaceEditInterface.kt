@@ -26,7 +26,6 @@ import org.bukkit.inventory.ItemStack
 class NamespaceEditContext : ScrollContext()
 
 object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
-    "NamespaceEditInterface",
     handler { NamespaceEditContext() },
     ScrollInterfaceOptions<NamespaceEditContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Edit ${secondaryColor}· Namespaces") }

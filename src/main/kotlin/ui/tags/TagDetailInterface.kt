@@ -25,7 +25,6 @@ class TagDetailContext(
 ) : Context()
 
 object TagDetailInterface : RoosterInterface<TagDetailContext>(
-    "TagDetailInterface",
     handler { TagDetailContext(0, 0) },
     options {
         inventorySize = InventorySize.TWO_ROWS

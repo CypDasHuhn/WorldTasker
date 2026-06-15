@@ -26,7 +26,6 @@ import org.bukkit.inventory.ItemStack
 class ProfileListContext : ScrollContext()
 
 object ProfileListInterface : ScrollInterface<ProfileListContext, ProfileData>(
-    "ProfileListInterface",
     handler { ProfileListContext() },
     ScrollInterfaceOptions<ProfileListContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Query Profiles") }

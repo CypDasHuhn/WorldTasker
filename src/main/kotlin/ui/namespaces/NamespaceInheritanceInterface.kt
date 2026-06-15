@@ -26,7 +26,6 @@ class NamespaceInheritanceContext(
 ) : ScrollContext()
 
 object NamespaceInheritanceInterface : NamespaceOverviewBase<NamespaceInheritanceContext>(
-    "NamespaceInheritanceInterface",
     handler { NamespaceInheritanceContext(0, 0) },
     ScrollInterfaceOptions<NamespaceInheritanceContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Add Inheritance ${secondaryColor}· Namespaces") }

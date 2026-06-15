@@ -29,7 +29,6 @@ class TagQueryContext(
 ) : ScrollContext()
 
 object TagSelectInterface : TagOverviewBase<TagQueryContext>(
-    "TagSelectInterface",
     handler { TagQueryContext(0, TodoFilter()) },
     ScrollInterfaceOptions<TagQueryContext>().apply {
         inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Tags") }

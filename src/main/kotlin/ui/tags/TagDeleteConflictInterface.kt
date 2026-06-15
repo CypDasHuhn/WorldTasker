@@ -13,7 +13,6 @@ import dev.rooster.ui.items.InterfaceItem
 import org.bukkit.Material
 
 object TagDeleteConflictInterface : RoosterInterface<DeleteTagContext>(
-    "TagDeleteConflictInterface",
     handler { DeleteTagContext(0, 0) },
     options {
         inventorySize = InventorySize.ONE_ROW

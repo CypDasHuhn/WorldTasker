@@ -25,7 +25,6 @@ class TodoDetailContext(
 ) : Context()
 
 object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
-    "TodoDetailInterface",
     handler { TodoDetailContext(0) },
     options {
         inventorySize = InventorySize.TWO_ROWS

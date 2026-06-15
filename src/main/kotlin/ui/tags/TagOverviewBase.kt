@@ -14,10 +14,9 @@ data class TagData(
 )
 
 abstract class TagOverviewBase<C : ScrollContext>(
-    name: String,
     handler: ContextHandler<C>,
     options: ScrollInterfaceOptions<C>,
-) : ScrollInterface<C, TagData>(name, handler, options) {
+) : ScrollInterface<C, TagData>(handler, options) {
     abstract fun namespaceId(context: C): Int
 
     override fun contentProvider(id: Int, context: C): TagData? =

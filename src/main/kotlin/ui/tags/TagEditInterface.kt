@@ -34,7 +34,6 @@ class TagEditContext(
 ) : ScrollContext()
 
 object TagEditInterface : TagOverviewBase<TagEditContext>(
-    "TagEditInterface",
     handler { TagEditContext(0) },
     ScrollInterfaceOptions<TagEditContext>().apply {
         inventoryTitle = { _, context ->
