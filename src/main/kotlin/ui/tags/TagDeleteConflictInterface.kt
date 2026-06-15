@@ -3,6 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.InventorySize
 import dev.rooster.ui.interfaces.RoosterInterface
@@ -27,14 +28,14 @@ object TagDeleteConflictInterface : RoosterInterface<DeleteTagContext>(
             item()
                 .atSlot(0)
                 .displayAs(
-                    createItem(Material.BARRIER, mm("<white>Cancel"), listOf(mm("<gray>Return to tag."))),
+                    createItem(Material.BARRIER, mm("${primaryColor}Cancel"), listOf(mm("<gray>Return to tag."))),
                 ).routeTo(TagDetailInterface) { TagDetailContext(context.tagId, context.namespaceId) },
             item()
                 .atSlot(4)
                 .displayAs {
                     val todos = TagManager.todosForTag(context.tagId)
                     val lore = todos.map { row -> mm("<gray>${row[TodoManager.Todos.name]}") }
-                    createItem(Material.WRITABLE_BOOK, mm("<white>Tagged Todos"), lore)
+                    createItem(Material.WRITABLE_BOOK, mm("${primaryColor}Tagged Todos"), lore)
                 },
             item()
                 .atSlot(6)

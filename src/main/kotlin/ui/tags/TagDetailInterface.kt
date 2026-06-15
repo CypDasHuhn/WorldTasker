@@ -6,6 +6,8 @@ import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
 import dev.rooster.ui.interfaces.InventorySize
@@ -30,7 +32,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
             val tagName = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
-            mm("<white>$nsName<gray>:$tagName")
+            mm("${primaryColor}$nsName${secondaryColor}:$tagName")
         }
     },
 ) {
@@ -41,7 +43,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                 .displayAs(
                     createItem(
                         Material.COMPARATOR,
-                        mm("<white>Change Material"),
+                        mm("${primaryColor}Change Material"),
                         listOf(mm("<gray>Change the icon for this tag.")),
                     ),
                 ).routeTo(ChangeTagMaterialInterface) { ChangeTagMaterialContext(context.tagId, context.namespaceId) },
@@ -58,14 +60,14 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                             add(mm("<dark_gray>$pNsName:${p[TagManager.Tags.name]}"))
                         }
                     }
-                    createItem(Material.CHAIN, mm("<white>Inheritance"), lore)
+                    createItem(Material.CHAIN, mm("${primaryColor}Inheritance"), lore)
                 }.routeTo(TagInheritanceInterface) { TagInheritanceContext(context.tagId, context.namespaceId) },
             item()
                 .atSlot(6)
                 .displayAs(
                     createItem(
                         Material.NAME_TAG,
-                        mm("<white>Rename"),
+                        mm("${primaryColor}Rename"),
                         listOf(mm("<gray>Requires confirmation.")),
                     ),
                 ).routeTo(RenameTagConfirmation) { RenameTagContext(context.tagId, context.namespaceId) },

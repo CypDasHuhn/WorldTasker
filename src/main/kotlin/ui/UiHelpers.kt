@@ -14,6 +14,9 @@ import org.bukkit.entity.Player
 
 private val miniMessage: MiniMessage = MiniMessage.miniMessage()
 
+const val primaryColor = "<gold>"
+const val secondaryColor = "<dark_gray>"
+
 internal fun mm(s: String) = miniMessage.deserialize(s) as TextComponent
 
 internal fun <T : Context> CancelInfo<T>.player(): Player? =
@@ -24,7 +27,7 @@ internal fun <T : Context> CancelInfo<T>.player(): Player? =
 
 fun <C : Context> RoosterInterface<C>.backItemBase(): InterfaceItem<C> =
     item()
-        .displayAs(createItem(Material.FEATHER, mm("<white>Back")))
+        .displayAs(createItem(Material.FEATHER, mm("${primaryColor}Back")))
         .atSlot(bottomRow)
 
 fun <C : Context, E : Context> RoosterInterface<C>.backItem(target: RoosterInterface<E>): InterfaceItem<C> =

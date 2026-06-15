@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceAssignInterface
 import dev.rooster.core.util.createItem
@@ -32,7 +33,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
             val name = transaction { TodoManager.findById(context.todoId)?.name } ?: "Todo"
             val scopeTag = TodoScopeManager.scopeTagNameForTodo(context.todoId)
             val title = if (scopeTag != null) "$scopeTag:$name" else name
-            mm("<white>$title")
+            mm("${primaryColor}$title")
         }
     },
 ) {
@@ -45,7 +46,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                 .displayAs(
                     createItem(
                         Material.ENDER_PEARL,
-                        mm("<white>Jump To"),
+                        mm("${primaryColor}Jump To"),
                         listOf(mm("<gray>Teleport to this todo's location.")),
                     ),
                 ).onClick {
@@ -66,7 +67,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                         if (direct.isEmpty() && inherited.isEmpty()) add(mm("<gray>No tags assigned."))
                         add(mm("<dark_gray>Click to manage tags."))
                     }
-                    createItem(Material.NAME_TAG, mm("<white>Tags"), lore)
+                    createItem(Material.NAME_TAG, mm("${primaryColor}Tags"), lore)
                 }.routeTo(NamespaceAssignInterface) { NamespaceAssignContext(context.todoId) },
             // Rename button
             item()
@@ -74,7 +75,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                 .displayAs(
                     createItem(
                         Material.OAK_SIGN,
-                        mm("<white>Rename"),
+                        mm("${primaryColor}Rename"),
                         listOf(mm("<gray>Requires confirmation.")),
                     ),
                 ).routeTo(RenameTodoConfirmation) { TodoDetailContext(context.todoId) },
@@ -94,7 +95,7 @@ object TodoDetailInterface : RoosterInterface<TodoDetailContext>(
                 .displayAs(
                     createItem(
                         Material.CLOCK,
-                        mm("<white>History"),
+                        mm("${primaryColor}History"),
                         listOf(mm("<gray>View the history of this todo.")),
                     ),
                 ).routeTo(TodoHistoryInterface) { TodoHistoryContext(context.todoId) },

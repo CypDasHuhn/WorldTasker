@@ -5,6 +5,7 @@ import dev.cypdashuhn.worldtasker.db.ProfileData
 import dev.cypdashuhn.worldtasker.db.QueryProfileManager
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.todo.TodoListContext
@@ -28,7 +29,7 @@ object ProfileListInterface : ScrollInterface<ProfileListContext, ProfileData>(
     "ProfileListInterface",
     handler { ProfileListContext() },
     ScrollInterfaceOptions<ProfileListContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Query Profiles") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Query Profiles") }
         sizeFromRows(4)
     },
 ) {

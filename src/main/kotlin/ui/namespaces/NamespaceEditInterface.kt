@@ -6,6 +6,8 @@ import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
@@ -27,7 +29,7 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
     "NamespaceEditInterface",
     handler { NamespaceEditContext() },
     ScrollInterfaceOptions<NamespaceEditContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Edit <gray>· Namespaces") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Edit ${secondaryColor}· Namespaces") }
         sizeFromRows(4)
     },
 ) {
@@ -53,7 +55,7 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
                 .displayAs(
                     createItem(
                         Material.WRITABLE_BOOK,
-                        mm("<white>Add Namespace"),
+                        mm("${primaryColor}Add Namespace"),
                         listOf(mm("<gray>Type a new namespace name in chat.")),
                     ),
                 ).onClick {

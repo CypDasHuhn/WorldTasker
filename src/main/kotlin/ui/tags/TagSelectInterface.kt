@@ -3,6 +3,8 @@ package dev.cypdashuhn.worldtasker.ui.tags
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
@@ -30,7 +32,7 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
     "TagSelectInterface",
     handler { TagQueryContext(0, TodoFilter()) },
     ScrollInterfaceOptions<TagQueryContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Tags") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Tags") }
         sizeFromRows(3)
     },
 ) {

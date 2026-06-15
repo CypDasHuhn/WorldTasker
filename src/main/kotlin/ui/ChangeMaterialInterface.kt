@@ -77,7 +77,7 @@ object ChangeTagMaterialInterface : ChangeMaterialBase<ChangeTagMaterialContext>
     handler { ChangeTagMaterialContext(0, 0) },
     { _, context ->
         val name = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
-        mm("<white>Change Material <gray>· $name")
+        mm("${primaryColor}Change Material $secondaryColor· $name")
     },
 ) {
     override fun onSave(info: ClickInfo<ChangeTagMaterialContext>, material: Material) {
@@ -97,7 +97,7 @@ object ChangeNamespaceMaterialInterface : ChangeMaterialBase<ChangeNamespaceMate
     handler { ChangeNamespaceMaterialContext(0) },
     { _, context ->
         val name = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "Namespace"
-        mm("<white>Change Material <gray>· $name")
+        mm("${primaryColor}Change Material $secondaryColor· $name")
     },
 ) {
     override fun onSave(info: ClickInfo<ChangeNamespaceMaterialContext>, material: Material) {

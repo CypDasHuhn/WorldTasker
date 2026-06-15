@@ -4,6 +4,8 @@ import dev.cypdashuhn.worldtasker.WorldTaskerPlugin
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
@@ -35,7 +37,7 @@ object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
     "AuthorInterface",
     handler { AuthorContext() },
     ScrollInterfaceOptions<AuthorContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Authors") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Authors") }
         sizeFromRows(4)
     },
 ) {

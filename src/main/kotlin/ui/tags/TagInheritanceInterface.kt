@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -36,7 +38,7 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
     ScrollInterfaceOptions<TagInheritanceContext>().apply {
         inventoryTitle = { _, context ->
             val name = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
-            mm("<white>$name <gray>· Inheritance")
+            mm("${primaryColor}$name ${secondaryColor}· Inheritance")
         }
         sizeFromRows(4)
     },
@@ -81,7 +83,7 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
                 .displayAs(
                     createItem(
                         Material.WRITABLE_BOOK,
-                        mm("<white>Add Parent Tag"),
+                        mm("${primaryColor}Add Parent Tag"),
                         listOf(mm("<gray>Browse namespaces to add a parent.")),
                     ),
                 ).routeTo(NamespaceInheritanceInterface) { NamespaceInheritanceContext(context.tagId, context.namespaceId) },
@@ -102,7 +104,7 @@ object TagInheritanceSelectInterface : TagOverviewBase<TagInheritanceSelectConte
     ScrollInterfaceOptions<TagInheritanceSelectContext>().apply {
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
-            mm("<white>Add Inheritance <gray>· $nsName")
+            mm("${primaryColor}Add Inheritance ${secondaryColor}· $nsName")
         }
         sizeFromRows(3)
     },

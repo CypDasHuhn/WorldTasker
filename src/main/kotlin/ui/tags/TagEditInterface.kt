@@ -9,6 +9,8 @@ import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
@@ -37,7 +39,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
     ScrollInterfaceOptions<TagEditContext>().apply {
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
-            mm("<white>Edit <gray>· $nsName")
+            mm("${primaryColor}Edit ${secondaryColor}· $nsName")
         }
         sizeFromRows(4)
     },
@@ -71,7 +73,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     val mode = if (allowsMultiple) "multiple" else "single"
                     createItem(
                         if (allowsMultiple) Material.OAK_SIGN else Material.IRON_DOOR,
-                        mm("<white>Tag Mode: $mode"),
+                        mm("${primaryColor}Tag Mode: $mode"),
                         listOf(mm("<gray>Click to toggle between single/multiple tag assignment.")),
                     )
                 }.onClick {
@@ -82,11 +84,11 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
             item()
                 .atSlot(bottomRow + 3)
                 .displayAs {
-                    createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material.")))
+                    createItem(Material.BOOKSHELF, mm("${primaryColor}Change Material"), listOf(mm("<gray>Change the namespace's display material.")))
                 }.routeTo(ChangeNamespaceMaterialInterface) { ChangeNamespaceMaterialContext(context.namespaceId) },
             item()
                 .atSlot(bottomRow + 4)
-                .displayAs { createItem(Material.WRITABLE_BOOK, mm("<white>Add Tag"), listOf(mm("<gray>Type a new tag name."))) }
+                .displayAs { createItem(Material.WRITABLE_BOOK, mm("${primaryColor}Add Tag"), listOf(mm("<gray>Type a new tag name."))) }
                 .onClick {
                     val nsId = context.namespaceId
                     ChatInputManager.awaitInput(click.player, "<gray>Type the new tag name:") { name ->
@@ -119,7 +121,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                 },
             item()
                 .atSlot(bottomRow + 7)
-                .displayAs { createItem(Material.NAME_TAG, mm("<white>Rename Namespace"), listOf(mm("<gray>Requires confirmation."))) }
+                .displayAs { createItem(Material.NAME_TAG, mm("${primaryColor}Rename Namespace"), listOf(mm("<gray>Requires confirmation."))) }
                 .routeTo(RenameNamespaceConfirmation) { RenameNamespaceContext(context.namespaceId) },
         )
 }

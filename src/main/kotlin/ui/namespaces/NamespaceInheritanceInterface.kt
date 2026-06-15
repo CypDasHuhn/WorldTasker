@@ -2,6 +2,8 @@ package dev.cypdashuhn.worldtasker.ui.namespaces
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceInterface
@@ -27,7 +29,7 @@ object NamespaceInheritanceInterface : NamespaceOverviewBase<NamespaceInheritanc
     "NamespaceInheritanceInterface",
     handler { NamespaceInheritanceContext(0, 0) },
     ScrollInterfaceOptions<NamespaceInheritanceContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Add Inheritance <gray>· Namespaces") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Add Inheritance ${secondaryColor}· Namespaces") }
         sizeFromRows(3)
     },
 ) {

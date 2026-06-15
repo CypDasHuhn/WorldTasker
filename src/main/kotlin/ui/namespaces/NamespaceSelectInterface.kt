@@ -3,6 +3,8 @@ package dev.cypdashuhn.worldtasker.ui.namespaces
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.ui.backItemBase
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.backgroundPane
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
@@ -32,7 +34,7 @@ object NamespaceSelectInterface : NamespaceOverviewBase<NamespaceQueryContext>(
     "NamespaceSelectInterface",
     handler { NamespaceQueryContext() },
     ScrollInterfaceOptions<NamespaceQueryContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Filter <gray>· Namespaces") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Filter ${secondaryColor}· Namespaces") }
         sizeFromRows(3)
     },
 ) {

@@ -2,6 +2,8 @@ package dev.cypdashuhn.worldtasker.ui.namespaces
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagAssignContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagAssignInterface
@@ -26,7 +28,7 @@ object NamespaceAssignInterface : NamespaceOverviewBase<NamespaceAssignContext>(
     "NamespaceAssignInterface",
     handler { NamespaceAssignContext(0) },
     ScrollInterfaceOptions<NamespaceAssignContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white>Assign Tags <gray>· Namespaces") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Assign Tags ${secondaryColor}· Namespaces") }
         sizeFromRows(3)
     },
 ) {

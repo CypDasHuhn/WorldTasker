@@ -1,6 +1,8 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
+import dev.cypdashuhn.worldtasker.ui.secondaryColor
 import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagAssignResult
@@ -33,7 +35,7 @@ object TagAssignInterface : TagOverviewBase<TagAssignContext>(
     ScrollInterfaceOptions<TagAssignContext>().apply {
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
-            mm("<white>Assign Tags <gray>· $nsName")
+            mm("${primaryColor}Assign Tags ${secondaryColor}· $nsName")
         }
         sizeFromRows(3)
     },

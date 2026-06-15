@@ -6,6 +6,7 @@ import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.db.TodoFilter
 import dev.cypdashuhn.worldtasker.ui.backAndBackground
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 // import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
@@ -31,7 +32,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
     handler { FiltersContext() },
     options {
         inventorySize = InventorySize.THREE_ROWS
-        inventoryTitle = { _, _ -> mm("<white>Filters") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}Filters") }
     },
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<FiltersContext>> =
@@ -48,7 +49,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                     }
                     createItem(
                         if (f.included.isEmpty() && f.excluded.isEmpty()) Material.BOOKSHELF else Material.COMPARATOR,
-                        mm("<white>Tag Filter"),
+                        mm("${primaryColor}Tag Filter"),
                         lore,
                     )
                 }.onClick {
@@ -66,7 +67,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                         StatusFilter.ALL -> Material.YELLOW_CONCRETE to "All (active + completed)"
                         StatusFilter.COMPLETED -> Material.ORANGE_CONCRETE to "Completed only"
                     }
-                    createItem(material, mm("<white>Status: $label"), listOf(mm("<gray>Click to cycle.")))
+                    createItem(material, mm("${primaryColor}Status: $label"), listOf(mm("<gray>Click to cycle.")))
                 }.onClick {
                     val next = when (context.filter.statusFilter) {
                         StatusFilter.DEFAULT -> StatusFilter.ALL
@@ -86,7 +87,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                         if (f.authorExcluded.isNotEmpty()) add(mm("<red>${f.authorExcluded.size} excluded author(s)"))
                         if (f.authorIncluded.isEmpty() && f.authorExcluded.isEmpty()) add(mm("<gray>No author filter active."))
                     }
-                    createItem(Material.PLAYER_HEAD, mm("<white>Author Filter"), lore)
+                    createItem(Material.PLAYER_HEAD, mm("${primaryColor}Author Filter"), lore)
                 }.routeTo(AuthorInterface) { AuthorContext(context.filter) },
             // Distance filter button
             item()
@@ -103,7 +104,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
                     }
                     createItem(
                         if (context.filter.distanceEnabled) Material.ENDER_PEARL else Material.COMPASS,
-                        mm("<white>Distance Filter"),
+                        mm("${primaryColor}Distance Filter"),
                         lore,
                     )
                 }.onClick {

@@ -9,6 +9,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.player
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
 import dev.rooster.ui.interfaces.constructors.confirmation.BaseConfirmationInterface
@@ -170,13 +171,13 @@ object ToggleTagModeConfirmation : BaseConfirmationInterface<ToggleTagModeContex
                 if (context.newAllowsMultiple) {
                     createItem(
                         Material.OAK_SIGN,
-                        mm("<white>Switch namespace $nsName to <green>multiple</green> tag mode?"),
+                        mm("${primaryColor}Switch namespace $nsName to <green>multiple</green> tag mode?"),
                         listOf(mm("<gray>Multiple tags from this namespace can be assigned to a todo.")),
                     )
                 } else {
                     createItem(
                         Material.IRON_DOOR,
-                        mm("<white>Switch namespace $nsName to <yellow>single</yellow> tag mode?"),
+                        mm("${primaryColor}Switch namespace $nsName to <yellow>single</yellow> tag mode?"),
                         listOf(mm("<gray>Only one tag from this namespace can be assigned to a todo.")),
                     )
                 }

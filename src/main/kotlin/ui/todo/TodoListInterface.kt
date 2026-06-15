@@ -11,6 +11,7 @@ import dev.cypdashuhn.worldtasker.ui.backgroundPane
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
 import dev.cypdashuhn.worldtasker.ui.mm
+import dev.cypdashuhn.worldtasker.ui.primaryColor
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceEditInterface
 import dev.rooster.core.util.createItem
@@ -47,7 +48,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
     "TodoListInterface",
     handler { TodoListContext() },
     ScrollInterfaceOptions<TodoListContext>().apply {
-        inventoryTitle = { _, _ -> mm("<white><bold>Todos") }
+        inventoryTitle = { _, _ -> mm("${primaryColor}<bold>Todos") }
         sizeFromRows(6)
     },
 ) {
@@ -112,7 +113,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                         }
                     createItem(
                         if (filter.isEmpty()) Material.HOPPER else Material.COMPARATOR,
-                        mm("<white>Filters"),
+                        mm("${primaryColor}Filters"),
                         lore,
                     )
                 }.routeTo(FiltersInterface) { FiltersContext(context.filter) },
@@ -123,7 +124,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                 .displayAs(
                     createItem(
                         Material.WRITABLE_BOOK,
-                        mm("<white>New Todo"),
+                        mm("${primaryColor}New Todo"),
                         listOf(mm("<gray>Create a new todo.")),
                     ),
                 ).onClick {
@@ -161,7 +162,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                 .displayAs(
                     createItem(
                         Material.BOOKSHELF,
-                        mm("<white>Namespaces"),
+                        mm("${primaryColor}Namespaces"),
                         listOf(mm("<gray>Manage namespaces and tags.")),
                     ),
                 ).routeTo(NamespaceEditInterface) { NamespaceEditContext() },
@@ -171,7 +172,7 @@ object TodoListInterface : ScrollInterface<TodoListContext, TodoData>(
                 .displayAs(
                     createItem(
                         Material.ENDER_EYE,
-                        mm("<white>Random Todo"),
+                        mm("${primaryColor}Random Todo"),
                         listOf(mm("<gray>Open a random todo from the current list.")),
                     ),
                 ).onClick {
