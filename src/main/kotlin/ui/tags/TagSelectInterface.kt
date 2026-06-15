@@ -16,7 +16,6 @@ import dev.rooster.ui.interfaces.constructors.indexed_content.ScrollInterfaceOpt
 import dev.rooster.ui.interfaces.constructors.indexed_content.sizeFromRows
 import dev.rooster.ui.interfaces.handler
 import dev.rooster.ui.items.InterfaceItem
-import dev.rooster.ui.items.Slots
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
@@ -66,8 +65,5 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<TagQueryContext>> =
-        listOf(
-            item()
-                .atSlots(Slots(bottomRow..bottomRow + 2)),
-        ) + backAndBackground(NamespaceSelectInterface) { NamespaceQueryContext(context.filter, context.returnToFilters) }
+        backAndBackground(NamespaceSelectInterface) { NamespaceQueryContext(context.filter, context.returnToFilters) }
 }
