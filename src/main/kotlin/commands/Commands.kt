@@ -9,13 +9,14 @@ import dev.cypdashuhn.worldtasker.commands.nodes.buildJumpNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildRemoveNode
 import dev.cypdashuhn.worldtasker.commands.nodes.buildUiNode
 import dev.cypdashuhn.worldtasker.commands.nodes.tags.buildTodoTagsNode
+import dev.cypdashuhn.worldtasker.ui.todo.TodoListInterface
 import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 
 fun todo() {
     CommandTree("todo")
         .executesPlayer(PlayerCommandExecutor { sender, _ ->
-            sender.msg("<red>Usage: /todo <get|info|add|edit|remove|jump|tags>")
+            TodoListInterface.openInventory(sender)
         })
         .then(buildGetNode())
         .then(buildInfoNode())
