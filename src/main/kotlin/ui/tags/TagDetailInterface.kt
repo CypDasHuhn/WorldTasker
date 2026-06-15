@@ -31,14 +31,14 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
         inventoryTitle = { _, context ->
             val nsName = NamespaceManager.find(context.namespaceId)?.get(NamespaceManager.Namespaces.name) ?: "?"
             val tagName = TagManager.find(context.tagId)?.get(TagManager.Tags.name) ?: "Tag"
-            mm("${primaryColor}$nsName${secondaryColor}:$tagName")
+            mm("${primaryColor}$nsName$secondaryColor:$tagName")
         }
     },
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<TagDetailContext>> =
         backAndBackground(TagEditInterface) { TagEditContext(context.namespaceId) } + listOf(
             item()
-                .atSlot(2)
+                .atSlot(1)
                 .displayAs(
                     createItem(
                         Material.COMPARATOR,
@@ -47,7 +47,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                     ),
                 ).routeTo(ChangeTagMaterialInterface) { ChangeTagMaterialContext(context.tagId, context.namespaceId) },
             item()
-                .atSlot(4)
+                .atSlot(3)
                 .displayAs {
                     val parents = TagManager.parentsOf(context.tagId)
                     val lore = buildList<TextComponent> {
@@ -62,7 +62,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                     createItem(Material.CHAIN, mm("${primaryColor}Inheritance"), lore)
                 }.routeTo(TagInheritanceInterface) { TagInheritanceContext(context.tagId, context.namespaceId) },
             item()
-                .atSlot(6)
+                .atSlot(5)
                 .displayAs(
                     createItem(
                         Material.NAME_TAG,
@@ -71,7 +71,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
                     ),
                 ).routeTo(RenameTagConfirmation) { RenameTagContext(context.tagId, context.namespaceId) },
             item()
-                .atSlot(8)
+                .atSlot(7)
                 .displayAs(
                     createItem(
                         Material.TNT,

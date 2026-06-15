@@ -119,7 +119,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     DeleteNamespaceConfirmation.openInventory(click.player, DeleteNamespaceContext(context.namespaceId))
                 },
             item()
-                .atSlot(bottomRow + 7)
+                .atSlot(bottomRow + 6)
                 .displayAs { createItem(Material.NAME_TAG, mm("${primaryColor}Rename Namespace"), listOf(mm("<gray>Requires confirmation."))) }
                 .routeTo(RenameNamespaceConfirmation) { RenameNamespaceContext(context.namespaceId) },
         )
