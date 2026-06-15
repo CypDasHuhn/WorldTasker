@@ -8,6 +8,7 @@ import dev.cypdashuhn.worldtasker.db.TagAssignResult
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoCreateResult
 import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStateResult
 import dev.cypdashuhn.worldtasker.db.TodoUpdateNameResult
@@ -106,10 +107,16 @@ object TodoActions {
             sender.msg("<gray>No todos found.")
             return
         }
+        fun displayName(row: org.jetbrains.exposed.sql.ResultRow): String {
+            val id = row[TodoManager.Todos.id].value
+            val name = row[TodoManager.Todos.name]
+            val scopeTag = if (TodoScopeManager.isActive()) TodoScopeManager.scopeTagNameForTodo(id) else null
+            return scopeTag?.let { "$it:$name" } ?: name
+        }
         if (random) {
             val row = results.random()
             val id = row[TodoManager.Todos.id].value
-            val name = row[TodoManager.Todos.name]
+            val name = displayName(row)
             val state = TodoManager.stateOf(id)
             val tags = TagManager.tagLabelsForTodo(id)
             val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
@@ -127,7 +134,7 @@ object TodoActions {
         sender.msg("<gold>=== Todos $countLabel <gold>===")
         shown.forEach { row ->
             val id = row[TodoManager.Todos.id].value
-            val name = row[TodoManager.Todos.name]
+            val name = displayName(row)
             val state = TodoManager.stateOf(id)
             val tags = TagManager.tagLabelsForTodo(id)
             val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
