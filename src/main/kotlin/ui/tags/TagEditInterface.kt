@@ -65,7 +65,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
         listOf(
             backItem(NamespaceEditInterface) { NamespaceEditContext() },
             item()
-                .atSlot(bottomRow + 3)
+                .atSlot(bottomRow + 2)
                 .displayAs {
                     val ns = NamespaceManager.find(context.namespaceId)
                     val allowsMultiple = ns?.get(NamespaceManager.Namespaces.allowsMultiple) ?: true
@@ -81,12 +81,12 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     ToggleTagModeConfirmation.openInventory(click.player, ToggleTagModeContext(context.namespaceId, !current))
                 },
             item()
-                .atSlot(bottomRow + 5)
+                .atSlot(bottomRow + 4)
                 .displayAs {
                     createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material.")))
                 }.routeTo(ChangeNamespaceMaterialInterface) { ChangeNamespaceMaterialContext(context.namespaceId) },
             item()
-                .atSlot(bottomRow + 6)
+                .atSlot(bottomRow + 5)
                 .displayAs { createItem(Material.WRITABLE_BOOK, mm("<white>Add Tag"), listOf(mm("<gray>Type a new tag name."))) }
                 .onClick {
                     val nsId = context.namespaceId
@@ -109,7 +109,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     }
                 },
             item()
-                .atSlot(bottomRow + 7)
+                .atSlot(bottomRow + 6)
                 .displayAs { createItem(Material.TNT, mm("<red>Delete Namespace"), listOf(mm("<gray>Requires confirmation."))) }
                 .onClick {
                     if (TagManager.byNamespace(context.namespaceId).isNotEmpty()) {
@@ -119,7 +119,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     DeleteNamespaceConfirmation.openInventory(click.player, DeleteNamespaceContext(context.namespaceId))
                 },
             item()
-                .atSlot(bottomRow + 8)
+                .atSlot(bottomRow + 7)
                 .displayAs { createItem(Material.NAME_TAG, mm("<white>Rename Namespace"), listOf(mm("<gray>Requires confirmation."))) }
                 .routeTo(RenameNamespaceConfirmation) { RenameNamespaceContext(context.namespaceId) },
         )
