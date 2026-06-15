@@ -19,14 +19,14 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import java.time.LocalDate
 
 internal fun buildGetNode(): LiteralArgument {
-    fun makeExecutor(showCompleted: Boolean, random: Boolean = false) =
+    fun makeExecutor() =
         PlayerCommandExecutor { sender, args ->
             val query = TodoQuery(
                 nearRadius = args.argsMap[ARG_NEAR_RADIUS] as? Int,
                 tags = args.argsMap[ARG_TAGS] as? String,
                 name = args.argsMap[ARG_NAME] as? String,
                 author = args.argsMap[ARG_AUTHOR] as? String,
-                showCompleted = showCompleted,
+                showCompleted = "--completed" in args.fullInput(),
                 timeFilter = (args.argsMap[ARG_TIME_TYPE] as? String)?.let {
                     TimeFilter(
                         type = TimeType.valueOf(it.uppercase()),
@@ -35,18 +35,12 @@ internal fun buildGetNode(): LiteralArgument {
                     )
                 }
             )
-            TodoActions.get(sender, query, random)
+            TodoActions.get(sender, query, "--random" in args.fullInput())
         }
 
-    fun queryBranch(name: String, showCompleted: Boolean, random: Boolean = false) =
-        la(name).apply {
-            val exec = makeExecutor(showCompleted, random)
-            executesPlayer(exec)
-            QueryTreeBuilder.build(exec).forEach { then(it) }
-        }
-
-    return queryBranch("search", false).apply {
-        then(queryBranch("--completed", true))
-        then(queryBranch("--random", false, random = true))
+    return la("search").apply {
+        val exec = makeExecutor()
+        executesPlayer(exec)
+        QueryTreeBuilder.build(exec).forEach { then(it) }
     }
 }

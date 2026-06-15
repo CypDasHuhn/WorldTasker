@@ -49,6 +49,15 @@ object TimeQueryFlag : QueryFlag {
     }
 }
 
+/** Boolean flag: no value argument. The literal itself is the node. */
+class BooleanQueryFlag(
+    override val flagLiteral: String,
+) : QueryFlag {
+    override fun buildInner(remaining: List<Argument<*>>, executor: PlayerCommandExecutor): Argument<*> {
+        throw UnsupportedOperationException("BooleanQueryFlag handled directly in subtrees")
+    }
+}
+
 internal const val ARG_NEAR_RADIUS = "nearRadius"
 internal const val ARG_TAGS = "tags"
 internal const val ARG_NAME = "name"
@@ -65,6 +74,8 @@ object QueryTreeBuilder {
         SimpleQueryFlag("--name") { TextArgument(ARG_NAME) },
         SimpleQueryFlag("--author") { TextArgument(ARG_AUTHOR).suggestTodoAuthors() },
         TimeQueryFlag,
+        BooleanQueryFlag("--completed"),
+        BooleanQueryFlag("--random"),
     )
 
     /**
@@ -80,8 +91,15 @@ object QueryTreeBuilder {
                 for (flag in available) {
                     val remaining = available - flag
                     val childBranches = subtrees(remaining)
-                    val inner = flag.buildInner(childBranches, executor)
-                    branches.add(LiteralArgument(flag.flagLiteral).then(inner))
+                    if (flag is BooleanQueryFlag) {
+                        val lit = LiteralArgument(flag.flagLiteral)
+                        childBranches.forEach { lit.then(it) }
+                        lit.executesPlayer(executor)
+                        branches.add(lit)
+                    } else {
+                        val inner = flag.buildInner(childBranches, executor)
+                        branches.add(LiteralArgument(flag.flagLiteral).then(inner))
+                    }
                 }
                 branches
             }
