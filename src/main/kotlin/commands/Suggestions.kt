@@ -101,6 +101,21 @@ internal fun <T> Argument<T>.suggestTodoAuthors(): Argument<T> =
         }
     })
 
+internal fun <T> Argument<T>.suggestTimeType(): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { _ ->
+        arrayOf("created", "worked", "completed")
+    })
+
+internal fun <T> Argument<T>.suggestTimeOperator(): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { _ ->
+        arrayOf("before", "after", "on", "<", ">", "=")
+    })
+
+internal fun <T> Argument<T>.suggestTimeDate(): Argument<T> =
+    replaceSuggestions(ArgumentSuggestions.strings { _ ->
+        arrayOf(java.time.LocalDate.now().toString())
+    })
+
 internal fun <T> Argument<T>.suggestTagNamesGreedy(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
         val raw = info.currentArg()

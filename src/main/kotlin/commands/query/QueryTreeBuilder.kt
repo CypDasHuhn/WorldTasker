@@ -1,6 +1,9 @@
 package dev.cypdashuhn.worldtasker.commands.query
 
 import dev.cypdashuhn.worldtasker.commands.suggestTagNamesDsl
+import dev.cypdashuhn.worldtasker.commands.suggestTimeDate
+import dev.cypdashuhn.worldtasker.commands.suggestTimeOperator
+import dev.cypdashuhn.worldtasker.commands.suggestTimeType
 import dev.cypdashuhn.worldtasker.commands.suggestTodoAuthors
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.IntegerArgument
@@ -37,13 +40,13 @@ object TimeQueryFlag : QueryFlag {
     override val flagLiteral = "--time"
 
     override fun buildInner(remaining: List<Argument<*>>, executor: PlayerCommandExecutor): Argument<*> {
-        val opArg = TextArgument(ARG_TIME_OP)
-        val dateArg = TextArgument(ARG_TIME_DATE)
+        val opArg = TextArgument(ARG_TIME_OP).suggestTimeOperator()
+        val dateArg = TextArgument(ARG_TIME_DATE).suggestTimeDate()
         remaining.forEach { dateArg.then(it) }
         dateArg.executesPlayer(executor)
         opArg.then(dateArg)
 
-        val typeArg = TextArgument(ARG_TIME_TYPE)
+        val typeArg = TextArgument(ARG_TIME_TYPE).suggestTimeType()
         typeArg.then(opArg)
         return typeArg
     }
