@@ -4,7 +4,7 @@ import dev.cypdashuhn.worldtasker.commands.msg
 import dev.cypdashuhn.worldtasker.db.ProfileData
 import dev.cypdashuhn.worldtasker.db.QueryProfileManager
 import dev.cypdashuhn.worldtasker.db.StatusFilter
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.todo.TodoListContext
@@ -64,8 +64,7 @@ object ProfileListInterface : ScrollInterface<ProfileListContext, ProfileData>(
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<ProfileListContext>> =
-        listOf(
-            backItem(FiltersInterface) { FiltersContext() },
+        backAndBackground(FiltersInterface) { FiltersContext() } + listOf(
             item()
                 .atSlot(bottomRow + 4)
                 .displayAs(

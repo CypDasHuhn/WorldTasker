@@ -6,7 +6,7 @@ import dev.cypdashuhn.worldtasker.db.TagCreateResult
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeNamespaceMaterialInterface
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.DeleteNamespaceConfirmation
@@ -62,8 +62,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<TagEditContext>> =
-        listOf(
-            backItem(NamespaceEditInterface) { NamespaceEditContext() },
+        backAndBackground(NamespaceEditInterface) { NamespaceEditContext() } + listOf(
             item()
                 .atSlot(bottomRow + 2)
                 .displayAs {
@@ -81,12 +80,12 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     ToggleTagModeConfirmation.openInventory(click.player, ToggleTagModeContext(context.namespaceId, !current))
                 },
             item()
-                .atSlot(bottomRow + 4)
+                .atSlot(bottomRow + 3)
                 .displayAs {
                     createItem(Material.BOOKSHELF, mm("<white>Change Material"), listOf(mm("<gray>Change the namespace's display material.")))
                 }.routeTo(ChangeNamespaceMaterialInterface) { ChangeNamespaceMaterialContext(context.namespaceId) },
             item()
-                .atSlot(bottomRow + 5)
+                .atSlot(bottomRow + 4)
                 .displayAs { createItem(Material.WRITABLE_BOOK, mm("<white>Add Tag"), listOf(mm("<gray>Type a new tag name."))) }
                 .onClick {
                     val nsId = context.namespaceId
@@ -109,7 +108,7 @@ object TagEditInterface : TagOverviewBase<TagEditContext>(
                     }
                 },
             item()
-                .atSlot(bottomRow + 6)
+                .atSlot(bottomRow + 5)
                 .displayAs { createItem(Material.TNT, mm("<red>Delete Namespace"), listOf(mm("<gray>Requires confirmation."))) }
                 .onClick {
                     if (TagManager.byNamespace(context.namespaceId).isNotEmpty()) {

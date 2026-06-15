@@ -5,7 +5,7 @@ import dev.cypdashuhn.worldtasker.db.ProfileSaveResult
 import dev.cypdashuhn.worldtasker.db.QueryProfileManager
 import dev.cypdashuhn.worldtasker.db.StatusFilter
 import dev.cypdashuhn.worldtasker.db.TodoFilter
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
@@ -35,8 +35,7 @@ object FiltersInterface : RoosterInterface<FiltersContext>(
     },
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<FiltersContext>> =
-        listOf(
-            backItem(TodoListInterface) { TodoListContext(filter = context.filter) },
+        backAndBackground(TodoListInterface) { TodoListContext(filter = context.filter) } + listOf(
             // Tag filter button → namespace query mode
             item()
                 .atSlot(2)

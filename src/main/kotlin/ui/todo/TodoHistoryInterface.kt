@@ -5,7 +5,7 @@ import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoState
 import dev.cypdashuhn.worldtasker.db.TodoStatus
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.db.utility_tables.PlayerManager
@@ -82,8 +82,7 @@ object TodoHistoryInterface : ScrollInterface<TodoHistoryContext, HistoryEntry>(
     override fun contentClick(data: HistoryEntry, context: TodoHistoryContext,): ClickInfo<TodoHistoryContext>.() -> Unit = { }
 
     override fun getInterfaceItems(): List<InterfaceItem<TodoHistoryContext>> =
-        listOf(
-            backItem(TodoDetailInterface) { TodoDetailContext(context.todoId) },
+        backAndBackground(TodoDetailInterface) { TodoDetailContext(context.todoId) } + listOf(
             // Work — only when active
             item()
                 .atSlot(bottomRow + 3)

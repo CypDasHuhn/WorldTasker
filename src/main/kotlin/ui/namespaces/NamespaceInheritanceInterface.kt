@@ -1,7 +1,7 @@
 package dev.cypdashuhn.worldtasker.ui.namespaces
 
 import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagInheritanceInterface
@@ -52,7 +52,5 @@ object NamespaceInheritanceInterface : NamespaceOverviewBase<NamespaceInheritanc
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<NamespaceInheritanceContext>> =
-        listOf(
-            backItem(TagInheritanceInterface) { TagInheritanceContext(context.childTagId, context.childNsId) },
-        )
+        backAndBackground(TagInheritanceInterface) { TagInheritanceContext(context.childTagId, context.childNsId) }
 }

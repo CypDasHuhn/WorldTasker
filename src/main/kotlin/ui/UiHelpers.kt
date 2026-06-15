@@ -25,10 +25,10 @@ internal fun <T : Context> CancelInfo<T>.player(): Player? =
 fun <C : Context> RoosterInterface<C>.backItemBase(): InterfaceItem<C> =
     item()
         .displayAs(createItem(Material.FEATHER, mm("<white>Back")))
+        .atSlot(bottomRow)
 
 fun <C : Context, E : Context> RoosterInterface<C>.backItem(target: RoosterInterface<E>): InterfaceItem<C> =
     backItemBase()
-        .atSlot(bottomRow)
         .routeTo(target)
 
 fun <C : Context, E : Context> RoosterInterface<C>.backItem(
@@ -51,5 +51,4 @@ fun <C : Context, E : Context> RoosterInterface<C>.backAndBackground(target: Roo
 fun <C : Context, E : Context> RoosterInterface<C>.backAndBackground(
     target: RoosterInterface<E>,
     getContext: ClickInfo<C>.() -> E,
-): List<InterfaceItem<C>> =
-    listOf(backItem(target, getContext), backgroundPane())
+): List<InterfaceItem<C>> = listOf(backItem(target, getContext), backgroundPane())

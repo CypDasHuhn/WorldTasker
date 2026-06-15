@@ -2,9 +2,10 @@ package dev.cypdashuhn.worldtasker.ui.namespaces
 
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoFilter
+import dev.cypdashuhn.worldtasker.ui.backItemBase
+import dev.cypdashuhn.worldtasker.ui.backgroundPane
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersContext
 import dev.cypdashuhn.worldtasker.ui.filters.FiltersInterface
-import dev.cypdashuhn.worldtasker.ui.backItemBase
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagQueryContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagSelectInterface
@@ -71,5 +72,6 @@ object NamespaceSelectInterface : NamespaceOverviewBase<NamespaceQueryContext>(
                         TodoListInterface.openInventory(click.player, TodoListContext(filter = context.filter))
                     }
                 },
+            backgroundPane(),
         )
 }

@@ -1,6 +1,6 @@
 package dev.cypdashuhn.worldtasker.ui.tags
 
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.mm
@@ -75,8 +75,7 @@ object TagInheritanceInterface : ScrollInterface<TagInheritanceContext, Inherite
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<TagInheritanceContext>> =
-        listOf(
-            backItem(TagDetailInterface) { TagDetailContext(context.tagId, context.namespaceId) },
+        backAndBackground(TagDetailInterface) { TagDetailContext(context.tagId, context.namespaceId) } + listOf(
             item()
                 .atSlot(bottomRow + 8)
                 .displayAs(
@@ -132,7 +131,5 @@ object TagInheritanceSelectInterface : TagOverviewBase<TagInheritanceSelectConte
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<TagInheritanceSelectContext>> =
-        listOf(
-            backItem(NamespaceInheritanceInterface) { NamespaceInheritanceContext(context.childTagId, context.childNsId) },
-        )
+        backAndBackground(NamespaceInheritanceInterface) { NamespaceInheritanceContext(context.childTagId, context.childNsId) }
 }

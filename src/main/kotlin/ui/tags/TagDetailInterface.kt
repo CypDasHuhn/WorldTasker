@@ -4,7 +4,7 @@ import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialContext
 import dev.cypdashuhn.worldtasker.ui.ChangeTagMaterialInterface
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.Context
@@ -35,8 +35,7 @@ object TagDetailInterface : RoosterInterface<TagDetailContext>(
     },
 ) {
     override fun getInterfaceItems(): List<InterfaceItem<TagDetailContext>> =
-        listOf(
-            backItem(TagEditInterface) { TagEditContext(context.namespaceId) },
+        backAndBackground(TagEditInterface) { TagEditContext(context.namespaceId) } + listOf(
             item()
                 .atSlot(2)
                 .displayAs(

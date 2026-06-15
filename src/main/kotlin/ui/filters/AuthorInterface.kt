@@ -3,7 +3,7 @@ package dev.cypdashuhn.worldtasker.ui.filters
 import dev.cypdashuhn.worldtasker.WorldTaskerPlugin
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TodoFilter
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.rooster.core.util.createItem
 import dev.rooster.ui.interfaces.ClickInfo
@@ -80,7 +80,5 @@ object AuthorInterface : ScrollInterface<AuthorContext, AuthorEntry>(
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<AuthorContext>> =
-        listOf(
-            backItem(FiltersInterface) { FiltersContext(context.filter) },
-        )
+        backAndBackground(FiltersInterface) { FiltersContext(context.filter) }
 }

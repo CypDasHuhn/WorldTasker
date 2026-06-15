@@ -5,7 +5,7 @@ import dev.cypdashuhn.worldtasker.db.NamespaceCreateResult
 import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditContext
 import dev.cypdashuhn.worldtasker.ui.tags.TagEditInterface
@@ -47,8 +47,7 @@ object NamespaceEditInterface : NamespaceOverviewBase<NamespaceEditContext>(
         }
 
     override fun getInterfaceItems(): List<InterfaceItem<NamespaceEditContext>> =
-        listOf(
-            backItem(TodoListInterface),
+        backAndBackground(TodoListInterface) + listOf(
             item()
                 .atSlot(bottomRow + 4)
                 .displayAs(

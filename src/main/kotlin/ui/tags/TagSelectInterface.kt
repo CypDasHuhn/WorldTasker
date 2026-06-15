@@ -2,7 +2,7 @@ package dev.cypdashuhn.worldtasker.ui.tags
 
 import dev.cypdashuhn.worldtasker.db.TagFilterState
 import dev.cypdashuhn.worldtasker.db.TodoFilter
-import dev.cypdashuhn.worldtasker.ui.backItem
+import dev.cypdashuhn.worldtasker.ui.backAndBackground
 import dev.cypdashuhn.worldtasker.ui.mm
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceQueryContext
 import dev.cypdashuhn.worldtasker.ui.namespaces.NamespaceSelectInterface
@@ -68,6 +68,5 @@ object TagSelectInterface : TagOverviewBase<TagQueryContext>(
         listOf(
             item()
                 .atSlots(Slots(bottomRow..bottomRow + 2)),
-            backItem(NamespaceSelectInterface) { NamespaceQueryContext(context.filter, context.returnToFilters) },
-        )
+        ) + backAndBackground(NamespaceSelectInterface) { NamespaceQueryContext(context.filter, context.returnToFilters) }
 }
