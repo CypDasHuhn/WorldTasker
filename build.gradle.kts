@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "dev.CypDasHuhn"
-version = "0.1"
+version = "0.2"
 
 repositories {
     mavenCentral()
@@ -73,7 +73,6 @@ bukkit {
     }
 
     permissions {
-
     }
 }
 tasks {
@@ -96,5 +95,3 @@ tasks.withType<ShadowJar> {
 tasks.build {
     dependsOn("shadowJar")
 }
-
-

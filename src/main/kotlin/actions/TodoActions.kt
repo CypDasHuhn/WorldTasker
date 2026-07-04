@@ -121,7 +121,7 @@ object TodoActions {
             val tags = TagManager.tagLabelsForTodo(id)
             val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
             val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
-            sender.msg("<gold>Random todo: <yellow>#$id <white>$name$stateSuffix$tagSuffix")
+            sender.msg("<gold>Random todo: <yellow>#1 <white>$name$stateSuffix$tagSuffix")
             return
         }
         val cap = 10
@@ -132,14 +132,14 @@ object TodoActions {
             "<yellow>${results.size}</yellow> <gold>found"
         }
         sender.msg("<gold>=== Todos $countLabel <gold>===")
-        shown.forEach { row ->
+        shown.forEachIndexed { index, row ->
             val id = row[TodoManager.Todos.id].value
             val name = displayName(row)
             val state = TodoManager.stateOf(id)
             val tags = TagManager.tagLabelsForTodo(id)
             val stateSuffix = if (state == TodoState.COMPLETED) " <green>[✓]" else ""
             val tagSuffix = if (tags.isNotEmpty()) " <dark_gray>| <gray>${tags.joinToString(", ")}" else ""
-            sender.msg("<yellow>#$id <white>$name$stateSuffix$tagSuffix")
+            sender.msg("<yellow>#${index + 1} <white>$name$stateSuffix$tagSuffix")
         }
     }
 

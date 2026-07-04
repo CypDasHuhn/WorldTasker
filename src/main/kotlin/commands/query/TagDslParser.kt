@@ -46,7 +46,7 @@ private fun tokenizeTagDsl(input: String): List<String> {
 
             else -> {
                 val start = i
-                while (i < input.length && !input[i].isWhitespace() && input[i] !in "(),+-") i++
+                while (i < input.length && !input[i].isWhitespace() && input[i] !in "(),+") i++
                 tokens.add(input.substring(start, i))
             }
         }

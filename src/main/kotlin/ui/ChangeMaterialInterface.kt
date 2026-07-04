@@ -38,12 +38,24 @@ abstract class ChangeMaterialBase<C : Context>(
         },
     ) {
     abstract fun onSave(info: ClickInfo<C>, material: Material)
+    abstract fun onCancel(info: ClickInfo<C>)
 
     override fun getInterfaceItems(): List<InterfaceItem<C>> =
         listOf(
             item()
                 .atSlots((0..2).map { it * 9 }.flatMap { outer -> (3..5).map { it -> it + outer } }.filter { it != MATERIAL_SLOT })
                 .displayAs(createItem(Material.GRAY_STAINED_GLASS_PANE, mm(""), listOf())),
+            item()
+                .atSlot(bottomRow)
+                .displayAs(
+                    createItem(
+                        Material.RED_STAINED_GLASS_PANE,
+                        mm("<red>Cancel"),
+                        listOf(mm("<gray>Discard changes and go back.")),
+                    ),
+                ).onClick {
+                    onCancel(this)
+                },
             item()
                 .atSlot(bottomRow + 8)
                 .displayAs(
@@ -81,6 +93,10 @@ object ChangeTagMaterialInterface : ChangeMaterialBase<ChangeTagMaterialContext>
         TagManager.updateMaterial(info.context.tagId, material.name)
         TagDetailInterface.openInventory(info.click.player, TagDetailContext(info.context.tagId, info.context.namespaceId))
     }
+
+    override fun onCancel(info: ClickInfo<ChangeTagMaterialContext>) {
+        TagDetailInterface.openInventory(info.click.player, TagDetailContext(info.context.tagId, info.context.namespaceId))
+    }
 }
 
 // ─── namespace material change ────────────────────────────────────────────────
@@ -98,6 +114,10 @@ object ChangeNamespaceMaterialInterface : ChangeMaterialBase<ChangeNamespaceMate
 ) {
     override fun onSave(info: ClickInfo<ChangeNamespaceMaterialContext>, material: Material) {
         NamespaceManager.updateMaterial(info.context.namespaceId, material.name)
+        TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
+    }
+
+    override fun onCancel(info: ClickInfo<ChangeNamespaceMaterialContext>) {
         TagEditInterface.openInventory(info.click.player, TagEditContext(info.context.namespaceId))
     }
 }

@@ -77,15 +77,17 @@ internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
         val raw = info.currentArg().removePrefix("\"")
         if (raw.trimEnd().endsWith(")")) return@strings emptyArray()
-        val lastOpIdx = raw.indexOfLast { it in "+,-(" }
+        val lastOpIdx = raw.indexOfLast { it in "+,(" }
         val prefix = if (lastOpIdx == -1) "" else raw.substring(0, lastOpIdx + 1)
-        val currentToken = if (lastOpIdx == -1) raw else raw.substring(lastOpIdx + 1)
+        val rawToken = if (lastOpIdx == -1) raw else raw.substring(lastOpIdx + 1)
+        val notPrefix = if (rawToken.startsWith("-")) "-" else ""
+        val currentToken = rawToken.removePrefix("-")
         transaction {
             (TagManager.Tags innerJoin NamespaceManager.Namespaces)
                 .selectAll()
                 .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
                 .filter { it.startsWith(currentToken, ignoreCase = true) }
-                .map { "\"$prefix$it\"" }
+                .map { "\"$prefix$notPrefix$it\"" }
                 .toTypedArray()
         }
     })
