@@ -1,15 +1,11 @@
 package dev.cypdashuhn.worldtasker.commands
 
-import dev.cypdashuhn.worldtasker.db.NamespaceManager
-import dev.cypdashuhn.worldtasker.db.TagManager
-import dev.cypdashuhn.worldtasker.db.TodoManager
+import dev.cypdashuhn.worldtasker.db.SuggestionCache
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
 import dev.jorel.commandapi.arguments.Argument
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.LiteralArgument
 import dev.jorel.commandapi.executors.CommandArguments
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 
 internal fun LiteralArgument.suggestedWhen(condition: (CommandArguments) -> Boolean): Argument<String> =
     replaceSuggestions(ArgumentSuggestions.strings { info ->
@@ -18,53 +14,33 @@ internal fun LiteralArgument.suggestedWhen(condition: (CommandArguments) -> Bool
 
 internal fun <T> Argument<T>.suggestScopedTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
-        transaction {
-            val allTodos = TodoManager.Todos.selectAll().mapNotNull { row ->
-                val id = row[TodoManager.Todos.id].value
-                if (filter.allowsState(TodoManager.stateOf(id))) Pair(id, row[TodoManager.Todos.name]) else null
-            }
-            allTodos
-                .flatMap { (id, name) ->
-                    val scopeTag = if (TodoScopeManager.isActive()) TodoScopeManager.scopeTagNameForTodo(id) else null
-                    val scoped = scopeTag?.let { "$it:$name" }
-                    val noNs = if (TodoScopeManager.isActive() && scopeTag == null) "no-namespace:$name" else null
-                    listOfNotNull(name, scoped, noNs)
-                }.distinct()
-                .toTypedArray()
-        }
+        SuggestionCache.getTodos()
+            .filter { filter.allowsState(it.state) }
+            .flatMap { todo ->
+                val scopeTag = if (TodoScopeManager.isActive()) TodoScopeManager.scopeTagNameForTodo(todo.id) else null
+                val scoped = scopeTag?.let { "$it:${todo.name}" }
+                val noNs = if (TodoScopeManager.isActive() && scopeTag == null) "no-namespace:${todo.name}" else null
+                listOfNotNull(todo.name, scoped, noNs)
+            }.distinct()
+            .toTypedArray()
     })
 
 internal fun <T> Argument<T>.suggestTodoNames(filter: TodoNameFilter = TodoNameFilter.ACTIVE): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
-        transaction {
-            TodoManager.Todos
-                .selectAll()
-                .mapNotNull { row ->
-                    val id = row[TodoManager.Todos.id].value
-                    val state = TodoManager.stateOf(id)
-                    if (filter.allowsState(state)) row[TodoManager.Todos.name] else null
-                }.toTypedArray()
-        }
+        SuggestionCache.getTodos()
+            .filter { filter.allowsState(it.state) }
+            .map { it.name }
+            .toTypedArray()
     })
 
 internal fun <T> Argument<T>.suggestNamespaceNames(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
-        transaction {
-            NamespaceManager
-                .all()
-                .map { it[NamespaceManager.Namespaces.name] }
-                .toTypedArray()
-        }
+        SuggestionCache.getNamespaceNames().toTypedArray()
     })
 
 internal fun <T> Argument<T>.suggestTagNames(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
-        transaction {
-            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll()
-                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
-                .toTypedArray()
-        }
+        SuggestionCache.getTagNames().toTypedArray()
     })
 
 /**
@@ -82,25 +58,15 @@ internal fun <T> Argument<T>.suggestTagNamesDsl(): Argument<T> =
         val rawToken = if (lastOpIdx == -1) raw else raw.substring(lastOpIdx + 1)
         val notPrefix = if (rawToken.startsWith("-")) "-" else ""
         val currentToken = rawToken.removePrefix("-")
-        transaction {
-            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll()
-                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
-                .filter { it.startsWith(currentToken, ignoreCase = true) }
-                .map { "\"$prefix$notPrefix$it\"" }
-                .toTypedArray()
-        }
+        SuggestionCache.getTagNames()
+            .filter { it.startsWith(currentToken, ignoreCase = true) }
+            .map { "\"$prefix$notPrefix$it\"" }
+            .toTypedArray()
     })
 
 internal fun <T> Argument<T>.suggestTodoAuthors(): Argument<T> =
     replaceSuggestions(ArgumentSuggestions.strings { _ ->
-        transaction {
-            TodoManager.Todos
-                .selectAll()
-                .map { it[TodoManager.Todos.author] }
-                .distinct()
-                .toTypedArray()
-        }
+        SuggestionCache.getAuthors().toTypedArray()
     })
 
 internal fun <T> Argument<T>.suggestTimeType(): Argument<T> =
@@ -129,12 +95,8 @@ internal fun <T> Argument<T>.suggestTagNamesGreedy(): Argument<T> =
         }
         val prefix = if (done.isEmpty()) "" else done.joinToString(" ") + " "
 
-        transaction {
-            (TagManager.Tags innerJoin NamespaceManager.Namespaces)
-                .selectAll()
-                .map { "${it[NamespaceManager.Namespaces.name]}:${it[TagManager.Tags.name]}" }
-                .filter { it !in done }
-                .map { "$prefix$it" }
-                .toTypedArray()
-        }
+        SuggestionCache.getTagNames()
+            .filter { it !in done }
+            .map { "$prefix$it" }
+            .toTypedArray()
     })

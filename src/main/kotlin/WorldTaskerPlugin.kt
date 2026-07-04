@@ -7,6 +7,7 @@ import dev.cypdashuhn.worldtasker.db.NamespaceManager
 import dev.cypdashuhn.worldtasker.db.TagManager
 import dev.cypdashuhn.worldtasker.db.TodoManager
 import dev.cypdashuhn.worldtasker.db.TodoScopeManager
+import dev.cypdashuhn.worldtasker.db.ensureExposedInterceptorRegistered
 import dev.cypdashuhn.worldtasker.db.initDb
 import dev.cypdashuhn.worldtasker.ui.ChatInputManager
 import dev.cypdashuhn.worldtasker.ui.initUi
@@ -54,6 +55,7 @@ class WorldTaskerPlugin : JavaPlugin() {
         }
 
         TodoScopeManager.load()
+        ensureExposedInterceptorRegistered()
         CommandAPI.onEnable()
         initCommands()
         Bukkit.getPluginManager().registerEvents(ChatInputManager, this)
